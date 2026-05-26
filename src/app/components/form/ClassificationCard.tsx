@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Card, Field } from "./BasicInfoCard";
+import { LEVEL_OPTIONS, type DocumentLevel } from "../document-management/mockData";
 
 const L1 = ["", "法務", "人資資源管理", "雄獅大學", "資安暨個資管理室", "其他"];
 const L2: Record<string, string[]> = {
@@ -28,8 +29,6 @@ const L3: Record<string, string[]> = {
   流程標準: ["", "SOP", "作業說明", "流程檢核"],
 };
 const L4 = ["", "流程文件", "細分類", "表單附件", "其他"];
-const HIERARCHY = ["", "第一級", "第二級", "第三級", "第四級", "第五級", "第六級"];
-
 export interface ClassificationSelection {
   l1: string;
   l2: string;
@@ -51,7 +50,7 @@ interface Props {
 }
 
 export function ClassificationCard({ value, onChange }: Props) {
-  const [hierarchy, setHierarchy] = useState("");
+  const [hierarchy, setHierarchy] = useState<DocumentLevel | "">("");
 
   const l2Options = value.l1 ? (L2[value.l1] ?? [""]) : [""];
   const l3Options = value.l2 ? (L3[value.l2] ?? [""]) : [""];
@@ -123,7 +122,7 @@ export function ClassificationCard({ value, onChange }: Props) {
         <div className="border-t border-gray-100 pt-5">
           <Field label="文件階級" required>
             <Select
-              options={HIERARCHY}
+              options={LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
               placeholder="請選擇文件階級"
               value={hierarchy}
               onChange={setHierarchy}
@@ -145,7 +144,7 @@ function Select({
   value,
   onChange,
 }: {
-  options: string[];
+  options: Array<string | { value: string; label: string }>;
   placeholder: string;
   disabled?: boolean;
   value: string;
@@ -164,11 +163,15 @@ function Select({
         }}
       >
         <option value="">{placeholder}</option>
-        {options.filter(Boolean).map((option) => (
-          <option key={option} value={option}>
-            {option}
+        {options.filter(Boolean).map((option) => {
+          const value = typeof option === "string" ? option : option.value;
+          const label = typeof option === "string" ? option : option.label;
+          return (
+          <option key={value} value={value}>
+            {label}
           </option>
-        ))}
+          );
+        })}
       </select>
       <ChevronDown
         size={14}

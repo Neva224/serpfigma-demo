@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, ChevronDown, X, HelpCircle } from "lucide-react";
 
-const LEVELS = ["全部階級", "一階－政策、手冊", "二階－管理辦法、程序書", "三階－規範、說明書、須知、標準", "四階－表、單", "五階－教育訓練", "六階－外來文件"];
-const STATUSES = ["全部狀態", "草稿", "待主管審核", "待文管審核", "已上架", "退回", "下架", "作廢"];
+const LEVELS = [
+  "全部階級",
+  "一階-政策、手冊",
+  "二階-管理辦法、程序書",
+  "三階-規範、說明書、須知、標準",
+  "四階-表、單",
+  "五階-教育訓練",
+  "六階-外來文件",
+];
+const STATUSES = ["全部狀態", "上架", "草稿", "待主管審核", "待文管審核", "退回", "下架", "作廢"];
 const GROUPS = ["", "技術事業群", "商業事業群", "管理事業群", "國際事業群"];
 const DIVISIONS: Record<string, string[]> = {
   技術事業群: ["", "軟體開發處", "資訊安全處", "雲端平台處"],

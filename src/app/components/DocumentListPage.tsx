@@ -7,7 +7,6 @@ import {
   FileText,
   FolderOpen,
   LayoutGrid,
-  Menu,
   Search,
   Settings,
 } from "lucide-react";
@@ -27,7 +26,7 @@ import {
 type Screen = "signing-progress" | "database" | "permissions";
 
 type ViewMode =
-  | { kind: "empty" }
+  | { kind: "overview" }
   | { kind: "category"; path: string[]; label: string }
   | { kind: "query"; variant: "general" | "faq" }
   | { kind: "signing"; variant: "manager" | "docadmin" | "void" | "transfer" };
@@ -39,7 +38,7 @@ interface Props {
   onNavigate: (screen: Screen) => void;
 }
 
-const EMPTY_VIEW: ViewMode = { kind: "empty" };
+const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
 
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
@@ -49,7 +48,7 @@ const QUERY_ITEMS = [
 const SIGNING_ITEMS = [
   { label: "待主管簽核", variant: "manager" as const, status: "待主管審核" as const },
   { label: "待文管審核", variant: "docadmin" as const, status: "待文管審核" as const },
-  { label: "作廢文件", variant: "void" as const, status: "下架" as const },
+  { label: "作廢文件", variant: "void" as const, status: "作廢" as const },
   { label: "移轉單位", variant: "transfer" as const, status: null },
 ];
 
@@ -60,7 +59,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
   const [signingOpen, setSigningOpen] = useState(true);
   const [shortcutOpen, setShortcutOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
-  const [view, setView] = useState<ViewMode>(EMPTY_VIEW);
+  const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
 
   const [keywordInput, setKeywordInput] = useState("");
   const [keywordQuery, setKeywordQuery] = useState("");
@@ -81,15 +80,8 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
     return findNodeByPath(KNOWLEDGE_TREE, view.path);
   }, [view]);
 
-  const currentCategory = view.kind === "category"
-    ? {
-        title: view.label,
-        description: view.path.join(" / "),
-      }
-    : undefined;
-
   const docsForView = useMemo(() => {
-    if (view.kind === "empty") return [];
+    if (view.kind === "overview") return [];
     if (view.kind === "query" && view.variant === "faq") return [];
     if (view.kind === "signing" && view.variant === "transfer") return [];
 
@@ -102,7 +94,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
           ? ["待主管審核"]
           : view.variant === "docadmin"
             ? ["待文管審核"]
-            : ["下架"];
+            : ["作廢"];
       baseDocs = baseDocs.filter((doc) => statuses.includes(doc.status));
     }
 
@@ -174,6 +166,14 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
 
   const docsCount = docsForView.length;
   const categoryChildren = currentNode?.children ?? [];
+  const rootSummaries = KNOWLEDGE_TREE.map((node) => ({
+    node,
+    fileCount: countForPath(node.pathLabels),
+    childCount: node.children?.length ?? 0,
+    childPreview: (node.children ?? [])
+      .slice(0, 3)
+      .map((child) => ({ label: child.label, count: countForPath(child.pathLabels) })),
+  }));
   const searchPlaceholder =
     view.kind === "category"
       ? "搜尋此分類下的文件"
@@ -201,6 +201,10 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
     setView({ kind: "category", path, label });
   }
 
+  function activateKnowledgeOverview() {
+    setView(OVERVIEW_VIEW);
+  }
+
   function activateQuery(variant: "general" | "faq") {
     setView({ kind: "query", variant });
   }
@@ -226,9 +230,14 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
           <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white">
+            <button
+              type="button"
+              onClick={() => setSidebarCollapsed((current) => !current)}
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white transition hover:bg-teal-500"
+              aria-label={sidebarCollapsed ? "展開選單" : "收合選單"}
+            >
               <LayoutGrid size={16} />
-            </div>
+            </button>
             {!sidebarCollapsed && (
               <div>
                 <div className="text-sm font-semibold text-slate-800">總功能清單操作篩選</div>
@@ -236,14 +245,6 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
               </div>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => setSidebarCollapsed((current) => !current)}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            aria-label={sidebarCollapsed ? "展開選單" : "收合選單"}
-          >
-            <Menu size={16} />
-          </button>
         </div>
 
         <div className="h-full overflow-y-auto px-3 py-3">
@@ -255,7 +256,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
             badge={String(KNOWLEDGE_TREE.length)}
             open={knowledgeOpen}
             onToggle={() => setKnowledgeOpen((current) => !current)}
-            onHeaderClick={() => setView(EMPTY_VIEW)}
+            onHeaderClick={activateKnowledgeOverview}
           >
             <KnowledgeTree
               totalCount={DOCUMENTS.length}
@@ -353,17 +354,6 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
         </div>
       </aside>
 
-      {sidebarCollapsed && (
-        <button
-          type="button"
-          onClick={() => setSidebarCollapsed(false)}
-          className="fixed left-0 top-28 z-30 inline-flex items-center gap-2 rounded-r-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-lg transition hover:bg-slate-50"
-          aria-label="展開選單"
-        >
-          <ChevronRight size={15} />
-        </button>
-      )}
-
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
           <div className="min-w-0">
@@ -374,11 +364,11 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
             </div>
             <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
             <div className="mt-1 text-sm text-slate-500">
-              {view.kind === "empty" ? "請由左側選取知識樹分類" : getViewDescription(view)}
+              {view.kind === "overview" ? "請選擇第一層分類查看下層資料夾與文件" : getViewDescription(view)}
             </div>
           </div>
 
-          {view.kind !== "empty" && (
+          {view.kind === "category" && (
             <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
               共 {docsCount} 筆
@@ -387,10 +377,10 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {view.kind === "empty" ? (
-            <EmptyState
-              title="請由左側選取知識樹分類"
-              description="先選擇分類、查詢或簽核入口，再在右側瀏覽文件內容。"
+          {view.kind === "overview" ? (
+            <KnowledgeOverview
+              roots={rootSummaries}
+              onOpenCategory={activateCategory}
             />
           ) : view.kind === "query" && view.variant === "faq" ? (
             <EmptyState
@@ -469,7 +459,11 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
 
 function countForSigningSection() {
   return DOCUMENTS.filter(
-    (doc) => doc.status === "待主管審核" || doc.status === "待文管審核" || doc.status === "下架",
+    (doc) =>
+      doc.status === "待主管審核" ||
+      doc.status === "待文管審核" ||
+      doc.status === "下架" ||
+      doc.status === "作廢",
   ).length;
 }
 
@@ -485,6 +479,8 @@ function findNodeByPath(nodes: KnowledgeTreeNode[], path: string[]): KnowledgeTr
 
 function getViewTitle(view: ViewMode) {
   switch (view.kind) {
+    case "overview":
+      return "知識樹分類總覽";
     case "category":
       return view.label;
     case "query":
@@ -507,6 +503,8 @@ function getViewTitle(view: ViewMode) {
 
 function getViewDescription(view: ViewMode) {
   switch (view.kind) {
+    case "overview":
+      return "請選擇第一層分類查看下層資料夾與文件";
     case "category":
       return `分類總覽 > ${view.path.join(" > ")}`;
     case "query":
@@ -610,17 +608,23 @@ function FilterBar({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 px-4 py-4">
-        <FilterSelect
+          <FilterSelect
           label="文件階級"
           value={level}
           onChange={(value) => setLevel(value as "all" | DocumentLevel)}
-          options={["all", ...LEVEL_OPTIONS]}
+          options={[
+            { value: "all", label: "全部階級" },
+            ...LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label })),
+          ]}
         />
         <FilterSelect
           label="文件狀態"
           value={status}
           onChange={(value) => setStatus(value as "all" | DocumentStatus)}
-          options={["all", ...STATUS_OPTIONS]}
+          options={[
+            { value: "all", label: "全部狀態" },
+            ...STATUS_OPTIONS.map((option) => ({ value: option, label: option })),
+          ]}
         />
 
         <div className="flex min-w-[240px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -739,7 +743,7 @@ function FilterSelect({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: string[];
+  options: Array<{ value: string; label: string }>;
 }) {
   return (
     <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -750,8 +754,8 @@ function FilterSelect({
         className="min-w-[110px] bg-transparent text-sm text-slate-700 outline-none"
       >
         {options.map((option) => (
-          <option key={option} value={option}>
-            {option === "all" ? (label === "文件階級" ? "全部階級" : "全部狀態") : option}
+          <option key={option.value} value={option.value}>
+            {option.label}
           </option>
         ))}
       </select>
@@ -875,6 +879,82 @@ function FolderCard({
         {count}
       </span>
     </button>
+  );
+}
+
+function KnowledgeOverview({
+  roots,
+  onOpenCategory,
+}: {
+  roots: Array<{
+    node: KnowledgeTreeNode;
+    fileCount: number;
+    childCount: number;
+    childPreview: Array<{ label: string; count: number }>;
+  }>;
+  onOpenCategory: (path: string[], label: string) => void;
+}) {
+  return (
+    <div>
+      <div className="mb-4">
+        <h3 className="text-lg font-bold text-slate-800">知識樹分類總覽</h3>
+        <p className="mt-1 text-sm text-slate-500">請選擇第一層分類查看下層資料夾與文件</p>
+      </div>
+
+      <div className="grid gap-3 xl:grid-cols-2">
+        {roots.map(({ node, fileCount, childCount, childPreview }) => (
+          <button
+            key={node.id}
+            type="button"
+            onClick={() => onOpenCategory(node.pathLabels, node.label)}
+            className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-teal-300 hover:bg-teal-50/30"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <FolderOpen size={18} className="text-teal-600" />
+                  <h4 className="truncate text-base font-semibold text-slate-800">{node.label}</h4>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">{node.pathLabels.join(" / ")}</p>
+              </div>
+              <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
+                查看分類
+              </span>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className="text-xs text-slate-400">文件數</div>
+                <div className="mt-1 font-semibold text-slate-800">{fileCount}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className="text-xs text-slate-400">子分類數</div>
+                <div className="mt-1 font-semibold text-slate-800">{childCount}</div>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 text-xs font-semibold text-slate-400">前幾個第二層分類</div>
+              {childPreview.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {childPreview.map((child) => (
+                    <span
+                      key={child.label}
+                      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+                    >
+                      {child.label}
+                      <span className="text-slate-400">({child.count})</span>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-slate-400">此分類底下暫無子分類</div>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }
 

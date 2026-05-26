@@ -1,4 +1,4 @@
-/* eslint-disable */
+﻿/* eslint-disable */
 export interface KnowledgeNode {
   id: string;
   parentId: string | null;
@@ -143,86 +143,6 @@ export const KNOWLEDGE_NODES: KnowledgeNode[] = [
     "level": 1,
     "sortOrder": 14,
     "isSelectable": true
-  },
-  {
-    "id": "L1::自動貼標(雄獅版)",
-    "parentId": null,
-    "label": "自動貼標(雄獅版)",
-    "level": 1,
-    "sortOrder": 15,
-    "isSelectable": true
-  },
-  {
-    "id": "L1::組織架構",
-    "parentId": null,
-    "label": "組織架構",
-    "level": 1,
-    "sortOrder": 16,
-    "isSelectable": true
-  },
-  {
-    "id": "L1::回饋機制",
-    "parentId": null,
-    "label": "回饋機制",
-    "level": 1,
-    "sortOrder": 17,
-    "isSelectable": true
-  },
-  {
-    "id": "L1::風險管理",
-    "parentId": null,
-    "label": "風險管理",
-    "level": 1,
-    "sortOrder": 18,
-    "isSelectable": true
-  },
-  {
-    "id": "L1::監控機制",
-    "parentId": null,
-    "label": "監控機制",
-    "level": 1,
-    "sortOrder": 19,
-    "isSelectable": true
-  },
-  {
-    "id": "L1::機密文件>L2::營業數據::BDA",
-    "parentId": "L1::機密文件",
-    "label": "營業數據",
-    "level": 2,
-    "sortOrder": 1,
-    "isSelectable": true,
-    "code": "BDA",
-    "owner": "Eason"
-  },
-  {
-    "id": "L1::機密文件>L2::投後管理::PIM",
-    "parentId": "L1::機密文件",
-    "label": "投後管理",
-    "level": 2,
-    "sortOrder": 2,
-    "isSelectable": true,
-    "code": "PIM",
-    "owner": "Eason"
-  },
-  {
-    "id": "L1::機密文件>L2::合約相關::CTR",
-    "parentId": "L1::機密文件",
-    "label": "合約相關",
-    "level": 2,
-    "sortOrder": 3,
-    "isSelectable": true,
-    "code": "CTR",
-    "owner": "Eason"
-  },
-  {
-    "id": "L1::機密文件>L2::年度目標::ANT",
-    "parentId": "L1::機密文件",
-    "label": "年度目標",
-    "level": 2,
-    "sortOrder": 4,
-    "isSelectable": true,
-    "code": "ANT",
-    "owner": "Eason"
   },
   {
     "id": "L1::機密文件>L2::公文文件::OFD",

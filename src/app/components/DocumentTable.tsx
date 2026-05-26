@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import {
   SAMPLE_DOCS,
-  type DocumentLevel,
+  LEVEL_META,
   type DocumentRecord,
   type DocumentStatus,
 } from "./document-management/mockData";
@@ -36,11 +36,11 @@ const STATUS_STYLES: Record<
   DocumentStatus,
   { bg: string; text: string; dot: string; label: string }
 > = {
-  已上架: {
+  上架: {
     bg: "bg-emerald-50",
     text: "text-emerald-700",
     dot: "bg-emerald-500",
-    label: "已上架",
+    label: "上架",
   },
   待主管審核: {
     bg: "bg-orange-50",
@@ -72,15 +72,12 @@ const STATUS_STYLES: Record<
     dot: "bg-orange-600",
     label: "下架",
   },
-};
-
-const LEVEL_LABELS: Record<DocumentLevel, { short: string; desc: string }> = {
-  第一級: { short: "第一級", desc: "文件最外層分類" },
-  第二級: { short: "第二級", desc: "部門或主題分類" },
-  第三級: { short: "第三級", desc: "細分類或流程" },
-  第四級: { short: "第四級", desc: "操作細節與表單" },
-  第五級: { short: "第五級", desc: "版本與附屬文件" },
-  第六級: { short: "第六級", desc: "機密或歸檔資料" },
+  作廢: {
+    bg: "bg-slate-100",
+    text: "text-slate-600",
+    dot: "bg-slate-500",
+    label: "作廢",
+  },
 };
 
 export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
@@ -246,7 +243,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
           </thead>
           <tbody>
             {pagedDocs.map((doc, index) => {
-              const level = LEVEL_LABELS[doc.level];
+              const level = LEVEL_META[doc.level];
               const status = STATUS_STYLES[doc.status];
               const needsApproval =
                 doc.status === "待主管審核" || doc.status === "待文管審核";
@@ -282,7 +279,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <span className="inline-flex w-fit items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
                         {level.short}
                       </span>
-                      <span className="text-xs text-slate-400">{level.desc}</span>
+                      <span className="text-xs text-slate-400">{level.description}</span>
                     </div>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">

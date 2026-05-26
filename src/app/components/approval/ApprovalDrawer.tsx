@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X, ChevronDown, ChevronRight, CheckCircle2, RotateCcw, MoveRight, ZoomIn, ZoomOut } from "lucide-react";
 import { DocRecord } from "../DocumentTable";
+import { LEVEL_META } from "../document-management/mockData";
 
 type RejectMode = "none" | "return" | "transfer";
 
@@ -113,8 +114,8 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
           </AccordionSection>
 
           <AccordionSection id="level" label="文件階層預覽" expanded={expanded} onToggle={toggle}>
-            <InfoRow label="文件階級" value={doc.level} />
-            <InfoRow label="分類說明" value={{ 一階: "政策、手冊", 二階: "管理辦法、程序書", 三階: "規範、說明書、須知、標準", 四階: "表、單", 五階: "教育訓練", 六階: "外來文件" }[doc.level] ?? ""} />
+            <InfoRow label="文件階級" value={LEVEL_META[doc.level].label} />
+            <InfoRow label="分類說明" value={LEVEL_META[doc.level].description} />
           </AccordionSection>
 
           {/* Rejection form (conditional) */}

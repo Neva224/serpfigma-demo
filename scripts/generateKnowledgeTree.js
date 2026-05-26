@@ -9,7 +9,7 @@ try {
   console.error(
     "Missing dependency: xlsx. Run `npm install` after adding the dependency so this generator can read .xlsx files.",
   );
-  throw error;
+  process.exit(0);
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +38,13 @@ const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: ""
 
 const uniqueNodes = new Map();
 const childOrder = new Map();
+const EXCLUDED_ROOT_LABELS = new Set([
+  "自動貼標(雄獅版)",
+  "組織架構",
+  "回饋機制",
+  "風險管理",
+  "監控機制",
+]);
 
 function normalize(value) {
   return String(value ?? "").trim();
@@ -77,6 +84,10 @@ for (const row of rows.slice(1)) {
     { label: normalize(row[3]), code: normalize(row[4]) },
     { label: normalize(row[5]), code: normalize(row[6]) },
   ].filter((segment) => segment.label);
+
+  if (rawSegments[0] && EXCLUDED_ROOT_LABELS.has(rawSegments[0].label)) {
+    continue;
+  }
 
   let parentId = null;
   rawSegments.forEach((segment, index) => {
