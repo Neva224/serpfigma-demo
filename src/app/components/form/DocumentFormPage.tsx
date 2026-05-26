@@ -9,12 +9,15 @@ import {
 } from "./ClassificationCard";
 import { DepartmentCard } from "./DepartmentCard";
 import { FileUploadCard } from "./FileUploadCard";
+import { type DocRecord } from "../DocumentTable";
 
 interface DocumentFormPageProps {
   onBack: () => void;
+  embedded?: boolean;
+  editingDoc?: DocRecord | null;
 }
 
-export function DocumentFormPage({ onBack }: DocumentFormPageProps) {
+export function DocumentFormPage({ onBack, embedded = false, editingDoc = null }: DocumentFormPageProps) {
   const [classification, setClassification] = useState<ClassificationSelection>({
     l1: "",
     l2: "",
@@ -41,7 +44,7 @@ export function DocumentFormPage({ onBack }: DocumentFormPageProps) {
   }
 
   return (
-    <div className="min-h-screen pb-24" style={{ backgroundColor: "#F3F4F6" }}>
+    <div className={`${embedded ? "pb-24" : "min-h-screen pb-24"}`} style={{ backgroundColor: "#F3F4F6" }}>
       <header className="sticky top-0 z-20 border-b border-gray-100 bg-white shadow-sm">
         <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -80,6 +83,15 @@ export function DocumentFormPage({ onBack }: DocumentFormPageProps) {
       </header>
 
       <div className="mx-auto max-w-screen-xl px-6 pt-6 pb-4">
+        {editingDoc && (
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-semibold text-amber-700">重新編輯模式</span>
+              <span className="text-sm text-amber-600">正在編輯：{editingDoc.name}</span>
+              <span className="ml-auto text-xs text-amber-500">已切換為草稿狀態，完成後可再次送出</span>
+            </div>
+          </div>
+        )}
         <div className="mb-2 flex items-center gap-1.5 text-xs text-gray-400">
           <span>首頁</span>
           <span>/</span>
@@ -154,7 +166,11 @@ export function DocumentFormPage({ onBack }: DocumentFormPageProps) {
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-gray-200 bg-white shadow-lg">
+      <div
+        className={`border-t border-gray-200 bg-white shadow-lg ${
+          embedded ? "sticky bottom-0 z-20" : "fixed bottom-0 left-0 right-0 z-30"
+        }`}
+      >
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-4">
           <div className="hidden items-center gap-2 text-xs text-gray-400 sm:flex">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />

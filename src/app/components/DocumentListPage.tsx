@@ -11,6 +11,10 @@ import {
   Settings,
 } from "lucide-react";
 import { DocumentTable } from "./DocumentTable";
+import { DocumentFormPage } from "./form/DocumentFormPage";
+import { SigningProgressPage } from "./signing/SigningProgressPage";
+import { DatabasePage } from "./database/DatabasePage";
+import { PermissionsPage } from "./settings/PermissionsPage";
 import { KnowledgeTree } from "./knowledge/KnowledgeTree";
 import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../mocks/knowledgeTreeData";
 import {
@@ -23,19 +27,21 @@ import {
   type DocumentStatus,
 } from "./document-management/mockData";
 
-type Screen = "signing-progress" | "database" | "permissions";
-
 export type ViewMode =
   | { kind: "overview" }
   | { kind: "category"; path: string[]; label: string }
   | { kind: "query"; variant: "general" | "faq" }
-  | { kind: "signing"; variant: "manager" | "docadmin" | "void" | "transfer" };
+  | { kind: "signing"; variant: "manager" | "docadmin" | "void" | "transfer" }
+  | { kind: "documentUpload" }
+  | { kind: "signingProgress" }
+  | { kind: "database" }
+  | { kind: "systemAdmin" };
 
 interface Props {
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
-  onNavigate: (screen: Screen) => void;
+  formDoc: DocumentRecord | null;
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
 }
@@ -47,18 +53,11 @@ const QUERY_ITEMS = [
   { label: "FAQ查詢", variant: "faq" as const },
 ];
 
-const SIGNING_ITEMS = [
-  { label: "待主管簽核", variant: "manager" as const, status: "待主管審核" as const },
-  { label: "待文管審核", variant: "docadmin" as const, status: "待文管審核" as const },
-  { label: "作廢文件", variant: "void" as const, status: "作廢" as const },
-  { label: "移轉單位", variant: "transfer" as const, status: null },
-];
-
 export function DocumentListPage({
   onAdd,
   onApprove,
   onReEdit,
-  onNavigate,
+  formDoc,
   view,
   onViewChange,
 }: Props) {
@@ -67,7 +66,7 @@ export function DocumentListPage({
   const [queryOpen, setQueryOpen] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(true);
   const [signingOpen, setSigningOpen] = useState(true);
-  const [shortcutOpen, setShortcutOpen] = useState(true);
+  const [databaseOpen, setDatabaseOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
 
   const [keywordInput, setKeywordInput] = useState("");
@@ -92,6 +91,10 @@ export function DocumentListPage({
   const docsForView = useMemo(() => {
     if (view.kind === "overview") return [];
     if (view.kind === "query" && view.variant === "faq") return [];
+    if (view.kind === "documentUpload") return [];
+    if (view.kind === "signingProgress") return [];
+    if (view.kind === "database") return [];
+    if (view.kind === "systemAdmin") return [];
     if (view.kind === "signing" && view.variant === "transfer") return [];
 
     let baseDocs = DOCUMENTS;
@@ -177,8 +180,6 @@ export function DocumentListPage({
   const categoryChildren = currentNode?.children ?? [];
   const rootSummaries = KNOWLEDGE_TREE.map((node) => ({
     node,
-    fileCount: countForPath(node.pathLabels),
-    childCount: node.children?.length ?? 0,
     childPreview: (node.children ?? [])
       .slice(0, 3)
       .map((child) => ({ label: child.label, count: countForPath(child.pathLabels) })),
@@ -224,10 +225,6 @@ export function DocumentListPage({
 
   function activateUpload() {
     onAdd();
-  }
-
-  function navigateTo(screen: Screen) {
-    onNavigate(screen);
   }
 
   function countForPath(path: string[]) {
@@ -303,43 +300,7 @@ export function DocumentListPage({
 
           <SectionCard
             collapsed={sidebarCollapsed}
-            title="簽核專區"
-            subtitle="主管與文管簽核及文件處理"
-            icon={<Clock3 size={16} />}
-            badge={String(countForSigningSection())}
-            open={signingOpen}
-            onToggle={() => setSigningOpen((current) => !current)}
-            onHeaderClick={() => activateSigning("manager")}
-          >
-            <div className="space-y-1.5">
-              {SIGNING_ITEMS.map((item) => (
-                <SelectionPill
-                  key={item.variant}
-                  label={item.label}
-                  active={view.kind === "signing" && view.variant === item.variant}
-                  onClick={() => activateSigning(item.variant)}
-                />
-              ))}
-            </div>
-          </SectionCard>
-
-          <SectionCard
-            collapsed={sidebarCollapsed}
-            title="文件簽核單進度查詢"
-            subtitle="查詢簽核單號、文件名稱與申請日期"
-            icon={<FileText size={16} />}
-            open={shortcutOpen}
-            onToggle={() => setShortcutOpen((current) => !current)}
-            onHeaderClick={() => navigateTo("signing-progress")}
-          >
-            <div className="space-y-1.5">
-              <SelectionPill label="前往查詢頁" active={false} onClick={() => navigateTo("signing-progress")} />
-            </div>
-          </SectionCard>
-
-          <SectionCard
-            collapsed={sidebarCollapsed}
-            title="文件上傳"
+            title="文件上傳專區"
             subtitle="新增文件、選擇分類與送出簽核"
             icon={<FileText size={16} />}
             badge="新增"
@@ -348,7 +309,40 @@ export function DocumentListPage({
             onHeaderClick={activateUpload}
           >
             <div className="space-y-1.5">
-              <SelectionPill label="新增文件" active={false} onClick={activateUpload} />
+              <SelectionPill
+                label="新增文件"
+                active={view.kind === "documentUpload"}
+                onClick={activateUpload}
+              />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="文件簽核專區"
+            subtitle="查詢簽核進度、處理退件與移轉"
+            icon={<Clock3 size={16} />}
+            badge={String(countForSigningSection())}
+            open={signingOpen}
+            onToggle={() => setSigningOpen((current) => !current)}
+            onHeaderClick={() => onViewChange({ kind: "signingProgress" })}
+          >
+            <div className="space-y-1.5">
+              <SelectionPill
+                label="前往查詢頁"
+                active={view.kind === "signingProgress"}
+                onClick={() => onViewChange({ kind: "signingProgress" })}
+              />
+              <SelectionPill
+                label="作廢文件"
+                active={view.kind === "signing" && view.variant === "void"}
+                onClick={() => activateSigning("void")}
+              />
+              <SelectionPill
+                label="移轉單位"
+                active={view.kind === "signing" && view.variant === "transfer"}
+                onClick={() => activateSigning("transfer")}
+              />
             </div>
           </SectionCard>
 
@@ -357,12 +351,16 @@ export function DocumentListPage({
             title="資料庫"
             subtitle="文件統計與查詢分析"
             icon={<Database size={16} />}
-            open={false}
-            onToggle={() => navigateTo("database")}
-            onHeaderClick={() => navigateTo("database")}
+            open={databaseOpen}
+            onToggle={() => setDatabaseOpen((current) => !current)}
+            onHeaderClick={() => onViewChange({ kind: "database" })}
           >
             <div className="space-y-1.5">
-              <SelectionPill label="前往資料庫" active={false} onClick={() => navigateTo("database")} />
+              <SelectionPill
+                label="前往資料庫"
+                active={view.kind === "database"}
+                onClick={() => onViewChange({ kind: "database" })}
+              />
             </div>
           </SectionCard>
 
@@ -373,7 +371,7 @@ export function DocumentListPage({
             icon={<Settings size={16} />}
             open={adminOpen}
             onToggle={() => setAdminOpen((current) => !current)}
-            onHeaderClick={() => navigateTo("permissions")}
+            onHeaderClick={() => onViewChange({ kind: "systemAdmin" })}
           >
             <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
               此區為系統後台管理功能，不存放文件。
@@ -383,7 +381,13 @@ export function DocumentListPage({
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
+        <div
+          className={`flex items-center justify-between border-b px-5 py-3 ${
+            view.kind === "overview" || view.kind === "category"
+              ? "border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white"
+              : "border-slate-200 bg-white"
+          }`}
+        >
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-slate-400">
               <button type="button" onClick={activateKnowledgeOverview} className="hover:text-slate-600">
@@ -409,11 +413,20 @@ export function DocumentListPage({
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
-              {view.kind === "overview" ? (
-                <KnowledgeOverview
-                  roots={rootSummaries}
-                  onOpenCategory={activateCategory}
-                />
+          {view.kind === "overview" ? (
+            <KnowledgeOverview roots={rootSummaries} onOpenCategory={activateCategory} />
+          ) : view.kind === "documentUpload" ? (
+            <DocumentFormPage
+              onBack={activateKnowledgeOverview}
+              embedded
+              editingDoc={formDoc}
+            />
+          ) : view.kind === "signingProgress" ? (
+            <SigningProgressPage onBack={activateKnowledgeOverview} embedded />
+          ) : view.kind === "database" ? (
+            <DatabasePage onBack={activateKnowledgeOverview} embedded />
+          ) : view.kind === "systemAdmin" ? (
+            <PermissionsPage onBack={activateKnowledgeOverview} embedded />
           ) : view.kind === "query" && view.variant === "faq" ? (
             <EmptyState
               title="FAQ查詢暫無資料"
@@ -433,7 +446,7 @@ export function DocumentListPage({
                     <span>/</span>
                     <span>{view.label}</span>
                   </div>
-                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {categoryChildren.map((child) => (
                       <FolderCard
                         key={child.id}
@@ -517,6 +530,14 @@ function getViewTitle(view: ViewMode) {
       return view.label;
     case "query":
       return view.variant === "general" ? "一般文件查詢" : "FAQ查詢";
+    case "documentUpload":
+      return "新增文件";
+    case "signingProgress":
+      return "文件簽核單進度查詢";
+    case "database":
+      return "資料庫";
+    case "systemAdmin":
+      return "系統後台管理";
     case "signing":
       switch (view.variant) {
         case "manager":
@@ -543,6 +564,14 @@ function getViewDescription(view: ViewMode) {
       return view.variant === "general"
         ? "一般文件查詢"
         : "FAQ 查詢入口";
+    case "documentUpload":
+      return "新增文件流程";
+    case "signingProgress":
+      return "查詢簽核單號、文件名稱與申請日期";
+    case "database":
+      return "文件知識管理總覽：窗口對應、點擊統計與標籤索引";
+    case "systemAdmin":
+      return "設定各角色對文件相關操作的執行權限";
     case "signing":
       switch (view.variant) {
         case "manager":
@@ -920,26 +949,31 @@ function KnowledgeOverview({
 }: {
   roots: Array<{
     node: KnowledgeTreeNode;
-    fileCount: number;
-    childCount: number;
     childPreview: Array<{ label: string; count: number }>;
   }>;
   onOpenCategory: (path: string[], label: string) => void;
 }) {
   return (
     <div>
-      <div className="mb-4">
-        <h3 className="text-lg font-bold text-slate-800">知識樹分類總覽</h3>
-        <p className="mt-1 text-sm text-slate-500">請選擇第一層分類查看下層資料夾與文件</p>
+      <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="mb-2 inline-flex items-center rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm ring-1 ring-emerald-100">
+              知識樹分類
+            </div>
+            <h3 className="text-xl font-bold text-slate-800">知識樹分類總覽</h3>
+            <p className="mt-1 text-sm text-slate-600">請選擇第一層分類查看下層資料夾與文件</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-        {roots.map(({ node, fileCount, childCount, childPreview }) => (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {roots.map(({ node, childPreview }) => (
           <button
             key={node.id}
             type="button"
             onClick={() => onOpenCategory(node.pathLabels, node.label)}
-            className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-teal-300 hover:bg-teal-50/30"
+            className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md hover:bg-teal-50/30"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -954,19 +988,8 @@ function KnowledgeOverview({
               </span>
             </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-xl bg-slate-50 px-3 py-2">
-                <div className="text-xs text-slate-400">文件數</div>
-                <div className="mt-1 font-semibold text-slate-800">{fileCount}</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">
-                <div className="text-xs text-slate-400">子分類數</div>
-                <div className="mt-1 font-semibold text-slate-800">{childCount}</div>
-              </div>
-            </div>
-
             <div className="mt-4">
-              <div className="mb-2 text-xs font-semibold text-slate-400">前幾個第二層分類</div>
+              <div className="mb-2 text-xs font-semibold text-slate-400">第二層分類分布</div>
               {childPreview.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {childPreview.map((child) => (

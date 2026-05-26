@@ -69,6 +69,7 @@ const INITIAL_TAGS: TagItem[] = [
 
 interface Props {
   onBack: () => void;
+  embedded?: boolean;
 }
 
 export function DatabasePage({ onBack }: Props) {

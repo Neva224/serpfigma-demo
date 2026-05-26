@@ -43,6 +43,7 @@ const CATEGORIES = [...new Set(PERMISSIONS.map((p) => p.category))];
 
 interface Props {
   onBack: () => void;
+  embedded?: boolean;
 }
 
 export function PermissionsPage({ onBack }: Props) {

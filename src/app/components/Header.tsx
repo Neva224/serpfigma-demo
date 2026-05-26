@@ -93,17 +93,22 @@ export function Header({ onNavigate, onLogoClick, onOpenApproval, onReEdit }: Pr
 
   return (
     <>
-      <header className="z-20 flex h-[52px] flex-shrink-0 border-b border-slate-200 bg-white">
-        <div className="flex h-full flex-1 items-center px-5">
-          <button type="button" onClick={onLogoClick} className="flex items-center gap-2.5 text-left">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600">
-              <FileText size={15} className="text-white" />
+      <header className="z-20 flex h-[68px] flex-shrink-0 border-b border-slate-200 bg-white">
+        <div className="flex h-full flex-1 items-center px-6">
+          <button
+            type="button"
+            onClick={onLogoClick}
+            aria-label="返回首頁"
+            className="flex cursor-pointer items-center gap-3 text-left"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-600 shadow-sm">
+              <FileText size={19} className="text-white" />
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-extrabold tracking-tight text-slate-900">
+              <div className="text-[26px] font-extrabold tracking-tight text-slate-900">
                 SERP文件管理系統
               </div>
-              <div className="text-[11px] text-slate-400">文件管理平台</div>
+              <div className="text-[14px] text-slate-400">文件管理平台</div>
             </div>
           </button>
 

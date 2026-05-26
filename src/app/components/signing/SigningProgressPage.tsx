@@ -65,6 +65,7 @@ const RECORDS: RecordItem[] = [
 
 interface Props {
   onBack: () => void;
+  embedded?: boolean;
 }
 
 export function SigningProgressPage({ onBack }: Props) {
