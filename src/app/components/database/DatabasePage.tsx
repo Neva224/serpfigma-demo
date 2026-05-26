@@ -67,7 +67,11 @@ const INITIAL_TAGS: TagItem[] = [
   { tag: "#年度", count: 9, description: "年度計畫與報表", levels: ["一階", "四階"], owner: "王大明", enabled: true, docs: ["年度預算規劃表", "年度稽核計畫"] },
 ];
 
-export function DatabasePage() {
+interface Props {
+  onBack: () => void;
+}
+
+export function DatabasePage({ onBack }: Props) {
   const [tab, setTab] = useState<Tab>("contacts");
   const [expandedTag, setExpandedTag] = useState<string | null>(null);
   const [tags, setTags] = useState<TagItem[]>(INITIAL_TAGS);
@@ -139,9 +143,29 @@ export function DatabasePage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-5" style={{ backgroundColor: "#F3F4F6" }}>
-      <div className="mb-5">
-        <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>資料庫</h2>
-        <p className="text-gray-500 text-sm mt-0.5">文件知識管理總覽：窗口對應、點擊統計與標籤索引</p>
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
+            <button type="button" onClick={onBack} className="hover:text-gray-600">
+              首頁
+            </button>
+            <span>/</span>
+            <button type="button" onClick={onBack} className="hover:text-gray-600">
+              文件管理
+            </button>
+            <span>/</span>
+            <span>資料庫</span>
+          </div>
+          <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>資料庫</h2>
+          <p className="text-gray-500 text-sm mt-0.5">文件知識管理總覽：窗口對應、點擊統計與標籤索引</p>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="shrink-0 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+        >
+          返回文件管理
+        </button>
       </div>
 
       <div className="flex gap-1 p-1 rounded-xl bg-white border border-gray-200 mb-5 w-fit">

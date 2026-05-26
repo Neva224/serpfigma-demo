@@ -68,11 +68,12 @@ const TYPE_LABEL: Record<NotificationItem["type"], string> = {
 interface Props {
   activeScreen: Screen;
   onNavigate: (s: Screen) => void;
+  onLogoClick: () => void;
   onOpenApproval: (docId: number, role: "manager" | "docadmin") => void;
   onReEdit: (docId: number) => void;
 }
 
-export function Header({ onNavigate, onOpenApproval, onReEdit }: Props) {
+export function Header({ onNavigate, onLogoClick, onOpenApproval, onReEdit }: Props) {
   const [panelOpen, setPanelOpen] = useState(false);
   const unreadCount = useMemo(
     () => NOTIFICATIONS.filter((notification) => notification.unread).length,
@@ -94,7 +95,7 @@ export function Header({ onNavigate, onOpenApproval, onReEdit }: Props) {
     <>
       <header className="z-20 flex h-[52px] flex-shrink-0 border-b border-slate-200 bg-white">
         <div className="flex h-full flex-1 items-center px-5">
-          <div className="flex items-center gap-2.5">
+          <button type="button" onClick={onLogoClick} className="flex items-center gap-2.5 text-left">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600">
               <FileText size={15} className="text-white" />
             </div>
@@ -104,7 +105,7 @@ export function Header({ onNavigate, onOpenApproval, onReEdit }: Props) {
               </div>
               <div className="text-[11px] text-slate-400">文件管理平台</div>
             </div>
-          </div>
+          </button>
 
           <div className="ml-auto flex items-center gap-2">
             <button

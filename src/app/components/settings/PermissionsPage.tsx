@@ -41,7 +41,11 @@ const PERMISSIONS: Permission[] = [
 
 const CATEGORIES = [...new Set(PERMISSIONS.map((p) => p.category))];
 
-export function PermissionsPage() {
+interface Props {
+  onBack: () => void;
+}
+
+export function PermissionsPage({ onBack }: Props) {
   const [perms, setPerms] = useState(PERMISSIONS);
   const [editing, setEditing] = useState(false);
   const [activeRole, setActiveRole] = useState<Role | "all">("all");
@@ -57,9 +61,29 @@ export function PermissionsPage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-5" style={{ backgroundColor: "#F3F4F6" }}>
-      <div className="mb-5">
-        <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>系統設定 — 人員權限管理</h2>
-        <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的執行權限</p>
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
+            <button type="button" onClick={onBack} className="hover:text-gray-600">
+              首頁
+            </button>
+            <span>/</span>
+            <button type="button" onClick={onBack} className="hover:text-gray-600">
+              文件管理
+            </button>
+            <span>/</span>
+            <span>系統設定 — 人員權限管理</span>
+          </div>
+          <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>系統設定 — 人員權限管理</h2>
+          <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的執行權限</p>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="shrink-0 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+        >
+          返回文件管理
+        </button>
       </div>
 
       {/* Role cards */}

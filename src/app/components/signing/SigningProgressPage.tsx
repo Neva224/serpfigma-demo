@@ -63,7 +63,11 @@ const RECORDS: RecordItem[] = [
   },
 ];
 
-export function SigningProgressPage() {
+interface Props {
+  onBack: () => void;
+}
+
+export function SigningProgressPage({ onBack }: Props) {
   const [signingNo, setSigningNo] = useState("");
   const [docName, setDocName] = useState("");
   const [subject, setSubject] = useState("");
@@ -137,9 +141,29 @@ export function SigningProgressPage() {
 
   return (
     <div className="flex-1 overflow-y-auto bg-slate-100 px-6 py-5">
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-slate-800">文件簽核單進度查詢</h2>
-        <p className="mt-1 text-sm text-slate-500">查詢各類文件的簽核流程進度、狀態及處理人員</p>
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
+            <button type="button" onClick={onBack} className="hover:text-slate-600">
+              首頁
+            </button>
+            <span>/</span>
+            <button type="button" onClick={onBack} className="hover:text-slate-600">
+              文件管理
+            </button>
+            <span>/</span>
+            <span>文件簽核單進度查詢</span>
+          </div>
+          <h2 className="text-lg font-bold text-slate-800">文件簽核單進度查詢</h2>
+          <p className="mt-1 text-sm text-slate-500">查詢各類文件的簽核流程進度、狀態及處理人員</p>
+        </div>
+        <button
+          type="button"
+          onClick={onBack}
+          className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+        >
+          返回文件管理
+        </button>
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

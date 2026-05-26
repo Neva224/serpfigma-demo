@@ -25,7 +25,7 @@ import {
 
 type Screen = "signing-progress" | "database" | "permissions";
 
-type ViewMode =
+export type ViewMode =
   | { kind: "overview" }
   | { kind: "category"; path: string[]; label: string }
   | { kind: "query"; variant: "general" | "faq" }
@@ -36,9 +36,11 @@ interface Props {
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
   onNavigate: (screen: Screen) => void;
+  view: ViewMode;
+  onViewChange: (view: ViewMode) => void;
 }
 
-const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
+export const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
 
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
@@ -52,14 +54,21 @@ const SIGNING_ITEMS = [
   { label: "移轉單位", variant: "transfer" as const, status: null },
 ];
 
-export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Props) {
+export function DocumentListPage({
+  onAdd,
+  onApprove,
+  onReEdit,
+  onNavigate,
+  view,
+  onViewChange,
+}: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
   const [queryOpen, setQueryOpen] = useState(true);
+  const [uploadOpen, setUploadOpen] = useState(true);
   const [signingOpen, setSigningOpen] = useState(true);
   const [shortcutOpen, setShortcutOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
-  const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
 
   const [keywordInput, setKeywordInput] = useState("");
   const [keywordQuery, setKeywordQuery] = useState("");
@@ -198,19 +207,23 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
   }
 
   function activateCategory(path: string[], label: string) {
-    setView({ kind: "category", path, label });
+    onViewChange({ kind: "category", path, label });
   }
 
   function activateKnowledgeOverview() {
-    setView(OVERVIEW_VIEW);
+    onViewChange(OVERVIEW_VIEW);
   }
 
   function activateQuery(variant: "general" | "faq") {
-    setView({ kind: "query", variant });
+    onViewChange({ kind: "query", variant });
   }
 
   function activateSigning(variant: "manager" | "docadmin" | "void" | "transfer") {
-    setView({ kind: "signing", variant });
+    onViewChange({ kind: "signing", variant });
+  }
+
+  function activateUpload() {
+    onAdd();
   }
 
   function navigateTo(screen: Screen) {
@@ -326,6 +339,21 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
 
           <SectionCard
             collapsed={sidebarCollapsed}
+            title="文件上傳"
+            subtitle="新增文件、選擇分類與送出簽核"
+            icon={<FileText size={16} />}
+            badge="新增"
+            open={uploadOpen}
+            onToggle={() => setUploadOpen((current) => !current)}
+            onHeaderClick={activateUpload}
+          >
+            <div className="space-y-1.5">
+              <SelectionPill label="新增文件" active={false} onClick={activateUpload} />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
             title="資料庫"
             subtitle="文件統計與查詢分析"
             icon={<Database size={16} />}
@@ -358,9 +386,13 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span>首頁</span>
+              <button type="button" onClick={activateKnowledgeOverview} className="hover:text-slate-600">
+                首頁
+              </button>
               <span>/</span>
-              <span>文件管理</span>
+              <button type="button" onClick={activateKnowledgeOverview} className="hover:text-slate-600">
+                文件管理
+              </button>
             </div>
             <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
             <div className="mt-1 text-sm text-slate-500">
@@ -377,11 +409,11 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {view.kind === "overview" ? (
-            <KnowledgeOverview
-              roots={rootSummaries}
-              onOpenCategory={activateCategory}
-            />
+              {view.kind === "overview" ? (
+                <KnowledgeOverview
+                  roots={rootSummaries}
+                  onOpenCategory={activateCategory}
+                />
           ) : view.kind === "query" && view.variant === "faq" ? (
             <EmptyState
               title="FAQ查詢暫無資料"
@@ -401,7 +433,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Pro
                     <span>/</span>
                     <span>{view.label}</span>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                     {categoryChildren.map((child) => (
                       <FolderCard
                         key={child.id}
@@ -901,7 +933,7 @@ function KnowledgeOverview({
         <p className="mt-1 text-sm text-slate-500">請選擇第一層分類查看下層資料夾與文件</p>
       </div>
 
-      <div className="grid gap-3 xl:grid-cols-2">
+      <div className="grid gap-3 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         {roots.map(({ node, fileCount, childCount, childPreview }) => (
           <button
             key={node.id}

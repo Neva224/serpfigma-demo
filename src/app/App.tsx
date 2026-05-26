@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { Header } from "./components/Header";
-import { DocumentListPage } from "./components/DocumentListPage";
+import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
 import { DocumentFormPage } from "./components/form/DocumentFormPage";
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import { SigningProgressPage } from "./components/signing/SigningProgressPage";
@@ -18,8 +18,10 @@ interface ApprovalTarget {
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("list");
+  const [listView, setListView] = useState<ViewMode>(OVERVIEW_VIEW);
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [reEditDoc, setReEditDoc] = useState<DocRecord | null>(null);
+  const knownScreens = new Set<Screen>(["list", "form", "re-edit", "signing-progress", "database", "permissions"]);
 
   function openApproval(docId: number, role: "manager" | "docadmin") {
     const doc = SAMPLE_DOCS.find((item) => item.id === docId);
@@ -36,7 +38,18 @@ export default function App() {
     toast.success(`已將「${doc.name}」切換為草稿，開始重新編輯。`);
   }
 
-  const navigateTo = (nextScreen: string) => setScreen(nextScreen as Screen);
+  const navigateTo = (nextScreen: string) => {
+    setScreen(knownScreens.has(nextScreen as Screen) ? (nextScreen as Screen) : "list");
+  };
+  function goList() {
+    setScreen("list");
+  }
+  function goHome() {
+    setListView(OVERVIEW_VIEW);
+    setApproval(null);
+    setReEditDoc(null);
+    setScreen("list");
+  }
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
@@ -44,6 +57,7 @@ export default function App() {
       <Header
         activeScreen={screen === "re-edit" ? "list" : screen}
         onNavigate={navigateTo}
+        onLogoClick={goHome}
         onOpenApproval={openApproval}
         onReEdit={(docId) => {
           const doc = SAMPLE_DOCS.find((item) => item.id === docId);
@@ -54,6 +68,8 @@ export default function App() {
       <div className="flex flex-1 flex-col overflow-hidden">
         {screen === "list" && (
           <DocumentListPage
+            view={listView}
+            onViewChange={setListView}
             onAdd={() => setScreen("form")}
             onNavigate={navigateTo}
             onApprove={(doc) =>
@@ -68,7 +84,7 @@ export default function App() {
 
         {screen === "form" && (
           <div className="flex-1 overflow-y-auto">
-            <DocumentFormPage onBack={() => setScreen("list")} />
+            <DocumentFormPage onBack={goList} />
           </div>
         )}
 
@@ -81,13 +97,25 @@ export default function App() {
                 已切換為草稿狀態，完成後可再次送出
               </span>
             </div>
-            <DocumentFormPage onBack={() => setScreen("list")} />
+            <DocumentFormPage onBack={goList} />
+          </div>
+        )}
+
+        {screen === "signing-progress" && (
+          <div className="flex-1 overflow-hidden">
+            <SigningProgressPage onBack={goHome} />
+          </div>
+        )}
+
+        {screen === "database" && (
+          <div className="flex-1 overflow-hidden">
+            <DatabasePage onBack={goHome} />
           </div>
         )}
 
         {screen === "permissions" && (
           <div className="flex flex-1 overflow-hidden">
-            <PermissionsPage />
+            <PermissionsPage onBack={goHome} />
           </div>
         )}
       </div>
