@@ -1,4 +1,4 @@
-export type DocumentLevel = "第一級" | "第二級" | "第三級" | "第四級" | "第五級" | "第六級";
+﻿export type DocumentLevel = "第一級" | "第二級" | "第三級" | "第四級" | "第五級" | "第六級";
 
 export type DocumentStatus =
   | "已上架"
@@ -16,12 +16,7 @@ export type LeftRailPreset =
   | "history"
   | "admin";
 
-export interface KnowledgeNode {
-  id: string;
-  label: string;
-  path: string[];
-  children?: KnowledgeNode[];
-}
+export type { KnowledgeNode, KnowledgeTreeNode } from "../../../mocks/knowledgeTreeData";
 
 export interface DocumentRecord {
   id: number;
@@ -36,290 +31,9 @@ export interface DocumentRecord {
   department: string;
   tags: string[];
   knowledgePath: string[];
+  categoryId?: string;
+  categoryPath?: string[];
 }
-
-export const KNOWLEDGE_TREE: KnowledgeNode[] = [
-  {
-    id: "management",
-    label: "雄獅旅遊-管理本部",
-    path: ["雄獅旅遊-管理本部"],
-    children: [
-      {
-        id: "management-law",
-        label: "法務",
-        path: ["雄獅旅遊-管理本部", "法務"],
-        children: [
-          {
-            id: "management-law-contract",
-            label: "內部公版契約",
-            path: ["雄獅旅遊-管理本部", "法務", "內部公版契約"],
-          },
-          {
-            id: "management-law-standard",
-            label: "定型化契約",
-            path: ["雄獅旅遊-管理本部", "法務", "定型化契約"],
-          },
-          {
-            id: "management-law-workflow",
-            label: "作業流程",
-            path: ["雄獅旅遊-管理本部", "法務", "作業流程"],
-          },
-          {
-            id: "management-law-form",
-            label: "外部客戶用表單",
-            path: ["雄獅旅遊-管理本部", "法務", "外部客戶用表單"],
-          },
-        ],
-      },
-      {
-        id: "management-hrm",
-        label: "人資資源管理",
-        path: ["雄獅旅遊-管理本部", "人資資源管理"],
-        children: [
-          {
-            id: "management-hrm-organize",
-            label: "組織",
-            path: ["雄獅旅遊-管理本部", "人資資源管理", "組織"],
-          },
-          {
-            id: "management-hrm-attendance",
-            label: "考勤",
-            path: ["雄獅旅遊-管理本部", "人資資源管理", "考勤"],
-          },
-          {
-            id: "management-hrm-salary",
-            label: "薪酬",
-            path: ["雄獅旅遊-管理本部", "人資資源管理", "薪酬"],
-          },
-          {
-            id: "management-hrm-er",
-            label: "員工關係",
-            path: ["雄獅旅遊-管理本部", "人資資源管理", "員工關係"],
-          },
-        ],
-      },
-      {
-        id: "management-university",
-        label: "雄獅大學",
-        path: ["雄獅旅遊-管理本部", "雄獅大學"],
-        children: [
-          {
-            id: "management-university-newhire",
-            label: "集團新人訓",
-            path: ["雄獅旅遊-管理本部", "雄獅大學", "集團新人訓"],
-          },
-          {
-            id: "management-university-guide",
-            label: "旅遊業基礎知識",
-            path: ["雄獅旅遊-管理本部", "雄獅大學", "旅遊業基礎知識"],
-          },
-          {
-            id: "management-university-security",
-            label: "資訊安全與OTP綁定",
-            path: ["雄獅旅遊-管理本部", "雄獅大學", "資訊安全與OTP綁定"],
-          },
-        ],
-      },
-      {
-        id: "management-security",
-        label: "資安暨個資管理室",
-        path: ["雄獅旅遊-管理本部", "資安暨個資管理室"],
-      },
-    ],
-  },
-  {
-    id: "product",
-    label: "雄獅旅遊-產品群",
-    path: ["雄獅旅遊-產品群"],
-    children: [
-      {
-        id: "product-git",
-        label: "GIT團產_泛國旅入境鐵道",
-        path: ["雄獅旅遊-產品群", "GIT團產_泛國旅入境鐵道"],
-        children: [
-          {
-            id: "product-git-rail",
-            label: "鐵道",
-            path: ["雄獅旅遊-產品群", "GIT團產_泛國旅入境鐵道", "鐵道"],
-          },
-          {
-            id: "product-git-inbound",
-            label: "入境部",
-            path: ["雄獅旅遊-產品群", "GIT團產_泛國旅入境鐵道", "入境部"],
-          },
-          {
-            id: "product-git-km",
-            label: "產品知識",
-            path: ["雄獅旅遊-產品群", "GIT團產_泛國旅入境鐵道", "產品知識"],
-          },
-        ],
-      },
-      {
-        id: "product-outb1",
-        label: "團產OUTB_產一",
-        path: ["雄獅旅遊-產品群", "團產OUTB_產一"],
-        children: [
-          {
-            id: "product-outb1-oceania",
-            label: "大洋洲",
-            path: ["雄獅旅遊-產品群", "團產OUTB_產一", "大洋洲"],
-          },
-          {
-            id: "product-outb1-japan",
-            label: "東北亞日本",
-            path: ["雄獅旅遊-產品群", "團產OUTB_產一", "東北亞日本"],
-          },
-        ],
-      },
-      {
-        id: "product-outb2",
-        label: "團產OUTB_產二",
-        path: ["雄獅旅遊-產品群", "團產OUTB_產二"],
-        children: [
-          {
-            id: "product-outb2-process",
-            label: "系統流程標準",
-            path: ["雄獅旅遊-產品群", "團產OUTB_產二", "系統流程標準"],
-          },
-          {
-            id: "product-outb2-confidential",
-            label: "合約文件(機密)",
-            path: ["雄獅旅遊-產品群", "團產OUTB_產二", "合約文件(機密)"],
-          },
-          {
-            id: "product-outb2-material",
-            label: "產品知識和教材",
-            path: ["雄獅旅遊-產品群", "團產OUTB_產二", "產品知識和教材"],
-          },
-        ],
-      },
-      {
-        id: "product-fit",
-        label: "FIT元件",
-        path: ["雄獅旅遊-產品群", "FIT元件"],
-        children: [
-          {
-            id: "product-fit-ticket",
-            label: "機票",
-            path: ["雄獅旅遊-產品群", "FIT元件", "機票"],
-          },
-          {
-            id: "product-fit-travel",
-            label: "自由行",
-            path: ["雄獅旅遊-產品群", "FIT元件", "自由行"],
-          },
-          {
-            id: "product-fit-room",
-            label: "訂房",
-            path: ["雄獅旅遊-產品群", "FIT元件", "訂房"],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "taiwan",
-    label: "雄獅旅遊-台灣塊狀",
-    path: ["雄獅旅遊-台灣塊狀"],
-    children: [
-      {
-        id: "taiwan-south",
-        label: "南高屏塊狀",
-        path: ["雄獅旅遊-台灣塊狀", "南高屏塊狀"],
-        children: [
-          {
-            id: "taiwan-south-northtrip",
-            label: "產品國旅",
-            path: ["雄獅旅遊-台灣塊狀", "南高屏塊狀", "產品國旅"],
-          },
-          {
-            id: "taiwan-south-rail",
-            label: "鐵道",
-            path: ["雄獅旅遊-台灣塊狀", "南高屏塊狀", "鐵道"],
-          },
-          {
-            id: "taiwan-south-daily",
-            label: "共用作業",
-            path: ["雄獅旅遊-台灣塊狀", "南高屏塊狀", "共用作業"],
-          },
-        ],
-      },
-      {
-        id: "taiwan-taichung",
-        label: "大台中塊狀",
-        path: ["雄獅旅遊-台灣塊狀", "大台中塊狀"],
-      },
-      {
-        id: "taiwan-taoyuan",
-        label: "桃竹苗塊狀",
-        path: ["雄獅旅遊-台灣塊狀", "桃竹苗塊狀"],
-      },
-    ],
-  },
-  {
-    id: "overseas",
-    label: "雄獅旅遊-海外塊狀",
-    path: ["雄獅旅遊-海外塊狀"],
-    children: [
-      {
-        id: "overseas-common",
-        label: "公用作業",
-        path: ["雄獅旅遊-海外塊狀", "公用作業"],
-      },
-    ],
-  },
-  {
-    id: "transit",
-    label: "雄獅通運",
-    path: ["雄獅通運"],
-    children: [
-      {
-        id: "transit-fleet",
-        label: "車隊管理",
-        path: ["雄獅通運", "車隊管理"],
-      },
-    ],
-  },
-  {
-    id: "marketing",
-    label: "雄獅旅遊-行銷群",
-    path: ["雄獅旅遊-行銷群"],
-  },
-  {
-    id: "planning",
-    label: "雄獅旅遊-企劃本部",
-    path: ["雄獅旅遊-企劃本部"],
-    children: [
-      {
-        id: "planning-project",
-        label: "專案管理",
-        path: ["雄獅旅遊-企劃本部", "專案管理"],
-        children: [
-          {
-            id: "planning-project-brief",
-            label: "0800早會簡報",
-            path: ["雄獅旅遊-企劃本部", "專案管理", "0800早會簡報"],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "info",
-    label: "雄獅資訊",
-    path: ["雄獅資訊"],
-  },
-  {
-    id: "channel",
-    label: "雄獅旅遊-通路群",
-    path: ["雄獅旅遊-通路群"],
-  },
-  {
-    id: "confidential",
-    label: "機密文件",
-    path: ["機密文件"],
-  },
-];
 
 export const SAMPLE_DOCS: DocumentRecord[] = [
   {
@@ -497,6 +211,16 @@ export const SAMPLE_DOCS: DocumentRecord[] = [
   },
 ];
 
+export function toCategoryId(path: string[]) {
+  return path.join(" / ");
+}
+
+export const DOCUMENTS: DocumentRecord[] = SAMPLE_DOCS.map((doc) => ({
+  ...doc,
+  categoryId: toCategoryId(doc.knowledgePath),
+  categoryPath: [...doc.knowledgePath],
+}));
+
 export const LEFT_RAIL_PRESETS: {
   id: LeftRailPreset;
   label: string;
@@ -530,7 +254,8 @@ export const STATUS_OPTIONS: DocumentStatus[] = [
 
 export function includesPathPrefix(doc: DocumentRecord, path: string[]) {
   if (path.length === 0) return true;
-  return path.every((segment, index) => doc.knowledgePath[index] === segment);
+  const categoryPath = doc.categoryPath ?? doc.knowledgePath;
+  return path.every((segment, index) => categoryPath[index] === segment);
 }
 
 export function matchesPreset(doc: DocumentRecord, preset: LeftRailPreset) {

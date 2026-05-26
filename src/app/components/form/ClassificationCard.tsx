@@ -1,102 +1,136 @@
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Card, Field } from "./BasicInfoCard";
 
-const L1 = ["", "行政管理", "財務會計", "技術研發", "人力資源", "業務行銷"];
+const L1 = ["", "法務", "人資資源管理", "雄獅大學", "資安暨個資管理室", "其他"];
 const L2: Record<string, string[]> = {
-  行政管理: ["", "文書管理", "庶務管理", "資產管理"],
-  財務會計: ["", "預算規劃", "帳務處理", "稅務申報"],
-  技術研發: ["", "系統架構", "產品開發", "資安管理"],
-  人力資源: ["", "招募甄選", "教育訓練", "薪酬福利"],
-  業務行銷: ["", "市場分析", "客戶關係", "品牌推廣"],
+  法務: ["", "契約管理", "法規遵循", "簽核流程"],
+  人資資源管理: ["", "組織與人員", "考勤與出勤", "薪酬福利"],
+  雄獅大學: ["", "新人訓練", "教材與指南", "資安教材"],
+  資安暨個資管理室: ["", "資訊安全", "個資管理", "權限控管"],
+  其他: ["", "部門共用", "表單範本", "流程標準"],
 };
 const L3: Record<string, string[]> = {
-  文書管理: ["", "合約文件", "公文函件", "簽核紀錄"],
-  預算規劃: ["", "年度預算", "季度預算", "專案預算"],
-  系統架構: ["", "架構設計", "API規格", "資料庫設計"],
-  招募甄選: ["", "職缺管理", "面試評核", "錄用作業"],
-  市場分析: ["", "競品分析", "用戶調研", "市場趨勢"],
+  契約管理: ["", "內部公版契約", "外部合約", "版本歷程"],
+  法規遵循: ["", "稽核文件", "法遵清單", "對應表單"],
+  簽核流程: ["", "主管簽核", "文管審核", "送審檢核"],
+  組織與人員: ["", "部門異動", "名冊維護", "職務表單"],
+  考勤與出勤: ["", "請假", "加班", "出勤規範"],
+  薪酬福利: ["", "薪資", "獎金", "福利制度"],
+  新人訓練: ["", "課程簡介", "新人手冊", "FAQ"],
+  教材與指南: ["", "操作手冊", "流程圖", "教學簡報"],
+  資安教材: ["", "OTP", "密碼規範", "資安宣導"],
+  資訊安全: ["", "弱點管理", "資安政策", "事件通報"],
+  個資管理: ["", "個資盤點", "保存年限", "使用授權"],
+  權限控管: ["", "角色權限", "申請流程", "帳號管理"],
+  部門共用: ["", "共用文件", "公告", "規範"],
+  表單範本: ["", "申請單", "簽核單", "範本庫"],
+  流程標準: ["", "SOP", "作業說明", "流程檢核"],
 };
-const L4: string[] = ["", "第一版", "第二版", "修訂版", "最終版"];
+const L4 = ["", "流程文件", "細分類", "表單附件", "其他"];
+const HIERARCHY = ["", "第一級", "第二級", "第三級", "第四級", "第五級", "第六級"];
 
-const HIERARCHY = ["", "政策文件", "程序文件", "作業指導書", "表單記錄", "參考資料"];
+export interface ClassificationSelection {
+  l1: string;
+  l2: string;
+  l3: string;
+  l4: string;
+}
 
-import { useState } from "react";
+export function buildCategoryPayload(selection: ClassificationSelection) {
+  const categoryPath = [selection.l1, selection.l2, selection.l3, selection.l4].filter(Boolean);
+  return {
+    categoryPath,
+    categoryId: categoryPath.join(" / "),
+  };
+}
 
-export function ClassificationCard() {
-  const [l1, setL1] = useState("");
-  const [l2, setL2] = useState("");
-  const [l3, setL3] = useState("");
+interface Props {
+  value: ClassificationSelection;
+  onChange: (next: ClassificationSelection) => void;
+}
 
-  const l2Options = l1 ? (L2[l1] ?? [""]) : [""];
-  const l3Options = l2 ? (L3[l2] ?? [""]) : [""];
+export function ClassificationCard({ value, onChange }: Props) {
+  const [hierarchy, setHierarchy] = useState("");
+
+  const l2Options = value.l1 ? (L2[value.l1] ?? [""]) : [""];
+  const l3Options = value.l2 ? (L3[value.l2] ?? [""]) : [""];
+  const payload = buildCategoryPayload(value);
 
   return (
-    <Card title="文件知識樹與階層選擇" icon="🌿">
+    <Card title="文件分類與歸屬" icon="🧭">
       <div className="space-y-5">
-        {/* 2x2 cascading grid */}
         <div>
-          <p className="text-xs text-gray-400 mb-3 flex items-center gap-1">
-            <span>依序選擇各層級類別，建立文件的知識樹分類路徑</span>
+          <p className="mb-3 flex items-center gap-1 text-xs text-gray-400">
+            <span>依照資料夾層級選擇歸屬分類，建立文件時會一起寫入 categoryId / categoryPath。</span>
           </p>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="第一層類別" required>
+            <Field label="第一層分類" required>
               <Select
                 options={L1}
-                placeholder="請選擇第一層"
-                value={l1}
-                onChange={(v) => { setL1(v); setL2(""); setL3(""); }}
+                placeholder="請選擇第一層分類"
+                value={value.l1}
+                onChange={(l1) => onChange({ l1, l2: "", l3: "", l4: "" })}
               />
             </Field>
-            <Field label="第二層類別" required>
+            <Field label="第二層分類" required>
               <Select
                 options={l2Options}
-                placeholder={l1 ? "請選擇第二層" : "請先選第一層"}
-                disabled={!l1}
-                value={l2}
-                onChange={(v) => { setL2(v); setL3(""); }}
+                placeholder={value.l1 ? "請選擇第二層分類" : "請先選擇第一層分類"}
+                disabled={!value.l1}
+                value={value.l2}
+                onChange={(l2) => onChange({ ...value, l2, l3: "", l4: "" })}
               />
             </Field>
-            <Field label="第三層類別" required>
+            <Field label="第三層分類" required>
               <Select
                 options={l3Options}
-                placeholder={l2 ? "請選擇第三層" : "請先選第二層"}
-                disabled={!l2}
-                value={l3}
-                onChange={setL3}
+                placeholder={value.l2 ? "請選擇第三層分類" : "請先選擇第二層分類"}
+                disabled={!value.l2}
+                value={value.l3}
+                onChange={(l3) => onChange({ ...value, l3, l4: "" })}
               />
             </Field>
-            <Field label="第四層類別" required>
+            <Field label="第四層分類" required>
               <Select
                 options={L4}
-                placeholder={l3 ? "請選擇第四層" : "請先選第三層"}
-                disabled={!l3}
-                value=""
-                onChange={() => {}}
+                placeholder={value.l3 ? "請選擇第四層分類" : "請先選擇第三層分類"}
+                disabled={!value.l3}
+                value={value.l4}
+                onChange={(l4) => onChange({ ...value, l4 })}
               />
             </Field>
           </div>
         </div>
 
-        {/* Breadcrumb preview */}
-        {l1 && (
-          <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-teal-50 border border-teal-100">
-            <span className="text-xs text-teal-600 font-medium">路徑：</span>
-            {[l1, l2, l3].filter(Boolean).map((seg, i, arr) => (
-              <span key={seg} className="flex items-center gap-1.5">
-                <span className="text-xs text-teal-700 font-semibold">{seg}</span>
-                {i < arr.length - 1 && <span className="text-teal-300 text-xs">›</span>}
-              </span>
-            ))}
+        {payload.categoryPath.length > 0 && (
+          <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2">
+            <p className="mb-1 text-xs font-medium text-teal-600">目前歸屬</p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {payload.categoryPath.map((segment, index) => (
+                <span key={segment} className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-teal-800">{segment}</span>
+                  {index < payload.categoryPath.length - 1 && <span className="text-xs text-teal-300">/</span>}
+                </span>
+              ))}
+            </div>
+            <p className="mt-1 text-[11px] text-teal-700/80">
+              categoryId: <span className="font-mono">{payload.categoryId || "未選擇"}</span>
+            </p>
           </div>
         )}
 
-        {/* Divider */}
         <div className="border-t border-gray-100 pt-5">
-          <Field label="文件階層" required>
-            <Select options={HIERARCHY} placeholder="請選擇文件階層類型" value="" onChange={() => {}} />
+          <Field label="文件階級" required>
+            <Select
+              options={HIERARCHY}
+              placeholder="請選擇文件階級"
+              value={hierarchy}
+              onChange={setHierarchy}
+            />
           </Field>
-          <p className="text-xs text-gray-400 mt-1.5">
-            文件階層決定文件在組織文管體系中的層級定位（如：政策、程序、作業指導書等）
+          <p className="mt-1.5 text-xs text-gray-400">
+            文件階級與分類歸屬分開保存，分類會寫入 categoryId / categoryPath，階級則作為文件層級欄位。
           </p>
         </div>
       </div>
@@ -123,20 +157,22 @@ function Select({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-full appearance-none px-4 py-2.5 pr-9 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full appearance-none rounded-lg border border-gray-200 px-4 py-2.5 pr-9 text-sm transition-all focus:border-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         style={{
           backgroundColor: disabled ? "#F9FAFB" : "#F9FAFB",
           color: value ? "#1F2937" : "#9CA3AF",
         }}
       >
         <option value="">{placeholder}</option>
-        {options.filter(Boolean).map((o) => (
-          <option key={o} value={o}>{o}</option>
+        {options.filter(Boolean).map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
         ))}
       </select>
       <ChevronDown
         size={14}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
       />
     </div>
   );

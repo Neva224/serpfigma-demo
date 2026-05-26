@@ -1,18 +1,10 @@
-import { useMemo, useState, type ReactNode } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  Folder,
-  FolderOpen,
-  LayoutGrid,
-  Menu,
-  Search,
-} from "lucide-react";
+﻿import { useMemo, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight, LayoutGrid, Menu, Search } from "lucide-react";
 import { DocumentTable } from "./DocumentTable";
+import { KnowledgeTree } from "./knowledge/KnowledgeTree";
 import {
-  KNOWLEDGE_TREE,
   LEFT_RAIL_PRESETS,
-  SAMPLE_DOCS,
+  DOCUMENTS,
   STATUS_OPTIONS,
   LEVEL_OPTIONS,
   includesPathPrefix,
@@ -20,7 +12,6 @@ import {
   type DocumentLevel,
   type DocumentRecord,
   type DocumentStatus,
-  type KnowledgeNode,
   type LeftRailPreset,
 } from "./document-management/mockData";
 
@@ -38,30 +29,33 @@ type LeftSelection =
 
 const DEFAULT_SELECTION: LeftSelection = { kind: "all", label: "全部文件" };
 
-const QUICK_SECTION_ITEMS: Record<
+const IA_QUICK_SECTION_ITEMS: Record<
   LeftRailPreset,
   { label: string; selection: LeftSelection }[]
 > = {
   all: [
     { label: "全部文件", selection: { kind: "all", label: "全部文件" } },
-    { label: "文件查詢專區", selection: { kind: "preset", preset: "query", label: "文件查詢專區" } },
-    { label: "文件上傳專區", selection: { kind: "preset", preset: "upload", label: "文件上傳專區" } },
+    { label: "已上架文件", selection: { kind: "status", status: "上架", label: "已上架文件" } },
+    {
+      label: "待簽核文件",
+      selection: { kind: "preset", preset: "signing", label: "待簽核文件" },
+    },
   ],
   query: [
-    { label: "關鍵字搜尋", selection: { kind: "all", label: "全部文件" } },
-    { label: "進階篩選", selection: { kind: "preset", preset: "query", label: "文件查詢專區" } },
-    { label: "已上架文件", selection: { kind: "status", status: "已上架", label: "已上架文件" } },
+    {
+      label: "關鍵字搜尋",
+      selection: { kind: "preset", preset: "query", label: "關鍵字搜尋" },
+    },
+    { label: "進階篩選", selection: { kind: "all", label: "進階篩選" } },
+    { label: "文件下載", selection: { kind: "status", status: "上架", label: "文件下載" } },
   ],
   upload: [
-    { label: "草稿", selection: { kind: "status", status: "草稿", label: "草稿" } },
+    { label: "草稿文件", selection: { kind: "status", status: "草稿", label: "草稿文件" } },
     {
       label: "送出簽核",
-      selection: { kind: "preset", preset: "signing", label: "簽核專區" },
+      selection: { kind: "preset", preset: "signing", label: "送出簽核" },
     },
-    {
-      label: "重新編輯",
-      selection: { kind: "status", status: "退回", label: "重新編輯" },
-    },
+    { label: "重新編輯", selection: { kind: "status", status: "退回", label: "重新編輯" } },
   ],
   signing: [
     {
@@ -72,18 +66,18 @@ const QUICK_SECTION_ITEMS: Record<
       label: "待文管審核",
       selection: { kind: "status", status: "待文管審核", label: "待文管審核" },
     },
-    {
-      label: "作廢文件",
-      selection: { kind: "status", status: "下架", label: "作廢文件" },
-    },
+    { label: "作廢文件", selection: { kind: "status", status: "下架", label: "作廢文件" } },
   ],
   history: [
-    { label: "退回文件", selection: { kind: "status", status: "退回", label: "退回文件" } },
-    { label: "下架文件", selection: { kind: "status", status: "下架", label: "下架文件" } },
     {
       label: "版本歷程",
-      selection: { kind: "preset", preset: "history", label: "文件簽核單專區" },
+      selection: { kind: "preset", preset: "history", label: "版本歷程" },
     },
+    {
+      label: "審核紀錄",
+      selection: { kind: "preset", preset: "history", label: "審核紀錄" },
+    },
+    { label: "退回文件", selection: { kind: "status", status: "退回", label: "退回文件" } },
   ],
   admin: [
     {
@@ -95,11 +89,11 @@ const QUICK_SECTION_ITEMS: Record<
       selection: { kind: "path", path: ["機密文件"], label: "機密文件" },
     },
     {
-      label: "資安與權限",
+      label: "資料庫",
       selection: {
         kind: "path",
         path: ["雄獅旅遊-管理本部", "資安暨個資管理室"],
-        label: "資安與權限",
+        label: "資料庫",
       },
     },
   ],
@@ -117,15 +111,6 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     history: false,
     admin: false,
   });
-  const [expandedTreeNodes, setExpandedTreeNodes] = useState<Record<string, boolean>>({
-    management: true,
-    product: true,
-    taiwan: false,
-    overseas: false,
-    transit: false,
-    planning: false,
-  });
-
   const [keywordInput, setKeywordInput] = useState("");
   const [keywordQuery, setKeywordQuery] = useState("");
   const [level, setLevel] = useState<"all" | DocumentLevel>("all");
@@ -149,7 +134,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     const departmentQuery = department.trim().toLowerCase();
     const tagQuery = tag.trim().toLowerCase();
 
-    return SAMPLE_DOCS
+    return DOCUMENTS
       .filter((doc) => {
         if (selected.kind === "preset") return matchesPreset(doc, selected.preset);
         if (selected.kind === "status") return doc.status === selected.status;
@@ -174,7 +159,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
           doc.uploaderName,
           doc.uploaderCode,
           doc.tags.join(" "),
-          doc.knowledgePath.join(" / "),
+          (doc.categoryPath ?? doc.knowledgePath).join(" / "),
         ]
           .join(" ")
           .toLowerCase();
@@ -211,23 +196,26 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     dateTo,
   ]);
 
-  const activeLabel = selected.label;
+  const currentCategory =
+    selected.kind === "path"
+      ? {
+          title: selected.label,
+          description: selected.path.join(" / "),
+        }
+      : undefined;
+  const activeLabel = currentCategory?.title ?? selected.label;
   const selectedCount = filteredDocs.length;
 
   function togglePreset(preset: LeftRailPreset) {
     setExpandedPresets((prev) => ({ ...prev, [preset]: !prev[preset] }));
   }
 
-  function toggleTreeNode(id: string) {
-    setExpandedTreeNodes((prev) => ({ ...prev, [id]: !prev[id] }));
-  }
-
   function countForPreset(preset: LeftRailPreset) {
-    return SAMPLE_DOCS.filter((doc) => matchesPreset(doc, preset)).length;
+    return DOCUMENTS.filter((doc) => matchesPreset(doc, preset)).length;
   }
 
   function countForPath(path: string[]) {
-    return SAMPLE_DOCS.filter((doc) => includesPathPrefix(doc, path)).length;
+    return DOCUMENTS.filter((doc) => includesPathPrefix(doc, path)).length;
   }
 
   function resetFilters() {
@@ -262,7 +250,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
               <LayoutGrid size={16} />
             </div>
             <div>
-              <div className="text-sm font-semibold text-slate-800">文件清單篩選</div>
+              <div className="text-sm font-semibold text-slate-800">文件管理清單</div>
               <div className="text-xs text-slate-400">知識樹與快速篩選</div>
             </div>
           </div>
@@ -270,7 +258,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
             type="button"
             onClick={() => setSidebarCollapsed((current) => !current)}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            title={sidebarCollapsed ? "展開側欄" : "收合側欄"}
+            title={sidebarCollapsed ? "撅??湔?" : "?嗅??湔?"}
           >
             <Menu size={16} />
           </button>
@@ -279,39 +267,25 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
         <div className="h-full overflow-y-auto px-3 py-3">
           <SectionCard
             title="知識樹分類"
-            badge={String(SAMPLE_DOCS.length)}
+            badge={String(DOCUMENTS.length)}
             open={knowledgeOpen}
             onToggle={() => setKnowledgeOpen((current) => !current)}
-              onHeaderClick={() => setSelected(DEFAULT_SELECTION)}
-              subtitle="依照 Excel 的資料夾層級繼續點入"
+            onHeaderClick={() => setSelected(DEFAULT_SELECTION)}
+            subtitle="由 Excel 轉換而來的正規化分類樹"
             >
-            <KnowledgeTreeNode
-              node={KNOWLEDGE_TREE[0]}
-              depth={0}
-              expandedTreeNodes={expandedTreeNodes}
-              onToggle={toggleTreeNode}
-              selected={selected}
-              onSelect={setSelected}
+            <KnowledgeTree
+              totalCount={DOCUMENTS.length}
+              selectedPathKey={selected.kind === "path" ? selected.path.join(" / ") : null}
+              onSelectAll={() => setSelected(DEFAULT_SELECTION)}
+              onSelectPath={(path, label) => setSelected({ kind: "path", path, label })}
               countForPath={countForPath}
             />
-            {KNOWLEDGE_TREE.slice(1).map((node) => (
-              <KnowledgeTreeNode
-                key={node.id}
-                node={node}
-                depth={0}
-                expandedTreeNodes={expandedTreeNodes}
-                onToggle={toggleTreeNode}
-                selected={selected}
-                onSelect={setSelected}
-                countForPath={countForPath}
-              />
-            ))}
           </SectionCard>
 
           {LEFT_RAIL_PRESETS.map((section) => {
             const isOpen = expandedPresets[section.id];
             const count = countForPreset(section.id);
-            const items = QUICK_SECTION_ITEMS[section.id];
+            const items = IA_QUICK_SECTION_ITEMS[section.id];
             const isActiveSection =
               selected.kind === "preset"
                 ? selected.preset === section.id
@@ -351,10 +325,10 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
           type="button"
           onClick={() => setSidebarCollapsed(false)}
           className="fixed left-0 top-28 z-30 inline-flex items-center gap-2 rounded-r-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-lg transition hover:bg-slate-50"
-          title="展開側欄"
+          title="撅??湔?"
         >
           <ChevronRight size={15} />
-          展開側欄
+          撅??湔?
         </button>
       )}
 
@@ -362,19 +336,22 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span>首頁</span>
+              <span>擐?</span>
               <span>/</span>
-              <span className="font-semibold text-teal-700">文件管理</span>
+              <span className="font-semibold text-teal-700">?辣蝞∠?</span>
             </div>
             <div className="mt-1.5 text-lg font-bold text-slate-800">{activeLabel}</div>
             <div className="mt-1 text-sm text-slate-500">
-              目前篩選：<span className="font-semibold text-slate-700">{activeLabel}</span>
+              目前篩選條件：
+              <span className="font-semibold text-slate-700">
+                {currentCategory?.title ?? activeLabel}
+              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            共 {selectedCount} 筆結果
+            共 {selectedCount} 筆
           </div>
         </div>
 
@@ -482,7 +459,7 @@ function FilterBar({
             onKeyDown={(e) => {
               if (e.key === "Enter") onSearch();
             }}
-            placeholder="請輸入關鍵字搜尋，支援文件名稱、編號、上傳者與標籤"
+            placeholder="輸入關鍵字、文件編號、標籤或分類"
             className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
           />
         </div>
@@ -516,13 +493,13 @@ function FilterBar({
           <input
             value={uploader}
             onChange={(e) => setUploader(e.target.value)}
-            placeholder="員編 / 姓名"
+            placeholder="姓名 / 員編"
             className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
           />
         </div>
 
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-          <span className="text-xs font-semibold text-slate-500">日期區間</span>
+          <span className="text-xs font-semibold text-slate-500">上傳日期</span>
           <input
             type="date"
             value={dateFrom}
@@ -559,7 +536,7 @@ function FilterBar({
             onClick={onReset}
             className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
-            清除條件
+            重置條件
           </button>
           <button
             type="button"
@@ -575,8 +552,8 @@ function FilterBar({
         <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
           <div className="grid gap-3 lg:grid-cols-3">
             <TextField label="文件編號" value={docNo} onChange={setDocNo} placeholder="DOC-2026-001" />
-            <TextField label="部門" value={department} onChange={setDepartment} placeholder="法務 / 產品群" />
-            <TextField label="標籤" value={tag} onChange={setTag} placeholder="契約 / 鐵道 / 新人訓" />
+            <TextField label="部門" value={department} onChange={setDepartment} placeholder="雄獅旅遊 / 管理本部" />
+            <TextField label="標籤" value={tag} onChange={setTag} placeholder="法務 / 合約 / 年度報告" />
           </div>
         </div>
       )}
@@ -629,7 +606,7 @@ function FilterSelect({
       >
         {options.map((option) => (
           <option key={option} value={option}>
-            {option === "all" ? "全部" : option}
+            {option === "all" ? "?券" : option}
           </option>
         ))}
       </select>
@@ -717,90 +694,6 @@ function SelectionPill({
   );
 }
 
-function KnowledgeTreeNode({
-  node,
-  depth,
-  expandedTreeNodes,
-  onToggle,
-  selected,
-  onSelect,
-  countForPath,
-}: {
-  node: KnowledgeNode;
-  depth: number;
-  expandedTreeNodes: Record<string, boolean>;
-  onToggle: (id: string) => void;
-  selected: LeftSelection;
-  onSelect: (value: LeftSelection) => void;
-  countForPath: (path: string[]) => number;
-}) {
-  const hasChildren = Boolean(node.children?.length);
-  const isExpanded = expandedTreeNodes[node.id] ?? false;
-  const isSelected =
-    selected.kind === "path" && selected.path.join(" / ") === node.path.join(" / ");
-  const count = countForPath(node.path);
-
-  return (
-    <div>
-      <div
-        className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition ${
-          isSelected ? "bg-teal-50 text-teal-800" : "hover:bg-slate-50"
-        }`}
-        style={{ paddingLeft: `${12 + depth * 14}px` }}
-      >
-        <span className="flex h-4 w-4 items-center justify-center text-slate-400">
-          {hasChildren ? (
-            <button
-              type="button"
-              onClick={() => onToggle(node.id)}
-              className="flex h-4 w-4 items-center justify-center"
-              aria-label={isExpanded ? "收合節點" : "展開節點"}
-            >
-              {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-            </button>
-          ) : null}
-        </span>
-        <button
-          type="button"
-          onClick={() => onSelect({ kind: "path", path: node.path, label: node.label })}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
-        >
-          {hasChildren ? (
-            isExpanded ? (
-              <FolderOpen size={14} className="flex-shrink-0 text-teal-600" />
-            ) : (
-              <Folder size={14} className="flex-shrink-0 text-teal-600" />
-            )
-          ) : (
-            <Folder size={14} className="flex-shrink-0 text-slate-400" />
-          )}
-          <span className="min-w-0 flex-1 truncate text-sm">{node.label}</span>
-        </button>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">
-          {count}
-        </span>
-      </div>
-
-      {hasChildren && isExpanded && (
-        <div className="mt-1 space-y-1">
-          {node.children!.map((child) => (
-            <KnowledgeTreeNode
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              expandedTreeNodes={expandedTreeNodes}
-              onToggle={onToggle}
-              selected={selected}
-              onSelect={onSelect}
-              countForPath={countForPath}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function isSelectionActive(selected: LeftSelection, target: LeftSelection) {
   if (selected.kind !== target.kind) return false;
   if (selected.kind === "all") return true;
@@ -815,3 +708,4 @@ function isSelectionActive(selected: LeftSelection, target: LeftSelection) {
   }
   return false;
 }
+

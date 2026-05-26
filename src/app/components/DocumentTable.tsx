@@ -85,13 +85,18 @@ const LEVEL_LABELS: Record<DocumentLevel, { short: string; desc: string }> = {
 
 export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSizeInput, setPageSizeInput] = useState("10");
   const [notice, setNotice] = useState<string | null>(null);
   const [panel, setPanel] = useState<TablePanel>(null);
 
+  const pageSize = useMemo(() => {
+    const parsed = Number(pageSizeInput);
+    return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
+  }, [pageSizeInput]);
+
   useEffect(() => {
     setPage(1);
-  }, [docs]);
+  }, [docs, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(docs.length / pageSize));
   const safePage = Math.min(page, totalPages);
@@ -351,10 +356,20 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
       <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <span>每頁顯示</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            aria-label="每頁顯示筆數"
+            value={pageSizeInput}
+            onFocus={(e) => e.currentTarget.select()}
+            onChange={(e) => setPageSizeInput(e.target.value.replace(/\D/g, ""))}
+            className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
+          />
           <select
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
-            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
+            className="hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
           >
             {[10].map((size) => (
               <option key={size} value={size}>
