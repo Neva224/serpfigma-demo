@@ -226,11 +226,11 @@ export const LEFT_RAIL_PRESETS: {
   label: string;
   description: string;
 }[] = [
-  { id: "all", label: "全部文件", description: "文件查詢專區入口" },
-  { id: "query", label: "文件查詢專區", description: "關鍵字、進階篩選與下載" },
-  { id: "upload", label: "文件上傳專區", description: "資料填寫、草稿與送出" },
+  { id: "all", label: "文件查詢", description: "一般文件搜尋與篩選入口" },
+  { id: "query", label: "一般文件查詢", description: "關鍵字、進階篩選與下載" },
+  { id: "upload", label: "文件上傳", description: "資料填寫、草稿與送出" },
   { id: "signing", label: "簽核專區", description: "主管與文管審核流程" },
-  { id: "history", label: "文件簽核單專區", description: "個人文件狀態總覽" },
+  { id: "history", label: "文件簽核單進度查詢", description: "個人文件簽核進度查詢" },
   { id: "admin", label: "系統後台管理", description: "權限與文件管理" },
 ];
 

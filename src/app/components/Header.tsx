@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Bell, Settings, ChevronRight, X, FileText } from "lucide-react";
-import { DocRecord } from "./DocumentTable";
+import { useMemo, useState } from "react";
+import { Bell, ChevronRight, FileText, Settings, X } from "lucide-react";
+import { type DocRecord } from "./DocumentTable";
 
 type Screen = "list" | "form" | "re-edit" | "signing-progress" | "database" | "permissions";
 
-interface QNotification {
+interface NotificationItem {
   id: number;
   date: string;
   sender: string;
@@ -15,26 +15,55 @@ interface QNotification {
   unread: boolean;
 }
 
-const Q_NOTIFICATIONS: QNotification[] = [
-  { id: 1, date: "05/25 08:12", sender: "系統自動", message: "您有一份文件待主管簽核，請盡快處理。", docTitle: "軟體開發管理辦法", docId: 2, type: "approve-manager", unread: true },
-  { id: 2, date: "05/25 09:44", sender: "系統自動", message: "員工教育訓練計畫已通過主管審核，請進行文管複審。", docTitle: "員工教育訓練計畫", docId: 7, type: "approve-docadmin", unread: true },
-  { id: 3, date: "05/24 14:22", sender: "文管人員", message: "您的系統架構說明書已被退回，請修改後重新提交。", docTitle: "系統架構說明書", docId: 6, type: "re-edit", unread: false },
-  { id: 4, date: "05/23 11:08", sender: "系統自動", message: "資訊安全管理政策已成功上架，感謝您的配合。", docTitle: "資訊安全管理政策", docId: 1, type: "info", unread: false },
+const NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 1,
+    date: "05/25 08:12",
+    sender: "系統通知",
+    message: "有一筆文件待主管簽核，請盡快處理。",
+    docTitle: "內部公版契約彙整",
+    docId: 2,
+    type: "approve-manager",
+    unread: true,
+  },
+  {
+    id: 2,
+    date: "05/25 09:44",
+    sender: "系統通知",
+    message: "有一筆文件待文管審核，請盡快處理。",
+    docTitle: "集團新人訓課綱",
+    docId: 7,
+    type: "approve-docadmin",
+    unread: true,
+  },
+  {
+    id: 3,
+    date: "05/24 14:22",
+    sender: "文件管理",
+    message: "文件已退回，請重新編輯後再送出。",
+    docTitle: "作業流程修訂版",
+    docId: 6,
+    type: "re-edit",
+    unread: false,
+  },
+  {
+    id: 4,
+    date: "05/23 11:08",
+    sender: "系統資訊",
+    message: "知識樹資料已同步更新。",
+    docTitle: "知識樹分類",
+    docId: null,
+    type: "info",
+    unread: false,
+  },
 ];
 
-const TYPE_CONFIG: Record<QNotification["type"], { label: string; bg: string; text: string }> = {
-  "approve-manager":  { label: "待主管審核", bg: "#FEF3C7", text: "#B45309" },
-  "approve-docadmin": { label: "待文管審核", bg: "#DBEAFE", text: "#1D4ED8" },
-  "re-edit":          { label: "請修改",     bg: "#FEE2E2", text: "#DC2626" },
-  "info":             { label: "通知",        bg: "#F3F4F6", text: "#6B7280" },
+const TYPE_LABEL: Record<NotificationItem["type"], string> = {
+  "approve-manager": "待主管簽核",
+  "approve-docadmin": "待文管審核",
+  "re-edit": "重新編輯",
+  info: "資訊",
 };
-
-const NAV_ITEMS: { label: string; screen: Screen }[] = [
-  { label: "文件管理",       screen: "list" },
-  { label: "文件簽核進度查詢", screen: "signing-progress" },
-  { label: "資料庫",         screen: "database" },
-  { label: "系統設定",       screen: "permissions" },
-];
 
 interface Props {
   activeScreen: Screen;
@@ -43,145 +72,131 @@ interface Props {
   onReEdit: (docId: number) => void;
 }
 
-export function Header({ activeScreen, onNavigate, onOpenApproval, onReEdit }: Props) {
-  const [qOpen, setQOpen] = useState(false);
-  const unread = Q_NOTIFICATIONS.filter((n) => n.unread).length;
+export function Header({ onNavigate, onOpenApproval, onReEdit }: Props) {
+  const [panelOpen, setPanelOpen] = useState(false);
+  const unreadCount = useMemo(
+    () => NOTIFICATIONS.filter((notification) => notification.unread).length,
+    [],
+  );
 
-  function handleGo(n: QNotification) {
-    setQOpen(false);
-    if (n.type === "approve-manager" && n.docId != null) onOpenApproval(n.docId, "manager");
-    else if (n.type === "approve-docadmin" && n.docId != null) onOpenApproval(n.docId, "docadmin");
-    else if (n.type === "re-edit" && n.docId != null) onReEdit(n.docId);
+  function handleNotificationClick(item: NotificationItem) {
+    setPanelOpen(false);
+    if (item.type === "approve-manager" && item.docId != null) {
+      onOpenApproval(item.docId, "manager");
+    } else if (item.type === "approve-docadmin" && item.docId != null) {
+      onOpenApproval(item.docId, "docadmin");
+    } else if (item.type === "re-edit" && item.docId != null) {
+      onReEdit(item.docId);
+    }
   }
 
   return (
     <>
-      <header className="bg-white border-b border-gray-200 z-20 flex-shrink-0" style={{ height: "52px" }}>
-        <div className="flex items-center h-full px-5 gap-0">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 mr-6">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: "#0D9488" }}>
+      <header className="z-20 flex h-[52px] flex-shrink-0 border-b border-slate-200 bg-white">
+        <div className="flex h-full flex-1 items-center px-5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-600">
               <FileText size={15} className="text-white" />
             </div>
-            <div>
-              <div
-                className="leading-none text-gray-900"
-                style={{ fontSize: "14px", fontWeight: 800, letterSpacing: "-0.3px" }}
-              >
+            <div className="leading-tight">
+              <div className="text-sm font-extrabold tracking-tight text-slate-900">
                 SERP文件管理系統
               </div>
+              <div className="text-[11px] text-slate-400">文件管理平台</div>
             </div>
           </div>
 
-          {/* Nav */}
-          <nav className="flex items-center gap-0.5 flex-1">
-            {NAV_ITEMS.map(({ label, screen }) => {
-              const active = activeScreen === screen;
-              return (
-                <button
-                  key={screen}
-                  onClick={() => onNavigate(screen)}
-                  className="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: active ? 700 : 400,
-                    backgroundColor: active ? "#0D9488" : "transparent",
-                    color: active ? "#ffffff" : "#4B5563",
-                  }}
-                  onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "#F3F4F6"; }}
-                  onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLElement).style.backgroundColor = "transparent"; }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Right: Q notification + user */}
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <button
-              onClick={() => setQOpen((v) => !v)}
-              className="relative w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-all"
+              type="button"
+              onClick={() => setPanelOpen((current) => !current)}
+              className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
+              aria-label="通知"
             >
               <Bell size={16} />
-              {unread > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full flex items-center justify-center text-white border-2 border-white" style={{ fontSize: "8px", fontWeight: 700, backgroundColor: "#EF4444" }}>
-                  {unread}
+              {unreadCount > 0 && (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+                  {unreadCount}
                 </span>
               )}
             </button>
-            <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-all">
+
+            <button
+              type="button"
+              onClick={() => onNavigate("permissions")}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
+              aria-label="系統設定"
+            >
               <Settings size={16} />
             </button>
-            <div className="flex items-center gap-2 ml-1 pl-3 border-l border-gray-100">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#0D9488" }}>管</div>
+
+            <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">
+                管
+              </div>
               <div className="hidden sm:block">
-                <p className="text-gray-800 leading-none" style={{ fontSize: "12px", fontWeight: 600 }}>系統管理員</p>
-                <p className="text-gray-400" style={{ fontSize: "10px" }}>Admin</p>
+                <div className="text-sm font-semibold text-slate-800">系統管理員</div>
+                <div className="text-[11px] text-slate-400">Admin</div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Q Notification panel */}
-      {qOpen && (
+      {panelOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setQOpen(false)} />
-          <div
-            className="fixed top-14 right-4 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden"
-            style={{ width: "360px" }}
-          >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100" style={{ backgroundColor: "#0D9488" }}>
+          <div className="fixed inset-0 z-40" onClick={() => setPanelOpen(false)} />
+          <div className="fixed right-4 top-14 z-50 w-[360px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-teal-600 px-4 py-3">
               <div className="flex items-center gap-2">
                 <Bell size={14} className="text-white" />
-                <h3 className="text-white font-bold" style={{ fontSize: "13px" }}>SERP Q 待辦通知</h3>
-                {unread > 0 && (
-                  <span className="bg-red-500 text-white rounded-full px-1.5 py-0.5" style={{ fontSize: "10px", fontWeight: 700 }}>{unread}</span>
-                )}
+                <div className="text-sm font-semibold text-white">通知中心</div>
               </div>
-              <button onClick={() => setQOpen(false)} className="text-white/70 hover:text-white transition-colors">
+              <button
+                type="button"
+                onClick={() => setPanelOpen(false)}
+                className="text-white/70 transition hover:text-white"
+                aria-label="關閉通知"
+              >
                 <X size={15} />
               </button>
             </div>
 
-            <div className="overflow-y-auto" style={{ maxHeight: "420px" }}>
-              {Q_NOTIFICATIONS.map((n) => {
-                const tc = TYPE_CONFIG[n.type];
-                const actionable = n.type !== "info";
-                return (
-                  <div
-                    key={n.id}
-                    className="border-b border-gray-50 px-4 py-3"
-                    style={{ backgroundColor: n.unread ? "#F0FDFA" : "#FFFFFF" }}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-gray-400" style={{ fontSize: "10px" }}>{n.date}</span>
-                      <span className="px-1.5 py-0.5 rounded font-semibold" style={{ fontSize: "10px", backgroundColor: tc.bg, color: tc.text }}>{tc.label}</span>
-                    </div>
-                    <p className="text-gray-600 mb-1.5 leading-snug" style={{ fontSize: "11px" }}>{n.message}</p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500 truncate flex-1" style={{ fontSize: "11px" }}>📄 {n.docTitle}</span>
-                      {actionable && (
-                        <button
-                          onClick={() => handleGo(n)}
-                          className="flex items-center gap-0.5 ml-3 font-bold transition-colors hover:opacity-70 whitespace-nowrap"
-                          style={{ fontSize: "11px", color: "#0D9488" }}
-                        >
-                          → GO <ChevronRight size={11} />
-                        </button>
-                      )}
-                    </div>
-                    {n.unread && (
-                      <div className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#0D9488" }} />
+            <div className="max-h-[420px] overflow-y-auto">
+              {NOTIFICATIONS.map((item) => (
+                <div
+                  key={item.id}
+                  className="border-b border-slate-50 px-4 py-3"
+                  style={{ backgroundColor: item.unread ? "#F0FDFA" : "#FFFFFF" }}
+                >
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">{item.date}</span>
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                      {TYPE_LABEL[item.type]}
+                    </span>
+                  </div>
+                  <p className="mb-1.5 text-sm text-slate-600">{item.message}</p>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 flex-1 truncate text-sm text-slate-500">
+                      相關文件：{item.docTitle}
+                    </span>
+                    {item.type !== "info" && (
+                      <button
+                        type="button"
+                        onClick={() => handleNotificationClick(item)}
+                        className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-teal-600 transition hover:text-teal-500"
+                      >
+                        前往處理
+                        <ChevronRight size={14} />
+                      </button>
                     )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
 
-            <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-center text-gray-400" style={{ fontSize: "11px" }}>
-              共 {Q_NOTIFICATIONS.length} 筆通知
+            <div className="border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-xs text-slate-400">
+              共 {NOTIFICATIONS.length} 筆通知
             </div>
           </div>
         </>

@@ -1,116 +1,67 @@
-﻿import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, ChevronRight, LayoutGrid, Menu, Search } from "lucide-react";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Clock3,
+  Database,
+  FileText,
+  FolderOpen,
+  LayoutGrid,
+  Menu,
+  Search,
+  Settings,
+} from "lucide-react";
 import { DocumentTable } from "./DocumentTable";
 import { KnowledgeTree } from "./knowledge/KnowledgeTree";
+import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../mocks/knowledgeTreeData";
 import {
-  LEFT_RAIL_PRESETS,
   DOCUMENTS,
-  STATUS_OPTIONS,
   LEVEL_OPTIONS,
+  STATUS_OPTIONS,
   includesPathPrefix,
-  matchesPreset,
   type DocumentLevel,
   type DocumentRecord,
   type DocumentStatus,
-  type LeftRailPreset,
 } from "./document-management/mockData";
+
+type Screen = "signing-progress" | "database" | "permissions";
+
+type ViewMode =
+  | { kind: "empty" }
+  | { kind: "category"; path: string[]; label: string }
+  | { kind: "query"; variant: "general" | "faq" }
+  | { kind: "signing"; variant: "manager" | "docadmin" | "void" | "transfer" };
 
 interface Props {
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
+  onNavigate: (screen: Screen) => void;
 }
 
-type LeftSelection =
-  | { kind: "all"; label: string }
-  | { kind: "preset"; preset: LeftRailPreset; label: string }
-  | { kind: "status"; status: DocumentStatus; label: string }
-  | { kind: "path"; path: string[]; label: string };
+const EMPTY_VIEW: ViewMode = { kind: "empty" };
 
-const DEFAULT_SELECTION: LeftSelection = { kind: "all", label: "全部文件" };
+const QUERY_ITEMS = [
+  { label: "一般文件查詢", variant: "general" as const },
+  { label: "FAQ查詢", variant: "faq" as const },
+];
 
-const IA_QUICK_SECTION_ITEMS: Record<
-  LeftRailPreset,
-  { label: string; selection: LeftSelection }[]
-> = {
-  all: [
-    { label: "全部文件", selection: { kind: "all", label: "全部文件" } },
-    { label: "已上架文件", selection: { kind: "status", status: "上架", label: "已上架文件" } },
-    {
-      label: "待簽核文件",
-      selection: { kind: "preset", preset: "signing", label: "待簽核文件" },
-    },
-  ],
-  query: [
-    {
-      label: "關鍵字搜尋",
-      selection: { kind: "preset", preset: "query", label: "關鍵字搜尋" },
-    },
-    { label: "進階篩選", selection: { kind: "all", label: "進階篩選" } },
-    { label: "文件下載", selection: { kind: "status", status: "上架", label: "文件下載" } },
-  ],
-  upload: [
-    { label: "草稿文件", selection: { kind: "status", status: "草稿", label: "草稿文件" } },
-    {
-      label: "送出簽核",
-      selection: { kind: "preset", preset: "signing", label: "送出簽核" },
-    },
-    { label: "重新編輯", selection: { kind: "status", status: "退回", label: "重新編輯" } },
-  ],
-  signing: [
-    {
-      label: "待主管簽核",
-      selection: { kind: "status", status: "待主管審核", label: "待主管簽核" },
-    },
-    {
-      label: "待文管審核",
-      selection: { kind: "status", status: "待文管審核", label: "待文管審核" },
-    },
-    { label: "作廢文件", selection: { kind: "status", status: "下架", label: "作廢文件" } },
-  ],
-  history: [
-    {
-      label: "版本歷程",
-      selection: { kind: "preset", preset: "history", label: "版本歷程" },
-    },
-    {
-      label: "審核紀錄",
-      selection: { kind: "preset", preset: "history", label: "審核紀錄" },
-    },
-    { label: "退回文件", selection: { kind: "status", status: "退回", label: "退回文件" } },
-  ],
-  admin: [
-    {
-      label: "管理本部",
-      selection: { kind: "path", path: ["雄獅旅遊-管理本部"], label: "管理本部" },
-    },
-    {
-      label: "機密文件",
-      selection: { kind: "path", path: ["機密文件"], label: "機密文件" },
-    },
-    {
-      label: "資料庫",
-      selection: {
-        kind: "path",
-        path: ["雄獅旅遊-管理本部", "資安暨個資管理室"],
-        label: "資料庫",
-      },
-    },
-  ],
-};
+const SIGNING_ITEMS = [
+  { label: "待主管簽核", variant: "manager" as const, status: "待主管審核" as const },
+  { label: "待文管審核", variant: "docadmin" as const, status: "待文管審核" as const },
+  { label: "作廢文件", variant: "void" as const, status: "下架" as const },
+  { label: "移轉單位", variant: "transfer" as const, status: null },
+];
 
-export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
+export function DocumentListPage({ onAdd, onApprove, onReEdit, onNavigate }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [selected, setSelected] = useState<LeftSelection>(DEFAULT_SELECTION);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
-  const [expandedPresets, setExpandedPresets] = useState<Record<LeftRailPreset, boolean>>({
-    all: true,
-    query: true,
-    upload: true,
-    signing: true,
-    history: false,
-    admin: false,
-  });
+  const [queryOpen, setQueryOpen] = useState(true);
+  const [signingOpen, setSigningOpen] = useState(true);
+  const [shortcutOpen, setShortcutOpen] = useState(true);
+  const [adminOpen, setAdminOpen] = useState(true);
+  const [view, setView] = useState<ViewMode>(EMPTY_VIEW);
+
   const [keywordInput, setKeywordInput] = useState("");
   const [keywordQuery, setKeywordQuery] = useState("");
   const [level, setLevel] = useState<"all" | DocumentLevel>("all");
@@ -123,8 +74,39 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
   const [department, setDepartment] = useState("");
   const [tag, setTag] = useState("");
 
-  const filteredDocs = useMemo(() => {
-    const queryTokens = keywordQuery
+  const selectedPathKey = view.kind === "category" ? view.path.join(" / ") : null;
+
+  const currentNode = useMemo(() => {
+    if (view.kind !== "category") return null;
+    return findNodeByPath(KNOWLEDGE_TREE, view.path);
+  }, [view]);
+
+  const currentCategory = view.kind === "category"
+    ? {
+        title: view.label,
+        description: view.path.join(" / "),
+      }
+    : undefined;
+
+  const docsForView = useMemo(() => {
+    if (view.kind === "empty") return [];
+    if (view.kind === "query" && view.variant === "faq") return [];
+    if (view.kind === "signing" && view.variant === "transfer") return [];
+
+    let baseDocs = DOCUMENTS;
+    if (view.kind === "category") {
+      baseDocs = baseDocs.filter((doc) => includesPathPrefix(doc, view.path));
+    } else if (view.kind === "signing") {
+      const statuses: DocumentStatus[] =
+        view.variant === "manager"
+          ? ["待主管審核"]
+          : view.variant === "docadmin"
+            ? ["待文管審核"]
+            : ["下架"];
+      baseDocs = baseDocs.filter((doc) => statuses.includes(doc.status));
+    }
+
+    const tokens = keywordQuery
       .trim()
       .toLowerCase()
       .split(/\s+/)
@@ -134,13 +116,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     const departmentQuery = department.trim().toLowerCase();
     const tagQuery = tag.trim().toLowerCase();
 
-    return DOCUMENTS
-      .filter((doc) => {
-        if (selected.kind === "preset") return matchesPreset(doc, selected.preset);
-        if (selected.kind === "status") return doc.status === selected.status;
-        if (selected.kind === "path") return includesPathPrefix(doc, selected.path);
-        return true;
-      })
+    return baseDocs
       .filter((doc) => level === "all" || doc.level === level)
       .filter((doc) => status === "all" || doc.status === status)
       .filter((doc) => {
@@ -151,7 +127,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
         );
       })
       .filter((doc) => {
-        if (queryTokens.length === 0) return true;
+        if (tokens.length === 0) return true;
         const haystack = [
           doc.docNo,
           doc.name,
@@ -163,7 +139,7 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
         ]
           .join(" ")
           .toLowerCase();
-        return queryTokens.every((token) => haystack.includes(token));
+        return tokens.every((token) => haystack.includes(token));
       })
       .filter((doc) => {
         if (!docNoQuery) return true;
@@ -184,11 +160,11 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
       })
       .sort((a, b) => b.uploadDate.localeCompare(a.uploadDate));
   }, [
-    selected,
+    view,
+    keywordQuery,
     level,
     status,
     uploader,
-    keywordQuery,
     docNo,
     department,
     tag,
@@ -196,30 +172,14 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     dateTo,
   ]);
 
-  const currentCategory =
-    selected.kind === "path"
-      ? {
-          title: selected.label,
-          description: selected.path.join(" / "),
-        }
-      : undefined;
-  const activeLabel = currentCategory?.title ?? selected.label;
-  const selectedCount = filteredDocs.length;
-
-  function togglePreset(preset: LeftRailPreset) {
-    setExpandedPresets((prev) => ({ ...prev, [preset]: !prev[preset] }));
-  }
-
-  function countForPreset(preset: LeftRailPreset) {
-    return DOCUMENTS.filter((doc) => matchesPreset(doc, preset)).length;
-  }
-
-  function countForPath(path: string[]) {
-    return DOCUMENTS.filter((doc) => includesPathPrefix(doc, path)).length;
-  }
+  const docsCount = docsForView.length;
+  const categoryChildren = currentNode?.children ?? [];
+  const searchPlaceholder =
+    view.kind === "category"
+      ? "搜尋此分類下的文件"
+      : "輸入關鍵字、文件編號、標籤或分類";
 
   function resetFilters() {
-    setSelected(DEFAULT_SELECTION);
     setKeywordInput("");
     setKeywordQuery("");
     setLevel("all");
@@ -237,28 +197,50 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
     setKeywordQuery(keywordInput.trim());
   }
 
+  function activateCategory(path: string[], label: string) {
+    setView({ kind: "category", path, label });
+  }
+
+  function activateQuery(variant: "general" | "faq") {
+    setView({ kind: "query", variant });
+  }
+
+  function activateSigning(variant: "manager" | "docadmin" | "void" | "transfer") {
+    setView({ kind: "signing", variant });
+  }
+
+  function navigateTo(screen: Screen) {
+    onNavigate(screen);
+  }
+
+  function countForPath(path: string[]) {
+    return DOCUMENTS.filter((doc) => includesPathPrefix(doc, path)).length;
+  }
+
   return (
     <div className="flex h-full min-h-[calc(100vh-56px)] overflow-hidden bg-slate-100">
       <aside
         className={`flex-shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 ${
-          sidebarCollapsed ? "pointer-events-none w-0 opacity-0" : "w-[320px] opacity-100"
+          sidebarCollapsed ? "w-[72px]" : "w-[320px]"
         }`}
       >
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <div className="flex items-center gap-2">
+          <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white">
               <LayoutGrid size={16} />
             </div>
-            <div>
-              <div className="text-sm font-semibold text-slate-800">文件管理清單</div>
-              <div className="text-xs text-slate-400">知識樹與快速篩選</div>
-            </div>
+            {!sidebarCollapsed && (
+              <div>
+                <div className="text-sm font-semibold text-slate-800">總功能清單操作篩選</div>
+                <div className="text-xs text-slate-400">文件管理與簽核功能入口</div>
+              </div>
+            )}
           </div>
           <button
             type="button"
             onClick={() => setSidebarCollapsed((current) => !current)}
             className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            title={sidebarCollapsed ? "撅??湔?" : "?嗅??湔?"}
+            aria-label={sidebarCollapsed ? "展開選單" : "收合選單"}
           >
             <Menu size={16} />
           </button>
@@ -266,57 +248,108 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
 
         <div className="h-full overflow-y-auto px-3 py-3">
           <SectionCard
+            collapsed={sidebarCollapsed}
             title="知識樹分類"
-            badge={String(DOCUMENTS.length)}
+            subtitle="由 Excel 轉換而來的正規化分類樹"
+            icon={<LayoutGrid size={16} />}
+            badge={String(KNOWLEDGE_TREE.length)}
             open={knowledgeOpen}
             onToggle={() => setKnowledgeOpen((current) => !current)}
-            onHeaderClick={() => setSelected(DEFAULT_SELECTION)}
-            subtitle="由 Excel 轉換而來的正規化分類樹"
-            >
+            onHeaderClick={() => setView(EMPTY_VIEW)}
+          >
             <KnowledgeTree
               totalCount={DOCUMENTS.length}
-              selectedPathKey={selected.kind === "path" ? selected.path.join(" / ") : null}
-              onSelectAll={() => setSelected(DEFAULT_SELECTION)}
-              onSelectPath={(path, label) => setSelected({ kind: "path", path, label })}
+              selectedPathKey={selectedPathKey}
+              onSelectPath={activateCategory}
               countForPath={countForPath}
             />
           </SectionCard>
 
-          {LEFT_RAIL_PRESETS.map((section) => {
-            const isOpen = expandedPresets[section.id];
-            const count = countForPreset(section.id);
-            const items = IA_QUICK_SECTION_ITEMS[section.id];
-            const isActiveSection =
-              selected.kind === "preset"
-                ? selected.preset === section.id
-                : selected.kind === "all" && section.id === "all";
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="文件查詢"
+            subtitle="一般文件搜尋與 FAQ 查詢"
+            icon={<Search size={16} />}
+            badge={String(DOCUMENTS.length)}
+            open={queryOpen}
+            onToggle={() => setQueryOpen((current) => !current)}
+            onHeaderClick={() => activateQuery("general")}
+          >
+            <div className="space-y-1.5">
+              {QUERY_ITEMS.map((item) => (
+                <SelectionPill
+                  key={item.variant}
+                  label={item.label}
+                  active={view.kind === "query" && view.variant === item.variant}
+                  onClick={() => activateQuery(item.variant)}
+                />
+              ))}
+            </div>
+          </SectionCard>
 
-            return (
-              <SectionCard
-                key={section.id}
-                title={section.label}
-                badge={String(count)}
-                open={isOpen}
-                active={isActiveSection}
-                subtitle={section.description}
-                onToggle={() => togglePreset(section.id)}
-                onHeaderClick={() =>
-                  setSelected({ kind: "preset", preset: section.id, label: section.label })
-                }
-              >
-                <div className="space-y-1.5">
-                  {items.map((item) => (
-                    <SelectionPill
-                      key={item.label}
-                      label={item.label}
-                      active={isSelectionActive(selected, item.selection)}
-                      onClick={() => setSelected(item.selection)}
-                    />
-                  ))}
-                </div>
-              </SectionCard>
-            );
-          })}
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="簽核專區"
+            subtitle="主管與文管簽核及文件處理"
+            icon={<Clock3 size={16} />}
+            badge={String(countForSigningSection())}
+            open={signingOpen}
+            onToggle={() => setSigningOpen((current) => !current)}
+            onHeaderClick={() => activateSigning("manager")}
+          >
+            <div className="space-y-1.5">
+              {SIGNING_ITEMS.map((item) => (
+                <SelectionPill
+                  key={item.variant}
+                  label={item.label}
+                  active={view.kind === "signing" && view.variant === item.variant}
+                  onClick={() => activateSigning(item.variant)}
+                />
+              ))}
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="文件簽核單進度查詢"
+            subtitle="查詢簽核單號、文件名稱與申請日期"
+            icon={<FileText size={16} />}
+            open={shortcutOpen}
+            onToggle={() => setShortcutOpen((current) => !current)}
+            onHeaderClick={() => navigateTo("signing-progress")}
+          >
+            <div className="space-y-1.5">
+              <SelectionPill label="前往查詢頁" active={false} onClick={() => navigateTo("signing-progress")} />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="資料庫"
+            subtitle="文件統計與查詢分析"
+            icon={<Database size={16} />}
+            open={false}
+            onToggle={() => navigateTo("database")}
+            onHeaderClick={() => navigateTo("database")}
+          >
+            <div className="space-y-1.5">
+              <SelectionPill label="前往資料庫" active={false} onClick={() => navigateTo("database")} />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
+            title="系統後台管理"
+            subtitle="權限與系統設定"
+            icon={<Settings size={16} />}
+            open={adminOpen}
+            onToggle={() => setAdminOpen((current) => !current)}
+            onHeaderClick={() => navigateTo("permissions")}
+          >
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+              此區為系統後台管理功能，不存放文件。
+            </div>
+          </SectionCard>
         </div>
       </aside>
 
@@ -325,10 +358,9 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
           type="button"
           onClick={() => setSidebarCollapsed(false)}
           className="fixed left-0 top-28 z-30 inline-flex items-center gap-2 rounded-r-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 shadow-lg transition hover:bg-slate-50"
-          title="撅??湔?"
+          aria-label="展開選單"
         >
           <ChevronRight size={15} />
-          撅??湔?
         </button>
       )}
 
@@ -336,64 +368,165 @@ export function DocumentListPage({ onAdd, onApprove, onReEdit }: Props) {
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-5 py-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span>擐?</span>
+              <span>首頁</span>
               <span>/</span>
-              <span className="font-semibold text-teal-700">?辣蝞∠?</span>
+              <span>文件管理</span>
             </div>
-            <div className="mt-1.5 text-lg font-bold text-slate-800">{activeLabel}</div>
+            <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
             <div className="mt-1 text-sm text-slate-500">
-              目前篩選條件：
-              <span className="font-semibold text-slate-700">
-                {currentCategory?.title ?? activeLabel}
-              </span>
+              {view.kind === "empty" ? "請由左側選取知識樹分類" : getViewDescription(view)}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            共 {selectedCount} 筆
-          </div>
+          {view.kind !== "empty" && (
+            <div className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-500" />
+              共 {docsCount} 筆
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          <FilterBar
-            keyword={keywordInput}
-            setKeyword={setKeywordInput}
-            onSearch={applyKeywordSearch}
-            level={level}
-            setLevel={setLevel}
-            status={status}
-            setStatus={setStatus}
-            uploader={uploader}
-            setUploader={setUploader}
-            dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
-            dateTo={dateTo}
-            setDateTo={setDateTo}
-            advancedOpen={advancedOpen}
-            setAdvancedOpen={setAdvancedOpen}
-            docNo={docNo}
-            setDocNo={setDocNo}
-            department={department}
-            setDepartment={setDepartment}
-            tag={tag}
-            setTag={setTag}
-            onReset={resetFilters}
-            onAdd={onAdd}
-          />
-
-          <div className="mt-4">
-            <DocumentTable
-              docs={filteredDocs}
-              onAdd={onAdd}
-              onApprove={onApprove}
-              onReEdit={onReEdit}
+          {view.kind === "empty" ? (
+            <EmptyState
+              title="請由左側選取知識樹分類"
+              description="先選擇分類、查詢或簽核入口，再在右側瀏覽文件內容。"
             />
-          </div>
+          ) : view.kind === "query" && view.variant === "faq" ? (
+            <EmptyState
+              title="FAQ查詢暫無資料"
+              description="目前尚未建立完整 FAQ 資料，請改用一般文件查詢。"
+            />
+          ) : view.kind === "signing" && view.variant === "transfer" ? (
+            <EmptyState
+              title="移轉單位功能待接入"
+              description="目前先保留入口，不列出文件資料。"
+            />
+          ) : (
+            <>
+              {view.kind === "category" && categoryChildren.length > 0 && (
+                <div className="mb-4">
+                  <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
+                    <span className="font-semibold text-slate-700">分類總覽</span>
+                    <span>/</span>
+                    <span>{view.label}</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {categoryChildren.map((child) => (
+                      <FolderCard
+                        key={child.id}
+                        node={child}
+                        onClick={() => activateCategory(child.pathLabels, child.label)}
+                        count={countForPath(child.pathLabels)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <FilterBar
+                keyword={keywordInput}
+                setKeyword={setKeywordInput}
+                onSearch={applyKeywordSearch}
+                level={level}
+                setLevel={setLevel}
+                status={status}
+                setStatus={setStatus}
+                uploader={uploader}
+                setUploader={setUploader}
+                dateFrom={dateFrom}
+                setDateFrom={setDateFrom}
+                dateTo={dateTo}
+                setDateTo={setDateTo}
+                advancedOpen={advancedOpen}
+                setAdvancedOpen={setAdvancedOpen}
+                docNo={docNo}
+                setDocNo={setDocNo}
+                department={department}
+                setDepartment={setDepartment}
+                tag={tag}
+                setTag={setTag}
+                onReset={resetFilters}
+                onAdd={onAdd}
+                searchPlaceholder={searchPlaceholder}
+              />
+
+              <div className="mt-4">
+                <DocumentTable
+                  docs={docsForView}
+                  onAdd={onAdd}
+                  onApprove={onApprove}
+                  onReEdit={onReEdit}
+                />
+              </div>
+            </>
+          )}
         </div>
       </main>
     </div>
   );
+}
+
+function countForSigningSection() {
+  return DOCUMENTS.filter(
+    (doc) => doc.status === "待主管審核" || doc.status === "待文管審核" || doc.status === "下架",
+  ).length;
+}
+
+function findNodeByPath(nodes: KnowledgeTreeNode[], path: string[]): KnowledgeTreeNode | null {
+  for (const node of nodes) {
+    if (node.pathLabels.join(" / ") === path.join(" / ")) return node;
+    const children = node.children ?? [];
+    const found = findNodeByPath(children, path);
+    if (found) return found;
+  }
+  return null;
+}
+
+function getViewTitle(view: ViewMode) {
+  switch (view.kind) {
+    case "category":
+      return view.label;
+    case "query":
+      return view.variant === "general" ? "一般文件查詢" : "FAQ查詢";
+    case "signing":
+      switch (view.variant) {
+        case "manager":
+          return "待主管簽核";
+        case "docadmin":
+          return "待文管審核";
+        case "void":
+          return "作廢文件";
+        case "transfer":
+          return "移轉單位";
+      }
+    default:
+      return "請選擇分類";
+  }
+}
+
+function getViewDescription(view: ViewMode) {
+  switch (view.kind) {
+    case "category":
+      return `分類總覽 > ${view.path.join(" > ")}`;
+    case "query":
+      return view.variant === "general"
+        ? "一般文件查詢"
+        : "FAQ 查詢入口";
+    case "signing":
+      switch (view.variant) {
+        case "manager":
+          return "待主管簽核文件清單";
+        case "docadmin":
+          return "待文管審核文件清單";
+        case "void":
+          return "作廢文件清單";
+        case "transfer":
+          return "移轉單位清單";
+      }
+    default:
+      return "";
+  }
 }
 
 function FilterBar({
@@ -420,6 +553,7 @@ function FilterBar({
   setTag,
   onReset,
   onAdd,
+  searchPlaceholder,
 }: {
   keyword: string;
   setKeyword: (value: string) => void;
@@ -444,6 +578,7 @@ function FilterBar({
   setTag: (value: string) => void;
   onReset: () => void;
   onAdd: () => void;
+  searchPlaceholder: string;
 }) {
   return (
     <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -459,7 +594,7 @@ function FilterBar({
             onKeyDown={(e) => {
               if (e.key === "Enter") onSearch();
             }}
-            placeholder="輸入關鍵字、文件編號、標籤或分類"
+            placeholder={searchPlaceholder}
             className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
           />
         </div>
@@ -476,13 +611,13 @@ function FilterBar({
 
       <div className="flex flex-wrap items-center gap-3 px-4 py-4">
         <FilterSelect
-          label="階級"
+          label="文件階級"
           value={level}
           onChange={(value) => setLevel(value as "all" | DocumentLevel)}
           options={["all", ...LEVEL_OPTIONS]}
         />
         <FilterSelect
-          label="狀態"
+          label="文件狀態"
           value={status}
           onChange={(value) => setStatus(value as "all" | DocumentStatus)}
           options={["all", ...STATUS_OPTIONS]}
@@ -536,7 +671,7 @@ function FilterBar({
             onClick={onReset}
             className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
-            重置條件
+            清除條件
           </button>
           <button
             type="button"
@@ -551,8 +686,18 @@ function FilterBar({
       {advancedOpen && (
         <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
           <div className="grid gap-3 lg:grid-cols-3">
-            <TextField label="文件編號" value={docNo} onChange={setDocNo} placeholder="DOC-2026-001" />
-            <TextField label="部門" value={department} onChange={setDepartment} placeholder="雄獅旅遊 / 管理本部" />
+            <TextField
+              label="文件編號"
+              value={docNo}
+              onChange={setDocNo}
+              placeholder="DOC-2026-001"
+            />
+            <TextField
+              label="部門"
+              value={department}
+              onChange={setDepartment}
+              placeholder="雄獅旅遊 / 管理本部"
+            />
             <TextField label="標籤" value={tag} onChange={setTag} placeholder="法務 / 合約 / 年度報告" />
           </div>
         </div>
@@ -606,7 +751,7 @@ function FilterSelect({
       >
         {options.map((option) => (
           <option key={option} value={option}>
-            {option === "all" ? "?券" : option}
+            {option === "all" ? (label === "文件階級" ? "全部階級" : "全部狀態") : option}
           </option>
         ))}
       </select>
@@ -618,20 +763,24 @@ function SectionCard({
   title,
   subtitle,
   badge,
+  icon,
   children,
   open,
   onToggle,
   active = false,
   onHeaderClick,
+  collapsed = false,
 }: {
   title: string;
   subtitle: string;
-  badge: string;
+  badge?: string;
+  icon: ReactNode;
   children?: ReactNode;
   open: boolean;
   onToggle: () => void;
   active?: boolean;
   onHeaderClick?: () => void;
+  collapsed?: boolean;
 }) {
   return (
     <section
@@ -642,30 +791,38 @@ function SectionCard({
       <div
         className={`flex w-full items-start justify-between gap-3 px-3 py-3 text-left transition ${
           active ? "bg-teal-50/70" : "bg-white hover:bg-slate-50"
-        }`}
+        } ${collapsed ? "px-2 py-2" : ""}`}
       >
         <button type="button" onClick={onHeaderClick} className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-slate-800">{title}</span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
-              {badge}
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+              {icon}
             </span>
+            {!collapsed && (
+              <>
+                <span className="text-sm font-semibold text-slate-800">{title}</span>
+                {badge && (
+                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                    {badge}
+                  </span>
+                )}
+              </>
+            )}
           </div>
-          <div className="mt-1 text-xs text-slate-400">{subtitle}</div>
+          {!collapsed && <div className="mt-1 text-xs text-slate-400">{subtitle}</div>}
         </button>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          aria-label={open ? "收合區塊" : "展開區塊"}
-        >
-          <ChevronRight
-            size={16}
-            className={`transition-transform ${open ? "rotate-90" : ""}`}
-          />
-        </button>
+        {!collapsed && (
+          <button
+            type="button"
+            onClick={onToggle}
+            className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label={open ? "收合區塊" : "展開區塊"}
+          >
+            <ChevronRight size={16} className={`transition-transform ${open ? "rotate-90" : ""}`} />
+          </button>
+        )}
       </div>
-      {open && <div className="border-t border-slate-100 bg-white px-3 py-3">{children}</div>}
+      {open && !collapsed && <div className="border-t border-slate-100 bg-white px-3 py-3">{children}</div>}
     </section>
   );
 }
@@ -694,18 +851,43 @@ function SelectionPill({
   );
 }
 
-function isSelectionActive(selected: LeftSelection, target: LeftSelection) {
-  if (selected.kind !== target.kind) return false;
-  if (selected.kind === "all") return true;
-  if (selected.kind === "preset" && target.kind === "preset") {
-    return selected.preset === target.preset;
-  }
-  if (selected.kind === "status" && target.kind === "status") {
-    return selected.status === target.status;
-  }
-  if (selected.kind === "path" && target.kind === "path") {
-    return selected.path.join(" / ") === target.path.join(" / ");
-  }
-  return false;
+function FolderCard({
+  node,
+  count,
+  onClick,
+}: {
+  node: KnowledgeTreeNode;
+  count: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left transition hover:border-teal-300 hover:bg-teal-50/40"
+    >
+      <FolderOpen className="mt-0.5 flex-shrink-0 text-teal-600" size={18} />
+      <div className="min-w-0 flex-1">
+        <div className="text-sm font-semibold text-slate-800">{node.label}</div>
+        <div className="mt-1 text-xs text-slate-400">{node.pathLabels.join(" / ")}</div>
+      </div>
+      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+        {count}
+      </span>
+    </button>
+  );
 }
 
+function EmptyState({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-10">
+      <div className="max-w-md text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-600">
+          <LayoutGrid size={24} />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
+        <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+      </div>
+    </div>
+  );
+}

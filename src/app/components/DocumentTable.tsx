@@ -84,14 +84,16 @@ const LEVEL_LABELS: Record<DocumentLevel, { short: string; desc: string }> = {
 };
 
 export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
+  const DEFAULT_PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
-  const [pageSizeInput, setPageSizeInput] = useState("10");
+  const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_PAGE_SIZE));
   const [notice, setNotice] = useState<string | null>(null);
   const [panel, setPanel] = useState<TablePanel>(null);
 
   const pageSize = useMemo(() => {
     const parsed = Number(pageSizeInput);
-    return Number.isFinite(parsed) && parsed >= 1 ? Math.floor(parsed) : 1;
+    if (!Number.isFinite(parsed) || parsed < 1) return DEFAULT_PAGE_SIZE;
+    return Math.min(100, Math.floor(parsed));
   }, [pageSizeInput]);
 
   useEffect(() => {
@@ -110,6 +112,15 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
   function gotoPage(nextPage: number) {
     const clamped = Math.max(1, Math.min(totalPages, nextPage));
     setPage(clamped);
+  }
+
+  function handlePageSizeBlur() {
+    const parsed = Number(pageSizeInput);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      setPageSizeInput(String(DEFAULT_PAGE_SIZE));
+      return;
+    }
+    setPageSizeInput(String(Math.min(100, Math.floor(parsed))));
   }
 
   function handleTableClickCapture(event: MouseEvent<HTMLTableElement>) {
@@ -139,7 +150,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
           <div>
             <p className="text-sm font-semibold text-slate-700">文件表格</p>
             <p className="text-xs text-slate-400">
-              目前顯示 {docs.length} 筆，分頁每頁 10 筆
+              目前顯示 {docs.length} 筆，分頁每頁 {pageSize} 筆
             </p>
           </div>
           <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
@@ -364,6 +375,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             value={pageSizeInput}
             onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => setPageSizeInput(e.target.value.replace(/\D/g, ""))}
+            onBlur={handlePageSizeBlur}
             className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
           />
           <select

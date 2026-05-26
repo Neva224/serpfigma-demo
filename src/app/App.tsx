@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Header } from "./components/Header";
 import { DocumentListPage } from "./components/DocumentListPage";
 import { DocumentFormPage } from "./components/form/DocumentFormPage";
@@ -55,6 +55,7 @@ export default function App() {
         {screen === "list" && (
           <DocumentListPage
             onAdd={() => setScreen("form")}
+            onNavigate={navigateTo}
             onApprove={(doc) =>
               setApproval({
                 doc,
@@ -77,22 +78,10 @@ export default function App() {
               <span className="text-sm font-semibold text-amber-700">重新編輯模式</span>
               <span className="text-sm text-amber-600">正在編輯：{reEditDoc.name}</span>
               <span className="ml-auto text-xs text-amber-500">
-                已帶入文件內容，請確認後重新送出
+                已切換為草稿狀態，完成後可再次送出
               </span>
             </div>
             <DocumentFormPage onBack={() => setScreen("list")} />
-          </div>
-        )}
-
-        {screen === "signing-progress" && (
-          <div className="flex flex-1 overflow-hidden">
-            <SigningProgressPage />
-          </div>
-        )}
-
-        {screen === "database" && (
-          <div className="flex flex-1 overflow-hidden">
-            <DatabasePage />
           </div>
         )}
 
