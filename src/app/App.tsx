@@ -6,7 +6,8 @@ import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import { SigningProgressPage } from "./components/signing/SigningProgressPage";
 import { DatabasePage } from "./components/database/DatabasePage";
 import { PermissionsPage } from "./components/settings/PermissionsPage";
-import { SAMPLE_DOCS, DocRecord } from "./components/DocumentTable";
+import { SAMPLE_DOCS, type DocRecord } from "./components/DocumentTable";
+import { Toaster, toast } from "sonner";
 
 type Screen = "list" | "form" | "re-edit" | "signing-progress" | "database" | "permissions";
 
@@ -21,36 +22,45 @@ export default function App() {
   const [reEditDoc, setReEditDoc] = useState<DocRecord | null>(null);
 
   function openApproval(docId: number, role: "manager" | "docadmin") {
-    const doc = SAMPLE_DOCS.find((d) => d.id === docId);
+    const doc = SAMPLE_DOCS.find((item) => item.id === docId);
     if (doc) setApproval({ doc, role });
   }
 
   function openReEdit(doc: DocRecord) {
-    setReEditDoc(doc);
+    const draftDoc = SAMPLE_DOCS.find((item) => item.id === doc.id);
+    if (draftDoc) {
+      draftDoc.status = "草稿";
+    }
+    setReEditDoc({ ...doc, status: "草稿" });
     setScreen("re-edit");
+    toast.success(`已將「${doc.name}」切換為草稿，開始重新編輯。`);
   }
 
-  const navigateTo = (s: string) => setScreen(s as Screen);
+  const navigateTo = (nextScreen: string) => setScreen(nextScreen as Screen);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: "#F3F4F6" }}>
-      {/* Global header */}
+    <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
+      <Toaster position="top-right" richColors closeButton />
       <Header
         activeScreen={screen === "re-edit" ? "list" : screen}
         onNavigate={navigateTo}
         onOpenApproval={openApproval}
         onReEdit={(docId) => {
-          const doc = SAMPLE_DOCS.find((d) => d.id === docId);
+          const doc = SAMPLE_DOCS.find((item) => item.id === docId);
           if (doc) openReEdit(doc);
         }}
       />
 
-      {/* Main content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {screen === "list" && (
           <DocumentListPage
             onAdd={() => setScreen("form")}
-            onApprove={(doc) => setApproval({ doc, role: doc.status === "待主管審核" ? "manager" : "docadmin" })}
+            onApprove={(doc) =>
+              setApproval({
+                doc,
+                role: doc.status === "待主管審核" ? "manager" : "docadmin",
+              })
+            }
             onReEdit={openReEdit}
           />
         )}
@@ -63,35 +73,36 @@ export default function App() {
 
         {screen === "re-edit" && reEditDoc && (
           <div className="flex-1 overflow-y-auto">
-            <div className="bg-amber-50 border-b border-amber-200 px-6 py-2.5 flex items-center gap-3">
-              <span className="text-amber-600 font-semibold text-sm">重新編輯模式</span>
-              <span className="text-amber-500 text-sm">— 正在修改：{reEditDoc.name}</span>
-              <span className="text-amber-400 text-xs ml-auto">退回原因已附於文件中，請修改後重新送審</span>
+            <div className="flex items-center gap-3 border-b border-amber-200 bg-amber-50 px-6 py-2.5">
+              <span className="text-sm font-semibold text-amber-700">重新編輯模式</span>
+              <span className="text-sm text-amber-600">正在編輯：{reEditDoc.name}</span>
+              <span className="ml-auto text-xs text-amber-500">
+                已帶入文件內容，請確認後重新送出
+              </span>
             </div>
             <DocumentFormPage onBack={() => setScreen("list")} />
           </div>
         )}
 
         {screen === "signing-progress" && (
-          <div className="flex-1 overflow-hidden flex">
+          <div className="flex flex-1 overflow-hidden">
             <SigningProgressPage />
           </div>
         )}
 
         {screen === "database" && (
-          <div className="flex-1 overflow-hidden flex">
+          <div className="flex flex-1 overflow-hidden">
             <DatabasePage />
           </div>
         )}
 
         {screen === "permissions" && (
-          <div className="flex-1 overflow-hidden flex">
+          <div className="flex flex-1 overflow-hidden">
             <PermissionsPage />
           </div>
         )}
       </div>
 
-      {/* Approval drawer (global overlay) */}
       {approval && (
         <ApprovalDrawer
           doc={approval.doc}

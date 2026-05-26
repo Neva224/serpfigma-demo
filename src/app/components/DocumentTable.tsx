@@ -1,249 +1,346 @@
-import { useState } from "react";
-import { Download, History, FileText, ChevronLeft, ChevronRight, Plus, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
+import {
+  CheckCircle2,
+  Clock3,
+  Download,
+  FileText,
+  History,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
+import {
+  SAMPLE_DOCS,
+  type DocumentLevel,
+  type DocumentRecord,
+  type DocumentStatus,
+} from "./document-management/mockData";
 
-export type DocStatus = "草稿" | "待主管審核" | "待文管審核" | "已上架" | "退回" | "下架" | "作廢";
-export type DocLevel = "一階" | "二階" | "三階" | "四階" | "五階" | "六階";
-
-export interface DocRecord {
-  id: number;
-  docNo: string;
-  signingNo: string;
-  name: string;
-  level: DocLevel;
-  version: string;
-  status: DocStatus;
-  uploaderCode: string;
-  uploaderName: string;
-  uploadDate: string;
-  department: string;
-  tags: string[];
-}
-
-const LEVEL_CONFIG: Record<DocLevel, { short: string; desc: string; bg: string; text: string }> = {
-  一階: { short: "一階", desc: "政策、手冊",         bg: "#EDE9FE", text: "#7C3AED" },
-  二階: { short: "二階", desc: "管理辦法、程序書",   bg: "#DBEAFE", text: "#1D4ED8" },
-  三階: { short: "三階", desc: "規範、說明書、須知、標準", bg: "#CCFBF1", text: "#0F766E" },
-  四階: { short: "四階", desc: "表、單",             bg: "#DCFCE7", text: "#15803D" },
-  五階: { short: "五階", desc: "教育訓練",           bg: "#FEF3C7", text: "#B45309" },
-  六階: { short: "六階", desc: "外來文件",           bg: "#F3F4F6", text: "#4B5563" },
-};
-
-const STATUS_CONFIG: Record<DocStatus, { bg: string; text: string; dot: string }> = {
-  草稿:     { bg: "bg-gray-100",    text: "text-gray-600",   dot: "bg-gray-400" },
-  待主管審核: { bg: "bg-amber-50",  text: "text-amber-700",  dot: "bg-amber-400" },
-  待文管審核: { bg: "bg-blue-50",   text: "text-blue-700",   dot: "bg-blue-500" },
-  已上架:   { bg: "bg-emerald-50",  text: "text-emerald-700",dot: "bg-emerald-500" },
-  退回:     { bg: "bg-red-50",      text: "text-red-700",    dot: "bg-red-500" },
-  下架:     { bg: "bg-orange-50",   text: "text-orange-700", dot: "bg-orange-500" },
-  作廢:     { bg: "bg-gray-100",    text: "text-gray-400",   dot: "bg-gray-300" },
-};
-
-export const SAMPLE_DOCS: DocRecord[] = [
-  { id:1,  docNo:"DOC-2024-001", signingNo:"SGN-2024-0089", name:"資訊安全管理政策", level:"一階", version:"v3.0", status:"已上架",   uploaderCode:"250341", uploaderName:"王大明", uploadDate:"2024-03-15", department:"資訊安全處", tags:["資安","政策"] },
-  { id:2,  docNo:"DOC-2024-002", signingNo:"SGN-2024-0091", name:"軟體開發管理辦法", level:"二階", version:"v2.1", status:"待主管審核", uploaderCode:"250342", uploaderName:"李小華", uploadDate:"2024-04-02", department:"軟體開發處", tags:["開發","程序"] },
-  { id:3,  docNo:"DOC-2024-003", signingNo:"SGN-2024-0093", name:"人力資源管理程序書", level:"二階", version:"v1.5", status:"已上架",   uploaderCode:"250343", uploaderName:"陳美玲", uploadDate:"2024-02-28", department:"人力資源處", tags:["人資"] },
-  { id:4,  docNo:"DOC-2024-004", signingNo:"",              name:"行銷企劃須知",      level:"三階", version:"v0.9", status:"草稿",     uploaderCode:"250344", uploaderName:"張志遠", uploadDate:"2024-04-10", department:"行銷策略處", tags:["行銷"] },
-  { id:5,  docNo:"DOC-2024-005", signingNo:"SGN-2024-0088", name:"供應商評鑑標準",   level:"三階", version:"v4.0", status:"已上架",   uploaderCode:"250345", uploaderName:"林建宏", uploadDate:"2024-01-20", department:"財務法務處", tags:["採購"] },
-  { id:6,  docNo:"DOC-2024-006", signingNo:"SGN-2024-0092", name:"系統架構說明書",   level:"三階", version:"v2.3", status:"退回",     uploaderCode:"250346", uploaderName:"吳俊傑", uploadDate:"2024-03-28", department:"軟體開發處", tags:["系統"] },
-  { id:7,  docNo:"DOC-2024-007", signingNo:"SGN-2024-0094", name:"員工教育訓練計畫", level:"五階", version:"v1.5", status:"待文管審核", uploaderCode:"250347", uploaderName:"趙雅婷", uploadDate:"2024-04-05", department:"人力資源處", tags:["訓練"] },
-  { id:8,  docNo:"DOC-2024-008", signingNo:"SGN-2024-0085", name:"客戶服務標準作業",  level:"三階", version:"v3.0", status:"已上架",   uploaderCode:"250348", uploaderName:"黃淑芬", uploadDate:"2024-02-14", department:"業務拓展處", tags:["服務"] },
-  { id:9,  docNo:"DOC-2024-009", signingNo:"",              name:"年度預算規劃表",   level:"四階", version:"v1.1", status:"草稿",     uploaderCode:"250349", uploaderName:"劉志豪", uploadDate:"2024-04-12", department:"財務法務處", tags:["財務","表單"] },
-  { id:10, docNo:"DOC-2024-010", signingNo:"SGN-2024-0076", name:"外部供應商合約",   level:"六階", version:"v5.0", status:"下架",     uploaderCode:"250350", uploaderName:"蔡宛芸", uploadDate:"2024-01-08", department:"財務法務處", tags:["合約","外來"] },
-  { id:11, docNo:"DOC-2024-011", signingNo:"SGN-2024-0080", name:"專案管理規範",     level:"三階", version:"v2.0", status:"已上架",   uploaderCode:"250351", uploaderName:"許文彬", uploadDate:"2024-03-20", department:"軟體開發處", tags:["專案"] },
-  { id:12, docNo:"DOC-2024-012", signingNo:"SGN-2024-0079", name:"差旅費申請單",     level:"四階", version:"v1.3", status:"作廢",     uploaderCode:"250352", uploaderName:"鄭惠君", uploadDate:"2024-04-01", department:"行政總務處", tags:["表單","財務"] },
-];
-
-const COLUMNS = ["文件編號", "文件名稱", "文件階級", "版本", "狀態", "上傳者", "上傳日期", "操作"];
+export type DocRecord = DocumentRecord;
 
 interface Props {
+  docs: DocumentRecord[];
   onAdd: () => void;
-  onApprove: (doc: DocRecord) => void;
-  onReEdit: (doc: DocRecord) => void;
-  filterLevel?: string;
+  onApprove: (doc: DocumentRecord) => void;
+  onReEdit: (doc: DocumentRecord) => void;
 }
 
-export function DocumentTable({ onAdd, onApprove, onReEdit, filterLevel }: Props) {
+type TablePanel =
+  | { kind: "version"; doc: DocumentRecord }
+  | { kind: "audit"; doc: DocumentRecord }
+  | null;
+
+const STATUS_STYLES: Record<
+  DocumentStatus,
+  { bg: string; text: string; dot: string; label: string }
+> = {
+  已上架: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    dot: "bg-emerald-500",
+    label: "已上架",
+  },
+  待主管審核: {
+    bg: "bg-orange-50",
+    text: "text-orange-700",
+    dot: "bg-orange-500",
+    label: "待主管審核",
+  },
+  待文管審核: {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    dot: "bg-blue-500",
+    label: "待文管審核",
+  },
+  草稿: {
+    bg: "bg-gray-100",
+    text: "text-gray-600",
+    dot: "bg-gray-400",
+    label: "草稿",
+  },
+  退回: {
+    bg: "bg-red-50",
+    text: "text-red-700",
+    dot: "bg-red-500",
+    label: "退回",
+  },
+  下架: {
+    bg: "bg-orange-100",
+    text: "text-orange-800",
+    dot: "bg-orange-600",
+    label: "下架",
+  },
+};
+
+const LEVEL_LABELS: Record<DocumentLevel, { short: string; desc: string }> = {
+  第一級: { short: "第一級", desc: "文件最外層分類" },
+  第二級: { short: "第二級", desc: "部門或主題分類" },
+  第三級: { short: "第三級", desc: "細分類或流程" },
+  第四級: { short: "第四級", desc: "操作細節與表單" },
+  第五級: { short: "第五級", desc: "版本與附屬文件" },
+  第六級: { short: "第六級", desc: "機密或歸檔資料" },
+};
+
+export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
   const [page, setPage] = useState(1);
-  const [pageInput, setPageInput] = useState("1");
   const [pageSize, setPageSize] = useState(10);
-  const [pageSizeInput, setPageSizeInput] = useState("10");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [panel, setPanel] = useState<TablePanel>(null);
 
-  const filtered = filterLevel
-    ? SAMPLE_DOCS.filter((d) => d.level === filterLevel)
-    : SAMPLE_DOCS;
+  useEffect(() => {
+    setPage(1);
+  }, [docs]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(docs.length / pageSize));
   const safePage = Math.min(page, totalPages);
-  const paginated = filtered.slice((safePage - 1) * pageSize, safePage * pageSize);
-  const start = (safePage - 1) * pageSize + 1;
-  const end = Math.min(safePage * pageSize, filtered.length);
+  const pagedDocs = useMemo(
+    () => docs.slice((safePage - 1) * pageSize, safePage * pageSize),
+    [docs, safePage, pageSize],
+  );
+  const start = docs.length === 0 ? 0 : (safePage - 1) * pageSize + 1;
+  const end = Math.min(safePage * pageSize, docs.length);
 
-  function gotoPage(p: number) {
-    const clamped = Math.max(1, Math.min(totalPages, p));
+  function gotoPage(nextPage: number) {
+    const clamped = Math.max(1, Math.min(totalPages, nextPage));
     setPage(clamped);
-    setPageInput(String(clamped));
   }
 
-  function commitPageInput() {
-    const n = parseInt(pageInput, 10);
-    if (!isNaN(n)) gotoPage(n);
-    else setPageInput(String(safePage));
-  }
+  function handleTableClickCapture(event: MouseEvent<HTMLTableElement>) {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest("button");
+    const actionLabel = button?.textContent?.trim() ?? "";
+    if (actionLabel !== "版本歷程" && actionLabel !== "審核紀錄") return;
 
-  function commitPageSize() {
-    const n = parseInt(pageSizeInput, 10);
-    if (!isNaN(n) && n > 0) {
-      setPageSize(Math.min(100, Math.max(1, n)));
-      setPage(1);
-      setPageInput("1");
-    } else {
-      setPageSizeInput(String(pageSize));
-    }
+    const row = button?.closest("tr");
+    if (!row) return;
+
+    const docNo = row.querySelector("td span")?.textContent?.trim() ?? "";
+    const name = row.querySelector("td:nth-child(2) button")?.textContent?.trim() ?? "";
+    const doc = docs.find((item) => item.docNo === docNo || item.name === name);
+    if (!doc) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setNotice(null);
+    setPanel({ kind: actionLabel === "版本歷程" ? "version" : "audit", doc });
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/60">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-3">
         <div className="flex items-center gap-3">
-          <span className="text-gray-500 text-sm">文件清單</span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 font-medium border border-teal-200">
-            共 {filtered.length} 筆
+          <div>
+            <p className="text-sm font-semibold text-slate-700">文件表格</p>
+            <p className="text-xs text-slate-400">
+              目前顯示 {docs.length} 筆，分頁每頁 10 筆
+            </p>
+          </div>
+          <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
+            共 {docs.length} 筆
           </span>
         </div>
         <button
           onClick={onAdd}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-white text-sm font-medium transition-all hover:opacity-90 active:scale-95"
-          style={{ backgroundColor: "#0D9488" }}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-500 active:scale-[0.98]"
         >
-          <Plus size={15} strokeWidth={2.5} />
+          <FileText size={15} />
           新增文件
         </button>
       </div>
 
-      {/* Table */}
+      {notice && (
+        <div className="flex items-center justify-between border-b border-teal-100 bg-teal-50 px-5 py-3 text-sm text-teal-700">
+          <span>{notice}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            className="rounded-lg px-2 py-1 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
+          >
+            關閉
+          </button>
+        </div>
+      )}
+
+      {panel && (
+        <div className="fixed inset-0 z-50 flex">
+          <div className="absolute inset-0 bg-slate-950/50" onClick={() => setPanel(null)} />
+          <div className="relative ml-auto flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">
+                  {panel.kind === "version" ? "版本歷程" : "審核紀錄"}
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-slate-900">{panel.doc.name}</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  {panel.doc.docNo} ・ 版本 {panel.doc.version} ・ {panel.doc.status}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPanel(null)}
+                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                aria-label="關閉"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto bg-slate-50 px-6 py-5">
+              {panel.kind === "version" ? (
+                <VersionHistoryPanel doc={panel.doc} />
+              ) : (
+                <AuditHistoryPanel doc={panel.doc} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto">
-        <table className="w-full" style={{ fontSize: "13px" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#0D9488" }}>
-              {COLUMNS.map((col) => (
-                <th key={col} className="text-left px-4 py-2.5 text-white font-semibold whitespace-nowrap" style={{ fontSize: "12px" }}>
-                  {col}
-                </th>
-              ))}
+        <table className="min-w-full text-left" onClickCapture={handleTableClickCapture}>
+          <thead className="bg-teal-600">
+            <tr>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                文件編號
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                文件名稱
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                文件階級
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                版本
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                狀態
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                上傳者
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                上傳日期
+              </th>
+              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                操作
+              </th>
             </tr>
           </thead>
           <tbody>
-            {paginated.map((doc, idx) => {
-              const sc = STATUS_CONFIG[doc.status];
-              const lc = LEVEL_CONFIG[doc.level];
-              const needsAction = doc.status === "待主管審核" || doc.status === "待文管審核";
-              const isReturned = doc.status === "退回";
+            {pagedDocs.map((doc, index) => {
+              const level = LEVEL_LABELS[doc.level];
+              const status = STATUS_STYLES[doc.status];
+              const needsApproval =
+                doc.status === "待主管審核" || doc.status === "待文管審核";
+              const canReEdit = doc.status === "退回";
               return (
                 <tr
                   key={doc.id}
-                  className="border-b border-gray-50 hover:bg-teal-50/20 transition-colors"
-                  style={{ backgroundColor: idx % 2 === 1 ? "#FAFAFA" : "#FFFFFF" }}
+                  className="border-b border-slate-100 transition hover:bg-teal-50/40"
+                  style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#fafafa" }}
                 >
-                  {/* 文件編號 */}
-                  <td className="px-4 py-2.5 whitespace-nowrap">
-                    <span className="font-mono text-gray-500" style={{ fontSize: "11px" }}>{doc.docNo}</span>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <span className="font-mono text-xs text-slate-500">{doc.docNo}</span>
                   </td>
-                  {/* 文件名稱 */}
-                  <td className="px-4 py-2.5">
-                    <div className="flex flex-col gap-0.5">
-                      <span
-                        className="font-medium text-gray-800 hover:text-teal-700 cursor-pointer transition-colors"
-                        style={{ fontSize: "13px" }}
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        className="w-fit text-left text-sm font-semibold text-slate-800 transition hover:text-teal-700"
                       >
                         {doc.name}
-                      </span>
-                      {doc.tags.length > 0 && (
-                        <div className="flex gap-1">
-                          {doc.tags.map((t) => (
-                            <span key={t} className="text-gray-400" style={{ fontSize: "10px" }}>#{t}</span>
-                          ))}
-                        </div>
-                      )}
+                      </button>
+                      <div className="flex flex-wrap gap-1.5">
+                        {doc.tags.map((tag) => (
+                          <span key={tag} className="text-xs text-slate-400">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </td>
-                  {/* 文件階級 */}
-                  <td className="px-4 py-2.5 whitespace-nowrap">
-                    <div className="flex flex-col gap-0.5">
-                      <span
-                        className="inline-flex items-center px-2 py-0.5 rounded font-semibold"
-                        style={{ fontSize: "11px", backgroundColor: lc.bg, color: lc.text }}
-                      >
-                        {lc.short}
+                  <td className="px-4 py-3">
+                    <div className="flex flex-col gap-1">
+                      <span className="inline-flex w-fit items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                        {level.short}
                       </span>
-                      <span className="text-gray-400" style={{ fontSize: "10px" }}>{lc.desc}</span>
+                      <span className="text-xs text-slate-400">{level.desc}</span>
                     </div>
                   </td>
-                  {/* 版本 */}
-                  <td className="px-4 py-2.5">
-                    <span className="font-mono bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded" style={{ fontSize: "11px" }}>
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs text-slate-600">
                       {doc.version}
                     </span>
                   </td>
-                  {/* 狀態 */}
-                  <td className="px-4 py-2.5 whitespace-nowrap">
-                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-medium ${sc.bg} ${sc.text}`} style={{ fontSize: "11px" }}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
-                      {doc.status}
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${status.bg} ${status.text}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
+                      {status.label}
                     </span>
                   </td>
-                  {/* 上傳者 */}
-                  <td className="px-4 py-2.5 whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                        style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#0D9488" }}
-                      >
-                        {doc.uploaderName[0]}
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">
+                        {doc.uploaderName.slice(0, 1)}
                       </div>
-                      <div>
-                        <div className="text-gray-700" style={{ fontSize: "12px", fontWeight: 500 }}>{doc.uploaderName}</div>
-                        <div className="text-gray-400" style={{ fontSize: "10px" }}>{doc.uploaderCode}</div>
+                      <div className="leading-tight">
+                        <div className="text-sm font-medium text-slate-700">
+                          {doc.uploaderName}
+                        </div>
+                        <div className="text-xs text-slate-400">{doc.uploaderCode}</div>
                       </div>
                     </div>
                   </td>
-                  {/* 上傳日期 */}
-                  <td className="px-4 py-2.5 text-gray-500 whitespace-nowrap" style={{ fontSize: "12px" }}>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">
                     {doc.uploadDate}
                   </td>
-                  {/* 操作 */}
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-1">
-                      <TinyBtn icon={<Download size={12} />} label="下載" />
-                      <TinyBtn icon={<History size={12} />} label="版本" />
-                      {needsAction && (
-                        <TinyBtn
-                          icon={<FileText size={12} />}
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <ActionButton
+                        icon={<Download size={13} />}
+                        label="下載"
+                        onClick={() => setNotice(`已觸發「${doc.name}」的下載（mock）。`)}
+                      />
+                      <ActionButton
+                        icon={<History size={13} />}
+                        label="版本歷程"
+                        onClick={() => setNotice(`已開啟「${doc.name}」的版本歷程（mock）。`)}
+                      />
+                      <ActionButton
+                        icon={<Clock3 size={13} />}
+                        label="審核紀錄"
+                        onClick={() => setNotice(`已開啟「${doc.name}」的審核紀錄（mock）。`)}
+                      />
+                      {needsApproval && (
+                        <ActionButton
+                          icon={<CheckCircle2 size={13} />}
                           label="審核"
-                          onClick={() => onApprove(doc)}
                           primary
+                          onClick={() => onApprove(doc)}
                         />
                       )}
-                      {isReturned && (
-                        <TinyBtn
-                          icon={<FileText size={12} />}
+                      {canReEdit && (
+                        <ActionButton
+                          icon={<FileText size={13} />}
                           label="重新編輯"
-                          onClick={() => onReEdit(doc)}
                           warn
+                          onClick={() => onReEdit(doc)}
                         />
-                      )}
-                      {!needsAction && !isReturned && (
-                        <TinyBtn icon={<FileText size={12} />} label="簽核紀錄" />
                       )}
                     </div>
                   </td>
                 </tr>
               );
             })}
-            {paginated.length === 0 && (
+
+            {pagedDocs.length === 0 && (
               <tr>
-                <td colSpan={8} className="text-center py-12 text-gray-400 text-sm">
-                  查無符合條件的文件
+                <td colSpan={8} className="px-4 py-16 text-center text-sm text-slate-400">
+                  目前沒有符合條件的文件
                 </td>
               </tr>
             )}
@@ -251,79 +348,224 @@ export function DocumentTable({ onAdd, onApprove, onReEdit, filterLevel }: Props
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/40">
-        {/* Page size */}
-        <div className="flex items-center gap-2 text-gray-500" style={{ fontSize: "12px" }}>
+      <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex items-center gap-2 text-sm text-slate-500">
           <span>每頁顯示</span>
-          <input
-            type="text"
-            value={pageSizeInput}
-            onChange={(e) => setPageSizeInput(e.target.value)}
-            onBlur={commitPageSize}
-            onKeyDown={(e) => e.key === "Enter" && commitPageSize()}
-            className="w-10 text-center border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500 text-gray-700"
-            style={{ fontSize: "12px" }}
-          />
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
+          >
+            {[10].map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
           <span>筆</span>
         </div>
 
-        {/* Record info + page nav */}
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500" style={{ fontSize: "12px" }}>
-            第 <span className="font-semibold text-gray-700">{start}</span>–
-            <span className="font-semibold text-gray-700">{end}</span> 筆，共{" "}
-            <span className="font-semibold text-gray-700">{filtered.length}</span> 筆
-          </span>
-          <div className="flex items-center gap-1 ml-2">
-            <PageBtn onClick={() => gotoPage(1)} disabled={safePage === 1} icon={<ChevronsLeft size={13} />} />
-            <PageBtn onClick={() => gotoPage(safePage - 1)} disabled={safePage === 1} icon={<ChevronLeft size={13} />} />
-            <div className="flex items-center gap-1 text-gray-500" style={{ fontSize: "12px" }}>
-              <span>第</span>
-              <input
-                type="text"
-                value={pageInput}
-                onChange={(e) => setPageInput(e.target.value)}
-                onBlur={commitPageInput}
-                onKeyDown={(e) => e.key === "Enter" && commitPageInput()}
-                className="w-10 text-center border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:border-teal-500 text-gray-700"
-                style={{ fontSize: "12px" }}
-              />
-              <span>/ {totalPages} 頁</span>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <div className="text-sm text-slate-500">
+            目前第 <span className="font-semibold text-slate-700">{safePage}</span> 頁 / 共{" "}
+            <span className="font-semibold text-slate-700">{totalPages}</span> 頁
+          </div>
+          <div className="flex items-center gap-1">
+            <PagerButton
+              icon={<ChevronsLeft size={14} />}
+              disabled={safePage === 1}
+              onClick={() => gotoPage(1)}
+            />
+            <PagerButton
+              icon={<ChevronLeft size={14} />}
+              disabled={safePage === 1}
+              onClick={() => gotoPage(safePage - 1)}
+            />
+            <div className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+              第 {safePage} 頁
             </div>
-            <PageBtn onClick={() => gotoPage(safePage + 1)} disabled={safePage === totalPages} icon={<ChevronRight size={13} />} />
-            <PageBtn onClick={() => gotoPage(totalPages)} disabled={safePage === totalPages} icon={<ChevronsRight size={13} />} />
+            <PagerButton
+              icon={<ChevronRight size={14} />}
+              disabled={safePage === totalPages}
+              onClick={() => gotoPage(safePage + 1)}
+            />
+            <PagerButton
+              icon={<ChevronsRight size={14} />}
+              disabled={safePage === totalPages}
+              onClick={() => gotoPage(totalPages)}
+            />
           </div>
         </div>
+      </div>
+
+      <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
+        顯示範圍 {start} - {end}，共 {docs.length} 筆資料
       </div>
     </div>
   );
 }
 
-function TinyBtn({ icon, label, onClick, primary, warn }: {
-  icon: React.ReactNode; label: string; onClick?: () => void; primary?: boolean; warn?: boolean;
+function ActionButton({
+  icon,
+  label,
+  primary = false,
+  warn = false,
+  onClick,
+}: {
+  icon: ReactNode;
+  label: string;
+  primary?: boolean;
+  warn?: boolean;
+  onClick?: () => void;
 }) {
-  const base = "flex items-center gap-0.5 px-1.5 py-1 rounded border transition-all whitespace-nowrap";
-  const style = primary
-    ? { borderColor: "#0D9488", color: "#0D9488", backgroundColor: "#F0FDFA" }
+  const styles = primary
+    ? "border-teal-600 bg-teal-50 text-teal-700 hover:bg-teal-100"
     : warn
-    ? { borderColor: "#F97316", color: "#EA580C", backgroundColor: "#FFF7ED" }
-    : { borderColor: "#E5E7EB", color: "#6B7280" };
+      ? "border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100"
+      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50";
+
   return (
-    <button onClick={onClick} className={base} style={{ ...style, fontSize: "11px" }}>
-      {icon}<span className="hidden xl:inline">{label}</span>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold transition ${styles}`}
+    >
+      {icon}
+      <span className="hidden xl:inline">{label}</span>
     </button>
   );
 }
 
-function PageBtn({ onClick, disabled, icon }: { onClick: () => void; disabled: boolean; icon: React.ReactNode }) {
+function PagerButton({
+  icon,
+  disabled,
+  onClick,
+}: {
+  icon: ReactNode;
+  disabled: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
-      onClick={onClick}
+      type="button"
       disabled={disabled}
-      className="w-6 h-6 rounded flex items-center justify-center text-gray-400 hover:bg-gray-200 hover:text-gray-700 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+      onClick={onClick}
+      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
     >
       {icon}
     </button>
   );
 }
+
+function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
+  const items = [
+    {
+      version: doc.version,
+      date: doc.uploadDate,
+      title: "目前版本",
+      note: "當前顯示於文件表格的版本。",
+      active: true,
+    },
+    {
+      version: "v1.2",
+      date: "2026-04-18",
+      title: "流程修訂",
+      note: "補充簽核條件與附件說明。",
+    },
+    {
+      version: "v1.1",
+      date: "2026-03-09",
+      title: "格式調整",
+      note: "調整章節順序與標題格式。",
+    },
+    {
+      version: "v1.0",
+      date: "2026-02-12",
+      title: "初版建立",
+      note: "建立文件初稿並送審。",
+    },
+  ];
+
+  return (
+    <div className="space-y-4">
+      {items.map((item, index) => (
+        <div
+          key={`${item.version}-${index}`}
+          className={`rounded-2xl border bg-white p-4 shadow-sm ${
+            item.active ? "border-teal-200 ring-1 ring-teal-100" : "border-slate-200"
+          }`}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-teal-50 px-2 py-0.5 text-xs font-semibold text-teal-700">
+                  {item.version}
+                </span>
+                {item.active && (
+                  <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                    目前版本
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-sm font-semibold text-slate-900">{item.title}</p>
+              <p className="mt-1 text-sm text-slate-500">{item.note}</p>
+            </div>
+            <div className="text-right text-xs text-slate-400">{item.date}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
+  const items = [
+    {
+      time: `${doc.uploadDate} 09:18`,
+      actor: doc.uploaderName,
+      action: "建立草稿",
+      note: "文件完成上傳並進入編輯流程。",
+    },
+    {
+      time: `${doc.uploadDate} 11:05`,
+      actor: "系統",
+      action: "送出審核",
+      note: "文件已送出至主管審核。",
+    },
+    {
+      time: "2026-05-06 15:42",
+      actor: "主管",
+      action: "審核中",
+      note: "已完成初步確認，等待下一步簽核。",
+    },
+    {
+      time: "2026-05-07 10:10",
+      actor: "文管",
+      action: "紀錄更新",
+      note: "補充審核意見與版本備註。",
+    },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {items.map((item, index) => (
+        <div key={`${item.time}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-slate-900">{item.action}</p>
+              <p className="mt-1 text-sm text-slate-500">{item.note}</p>
+              <p className="mt-3 text-xs text-slate-400">
+                {item.actor} ・ {item.time}
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+              {index + 1}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export { SAMPLE_DOCS };

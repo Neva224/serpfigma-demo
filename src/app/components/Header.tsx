@@ -64,8 +64,11 @@ export function Header({ activeScreen, onNavigate, onOpenApproval, onReEdit }: P
               <FileText size={15} className="text-white" />
             </div>
             <div>
-              <div className="text-gray-800 leading-none" style={{ fontSize: "14px", fontWeight: 800, letterSpacing: "-0.3px" }}>
-                SERP<span style={{ color: "#0D9488" }}>文件管理系統</span>
+              <div
+                className="leading-none text-gray-900"
+                style={{ fontSize: "14px", fontWeight: 800, letterSpacing: "-0.3px" }}
+              >
+                SERP文件管理系統
               </div>
             </div>
           </div>
