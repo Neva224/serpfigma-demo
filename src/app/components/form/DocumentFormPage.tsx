@@ -7,7 +7,7 @@ import {
   buildCategoryPayload,
   type ClassificationSelection,
 } from "./ClassificationCard";
-import { DepartmentCard } from "./DepartmentCard";
+import { DepartmentCard, type DepartmentSelection } from "./DepartmentCard";
 import { FileUploadCard } from "./FileUploadCard";
 import { type DocRecord } from "../DocumentTable";
 
@@ -29,6 +29,14 @@ export function DocumentFormPage({
     l2: "",
     l3: "",
     l4: "",
+  });
+  const [department, setDepartment] = useState<DepartmentSelection>({
+    regionName: "",
+    companyName: "",
+    businessGroupName: "",
+    divisionName: "",
+    departmentName: "",
+    teamName: "",
   });
 
   const categoryPayload = buildCategoryPayload(classification);
@@ -157,7 +165,7 @@ export function DocumentFormPage({
         <div className="mx-auto max-w-screen-xl space-y-5 px-0">
           <BasicInfoCard />
           <ClassificationCard value={classification} onChange={setClassification} />
-          <DepartmentCard />
+          <DepartmentCard value={department} onChange={setDepartment} />
           <FileUploadCard />
         </div>
 

@@ -1,101 +1,149 @@
 import { ChevronDown, GitBranch } from "lucide-react";
-import { useState } from "react";
 import { Card } from "./BasicInfoCard";
+import {
+  buildHrScopePayload as resolveHrScopePayload,
+  getHrScopeLevelOptions,
+  HR_SCOPE_NODES,
+  type HrScopeSelectionPath,
+} from "../../data/catalogModels";
 
-const GROUPS = ["", "技術事業群", "商業事業群", "管理事業群", "國際事業群"];
-const DIVISIONS: Record<string, string[]> = {
-  技術事業群: ["", "軟體開發處", "資訊安全處", "雲端平台處"],
-  商業事業群: ["", "業務拓展處", "行銷策略處", "客戶服務處"],
-  管理事業群: ["", "人力資源處", "財務法務處", "行政總務處"],
-  國際事業群: ["", "亞太業務處", "歐美業務處", "新興市場處"],
-};
-const DEPARTMENTS: Record<string, string[]> = {
-  軟體開發處: ["", "前端開發部", "後端開發部", "品質保證部"],
-  資訊安全處: ["", "安全架構部", "弱點管理部", "合規稽核部"],
-  人力資源處: ["", "招募甄選部", "教育訓練部", "薪酬福利部"],
-  財務法務處: ["", "財務會計部", "法務合規部", "稅務規劃部"],
-};
-const TEAMS: Record<string, string[]> = {
-  前端開發部: ["", "UI/UX組", "元件開發組", "效能優化組"],
-  後端開發部: ["", "API開發組", "資料庫組", "微服務組"],
-  招募甄選部: ["", "校園招募組", "社會招募組", "獵才合作組"],
+export interface DepartmentSelection extends HrScopeSelectionPath {
+  regionName: string;
+  companyName: string;
+  businessGroupName: string;
+  divisionName: string;
+  departmentName: string;
+  teamName: string;
+}
+
+const DEFAULT_SELECTION: DepartmentSelection = {
+  regionName: "",
+  companyName: "",
+  businessGroupName: "",
+  divisionName: "",
+  departmentName: "",
+  teamName: "",
 };
 
-export function DepartmentCard() {
-  const [group, setGroup] = useState("");
-  const [division, setDivision] = useState("");
-  const [dept, setDept] = useState("");
+interface Props {
+  value: DepartmentSelection;
+  onChange: (next: DepartmentSelection) => void;
+}
 
-  const divisionOpts = group ? (DIVISIONS[group] ?? [""]) : [""];
-  const deptOpts = division ? (DEPARTMENTS[division] ?? [""]) : [""];
-  const teamOpts = dept ? (TEAMS[dept] ?? [""]) : [""];
+export function DepartmentCard({ value, onChange }: Props) {
+  const level1Options = getHrScopeLevelOptions(HR_SCOPE_NODES, []);
+  const level2Options = value.regionName ? getHrScopeLevelOptions(HR_SCOPE_NODES, [value.regionName]) : [];
+  const level3Options = value.companyName
+    ? getHrScopeLevelOptions(HR_SCOPE_NODES, [value.regionName, value.companyName])
+    : [];
+  const level4Options = value.businessGroupName
+    ? getHrScopeLevelOptions(HR_SCOPE_NODES, [
+        value.regionName,
+        value.companyName,
+        value.businessGroupName,
+      ])
+    : [];
+
+  const payload = resolveHrScopePayload(HR_SCOPE_NODES, value);
 
   return (
-    <Card title="簽核歸屬部門" icon="🏢">
+    <Card title="文件所屬部門" icon="🏢">
       <div className="space-y-4">
-        <p className="text-xs text-gray-400 flex items-center gap-1.5">
+        <p className="flex items-center gap-1.5 text-xs text-gray-400">
           <GitBranch size={12} />
-          請依序選擇組織層級，確認文件所屬簽核部門
+          選擇文件所屬的部門範圍，會自動帶出對應的下層選項。
         </p>
 
-        {/* Four sequential dropdowns */}
         <div className="grid grid-cols-4 gap-3">
           <DeptSelect
-            label="群（事業群）"
-            options={GROUPS}
-            placeholder="選擇事業群"
-            value={group}
-            onChange={(v) => { setGroup(v); setDivision(""); setDept(""); }}
+            label="區域"
+            options={level1Options}
+            placeholder="請選擇區域"
+            value={value.regionName}
+            onChange={(next) =>
+              onChange({
+                ...DEFAULT_SELECTION,
+                regionName: next,
+              })
+            }
             step={1}
           />
           <DeptSelect
-            label="處（事業處）"
-            options={divisionOpts}
-            placeholder={group ? "選擇事業處" : "請先選事業群"}
-            disabled={!group}
-            value={division}
-            onChange={(v) => { setDivision(v); setDept(""); }}
+            label="公司"
+            options={level2Options}
+            placeholder={value.regionName ? "請選擇公司" : "請先選擇區域"}
+            disabled={!value.regionName}
+            value={value.companyName}
+            onChange={(next) =>
+              onChange({
+                ...value,
+                companyName: next,
+                businessGroupName: "",
+                divisionName: "",
+                departmentName: "",
+                teamName: "",
+              })
+            }
             step={2}
           />
           <DeptSelect
-            label="部門"
-            options={deptOpts}
-            placeholder={division ? "選擇部門" : "請先選事業處"}
-            disabled={!division}
-            value={dept}
-            onChange={setDept}
+            label="群(事業群)"
+            options={level3Options}
+            placeholder={value.companyName ? "請選擇群(事業群)" : "請先選擇公司"}
+            disabled={!value.companyName}
+            value={value.businessGroupName}
+            onChange={(next) =>
+              onChange({
+                ...value,
+                businessGroupName: next,
+                divisionName: "",
+                departmentName: "",
+                teamName: "",
+              })
+            }
             step={3}
           />
           <DeptSelect
-            label="組別"
-            options={teamOpts}
-            placeholder={dept ? "選擇組別" : "請先選部門"}
-            disabled={!dept}
-            value=""
-            onChange={() => {}}
+            label="處(事業處)"
+            options={level4Options}
+            placeholder={value.businessGroupName ? "請選擇處(事業處)" : "請先選擇群(事業群)"}
+            disabled={!value.businessGroupName}
+            value={value.divisionName}
+            onChange={(next) =>
+              onChange({
+                ...value,
+                divisionName: next,
+                departmentName: "",
+                teamName: "",
+              })
+            }
             step={4}
           />
         </div>
 
-        {/* Visual flow indicator */}
-        <div className="flex items-center gap-0 mt-1">
-          {["事業群", "事業處", "部門", "組別"].map((s, i) => (
-            <div key={s} className="flex items-center flex-1">
+        <div className="mt-1 flex items-center gap-0">
+          {["區域", "公司", "群", "處"].map((segment, index, arr) => (
+            <div key={segment} className="flex flex-1 items-center">
               <div
-                className="flex-1 h-1 rounded-l-full"
+                className="h-1 flex-1 rounded-l-full"
                 style={{
                   backgroundColor:
-                    (i === 0 && group) || (i === 1 && division) || (i === 2 && dept)
+                    (index === 0 && value.regionName) ||
+                    (index === 1 && value.companyName) ||
+                    (index === 2 && value.businessGroupName) ||
+                    (index === 3 && value.divisionName)
                       ? "#0D9488"
                       : "#E5E7EB",
                 }}
               />
-              {i < 3 && (
+              {index < arr.length - 1 && (
                 <div
-                  className="w-2 h-2 rotate-45 border-t-2 border-r-2 -ml-1 -mr-1 z-10"
+                  className="z-10 -ml-1 -mr-1 h-2 w-2 rotate-45 border-r-2 border-t-2"
                   style={{
                     borderColor:
-                      (i === 0 && division) || (i === 1 && dept)
+                      (index === 0 && value.companyName) ||
+                      (index === 1 && value.businessGroupName) ||
+                      (index === 2 && value.divisionName)
                         ? "#0D9488"
                         : "#E5E7EB",
                   }}
@@ -105,17 +153,13 @@ export function DepartmentCard() {
           ))}
         </div>
 
-        {/* Org path display */}
-        {group && (
-          <div
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm"
-            style={{ backgroundColor: "#F0FDFA", borderColor: "#99F6E4" }}
-          >
-            <span className="text-teal-600 font-medium text-xs">簽核路徑：</span>
-            {[group, division, dept].filter(Boolean).map((s, i, arr) => (
-              <span key={s} className="flex items-center gap-2">
-                <span className="text-teal-800 text-xs font-semibold">{s}</span>
-                {i < arr.length - 1 && <span className="text-teal-300">›</span>}
+        {payload.scopePath.length > 0 && (
+          <div className="flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm" style={{ backgroundColor: "#F0FDFA", borderColor: "#99F6E4" }}>
+            <span className="text-xs font-medium text-teal-600">目前選擇：</span>
+            {payload.scopePath.map((segment, index) => (
+              <span key={`${segment}-${index}`} className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-teal-800">{segment}</span>
+                {index < payload.scopePath.length - 1 && <span className="text-teal-300">/</span>}
               </span>
             ))}
           </div>
@@ -144,34 +188,38 @@ function DeptSelect({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-1.5 mb-1.5">
+      <div className="mb-1.5 flex items-center gap-1.5">
         <span
-          className="w-4 h-4 rounded-full flex items-center justify-center text-white flex-shrink-0"
+          className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-white"
           style={{ fontSize: "9px", fontWeight: 700, backgroundColor: disabled ? "#D1D5DB" : "#0D9488" }}
         >
           {step}
         </span>
-        <label className="text-xs text-gray-600" style={{ fontWeight: 600 }}>{label}</label>
+        <label className="text-xs text-gray-600" style={{ fontWeight: 600 }}>
+          {label}
+        </label>
       </div>
       <div className="relative">
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="w-full appearance-none px-3 py-2.5 pr-8 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full appearance-none rounded-lg border border-gray-200 px-3 py-2.5 pr-8 text-sm transition-all focus:border-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           style={{
             backgroundColor: disabled ? "#F3F4F6" : "#F9FAFB",
             color: value ? "#1F2937" : "#9CA3AF",
           }}
         >
           <option value="">{placeholder}</option>
-          {options.filter(Boolean).map((o) => (
-            <option key={o} value={o}>{o}</option>
+          {options.filter(Boolean).map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
           ))}
         </select>
         <ChevronDown
           size={13}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400"
         />
       </div>
     </div>

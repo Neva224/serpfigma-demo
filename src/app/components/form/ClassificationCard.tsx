@@ -1,35 +1,18 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { buildCategoryPayload as resolveCategoryPayload, CATEGORY_NODES, getCategoryLevelOptions, type CategorySelectionPath } from "../../data/catalogModels";
 import { Card, Field } from "./BasicInfoCard";
-import { LEVEL_OPTIONS, type DocumentLevel } from "../document-management/mockData";
 
-const L1 = ["", "法務", "人資資源管理", "雄獅大學", "資安暨個資管理室", "其他"];
-const L2: Record<string, string[]> = {
-  法務: ["", "契約管理", "法規遵循", "簽核流程"],
-  人資資源管理: ["", "組織與人員", "考勤與出勤", "薪酬福利"],
-  雄獅大學: ["", "新人訓練", "教材與指南", "資安教材"],
-  資安暨個資管理室: ["", "資訊安全", "個資管理", "權限控管"],
-  其他: ["", "部門共用", "表單範本", "流程標準"],
-};
-const L3: Record<string, string[]> = {
-  契約管理: ["", "內部公版契約", "外部合約", "版本歷程"],
-  法規遵循: ["", "稽核文件", "法遵清單", "對應表單"],
-  簽核流程: ["", "主管簽核", "文管審核", "送審檢核"],
-  組織與人員: ["", "部門異動", "名冊維護", "職務表單"],
-  考勤與出勤: ["", "請假", "加班", "出勤規範"],
-  薪酬福利: ["", "薪資", "獎金", "福利制度"],
-  新人訓練: ["", "課程簡介", "新人手冊", "FAQ"],
-  教材與指南: ["", "操作手冊", "流程圖", "教學簡報"],
-  資安教材: ["", "OTP", "密碼規範", "資安宣導"],
-  資訊安全: ["", "弱點管理", "資安政策", "事件通報"],
-  個資管理: ["", "個資盤點", "保存年限", "使用授權"],
-  權限控管: ["", "角色權限", "申請流程", "帳號管理"],
-  部門共用: ["", "共用文件", "公告", "規範"],
-  表單範本: ["", "申請單", "簽核單", "範本庫"],
-  流程標準: ["", "SOP", "作業說明", "流程檢核"],
-};
-const L4 = ["", "流程文件", "細分類", "表單附件", "其他"];
-export interface ClassificationSelection {
+const DOCUMENT_LEVEL_OPTIONS = [
+  { value: "level1", label: "第一層文件", short: "一層", description: "第一層文件" },
+  { value: "level2", label: "第二層文件", short: "二層", description: "第二層文件" },
+  { value: "level3", label: "第三層文件", short: "三層", description: "第三層文件" },
+  { value: "level4", label: "第四層文件", short: "四層", description: "第四層文件" },
+  { value: "level5", label: "第五層文件", short: "五層", description: "第五層文件" },
+  { value: "level6", label: "第六層文件", short: "六層", description: "第六層文件" },
+] as const;
+
+export interface ClassificationSelection extends CategorySelectionPath {
   l1: string;
   l2: string;
   l3: string;
@@ -37,11 +20,7 @@ export interface ClassificationSelection {
 }
 
 export function buildCategoryPayload(selection: ClassificationSelection) {
-  const categoryPath = [selection.l1, selection.l2, selection.l3, selection.l4].filter(Boolean);
-  return {
-    categoryPath,
-    categoryId: categoryPath.join(" / "),
-  };
+  return resolveCategoryPayload(CATEGORY_NODES, selection);
 }
 
 interface Props {
@@ -50,24 +29,26 @@ interface Props {
 }
 
 export function ClassificationCard({ value, onChange }: Props) {
-  const [hierarchy, setHierarchy] = useState<DocumentLevel | "">("");
+  const [hierarchy, setHierarchy] = useState<string>("");
 
-  const l2Options = value.l1 ? (L2[value.l1] ?? [""]) : [""];
-  const l3Options = value.l2 ? (L3[value.l2] ?? [""]) : [""];
+  const l1Options = getCategoryLevelOptions(CATEGORY_NODES, []);
+  const l2Options = value.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1]) : [];
+  const l3Options = value.l2 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2]) : [];
+  const l4Options = value.l3 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2, value.l3]) : [];
   const payload = buildCategoryPayload(value);
 
   return (
-    <Card title="文件分類與歸屬" icon="🧭">
+    <Card title="知識樹分類" icon="🗂️">
       <div className="space-y-5">
         <div>
           <p className="mb-3 flex items-center gap-1 text-xs text-gray-400">
-            <span>依照資料夾層級選擇歸屬分類，建立文件時會一起寫入 categoryId / categoryPath。</span>
+            <span>選擇對應的知識樹路徑，系統會自動產生 categoryId / categoryPath。</span>
           </p>
           <div className="grid grid-cols-2 gap-4">
             <Field label="第一層分類" required>
               <Select
-                options={L1}
-                placeholder="請選擇第一層分類"
+                options={l1Options}
+                placeholder="請先選擇第一層分類"
                 value={value.l1}
                 onChange={(l1) => onChange({ l1, l2: "", l3: "", l4: "" })}
               />
@@ -92,7 +73,7 @@ export function ClassificationCard({ value, onChange }: Props) {
             </Field>
             <Field label="第四層分類" required>
               <Select
-                options={L4}
+                options={l4Options}
                 placeholder={value.l3 ? "請選擇第四層分類" : "請先選擇第三層分類"}
                 disabled={!value.l3}
                 value={value.l4}
@@ -104,17 +85,17 @@ export function ClassificationCard({ value, onChange }: Props) {
 
         {payload.categoryPath.length > 0 && (
           <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2">
-            <p className="mb-1 text-xs font-medium text-teal-600">目前歸屬</p>
+            <p className="mb-1 text-xs font-medium text-teal-600">已選分類路徑</p>
             <div className="flex flex-wrap items-center gap-1.5">
               {payload.categoryPath.map((segment, index) => (
-                <span key={segment} className="flex items-center gap-1.5">
+                <span key={`${segment}-${index}`} className="flex items-center gap-1.5">
                   <span className="text-xs font-semibold text-teal-800">{segment}</span>
                   {index < payload.categoryPath.length - 1 && <span className="text-xs text-teal-300">/</span>}
                 </span>
               ))}
             </div>
             <p className="mt-1 text-[11px] text-teal-700/80">
-              categoryId: <span className="font-mono">{payload.categoryId || "未選擇"}</span>
+              categoryId: <span className="font-mono">{payload.categoryId || "尚未選擇"}</span>
             </p>
           </div>
         )}
@@ -122,14 +103,14 @@ export function ClassificationCard({ value, onChange }: Props) {
         <div className="border-t border-gray-100 pt-5">
           <Field label="文件階級" required>
             <Select
-              options={LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+              options={DOCUMENT_LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
               placeholder="請選擇文件階級"
               value={hierarchy}
               onChange={setHierarchy}
             />
           </Field>
           <p className="mt-1.5 text-xs text-gray-400">
-            文件階級與分類歸屬分開保存，分類會寫入 categoryId / categoryPath，階級則作為文件層級欄位。
+            文件階級會影響顯示與查詢，並與 categoryId / categoryPath 對應。
           </p>
         </div>
       </div>
@@ -164,12 +145,12 @@ function Select({
       >
         <option value="">{placeholder}</option>
         {options.filter(Boolean).map((option) => {
-          const value = typeof option === "string" ? option : option.value;
+          const optionValue = typeof option === "string" ? option : option.value;
           const label = typeof option === "string" ? option : option.label;
           return (
-          <option key={value} value={value}>
-            {label}
-          </option>
+            <option key={optionValue} value={optionValue}>
+              {label}
+            </option>
           );
         })}
       </select>
