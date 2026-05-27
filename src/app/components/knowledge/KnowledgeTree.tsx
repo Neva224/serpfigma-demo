@@ -1,4 +1,4 @@
-import { FolderOpen, LayoutGrid } from "lucide-react";
+﻿import { FolderOpen, LayoutGrid } from "lucide-react";
 import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../../mocks/knowledgeTreeData";
 
 interface Props {
@@ -23,7 +23,7 @@ export function KnowledgeTree({
           </div>
           <h3 className="text-sm font-semibold text-slate-800">知識樹分類</h3>
         </div>
-        <p className="text-xs leading-5 text-slate-400">由 Excel 轉換而來的正規化分類樹</p>
+        <p className="text-xs leading-5 text-slate-400">來自 Excel 的分類樹</p>
       </div>
 
       <div className="flex-1 overflow-y-auto py-2">
@@ -42,7 +42,7 @@ export function KnowledgeTree({
 
       <div className="border-t border-slate-100 bg-slate-50 px-4 py-3">
         <p className="text-center text-xs text-slate-400">
-          共 {totalCount} 筆文件，{KNOWLEDGE_TREE.length} 個第一層資料夾
+          共 {totalCount} 筆文件，{KNOWLEDGE_TREE.length} 個第一層分類
         </p>
       </div>
     </div>
