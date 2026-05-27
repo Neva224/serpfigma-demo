@@ -62,7 +62,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
 
   return (
     <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
-      <div className="mb-5 flex items-start justify-between gap-4">
+      <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
             <button type="button" onClick={onBack} className="hover:text-gray-600">
@@ -77,14 +77,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
           </div>
           <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>系統設定 — 人員權限管理</h2>
           <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的執行權限</p>
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="shrink-0 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
-        >
-          返回文件管理
-        </button>
+        </div>
       </div>
 
       {/* Role cards */}

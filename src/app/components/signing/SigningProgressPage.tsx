@@ -157,14 +157,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
           </div>
           <h2 className="text-lg font-bold text-slate-800">文件簽核單進度查詢</h2>
           <p className="mt-1 text-sm text-slate-500">查詢各類文件的簽核流程進度、狀態及處理人員</p>
-        </div>
-        <button
-          type="button"
-          onClick={onBack}
-          className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-        >
-          返回文件管理
-        </button>
+        </div>
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

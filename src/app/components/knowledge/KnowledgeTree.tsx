@@ -1,4 +1,4 @@
-import { Folder, FolderOpen, LayoutGrid } from "lucide-react";
+import { FolderOpen, LayoutGrid } from "lucide-react";
 import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../../mocks/knowledgeTreeData";
 
 interface Props {
@@ -30,7 +30,7 @@ export function KnowledgeTree({
         <div className="space-y-1 pb-2">
           {KNOWLEDGE_TREE.map((node) => (
             <TreeNodeRow
-              key={node.id}
+              key={`${node.id}-${getNodePath(node).join("|")}`}
               node={node}
               selectedPathKey={selectedPathKey}
               onSelectPath={onSelectPath}
@@ -60,13 +60,14 @@ function TreeNodeRow({
   onSelectPath: (path: string[], label: string) => void;
   countForPath: (path: string[]) => number;
 }) {
-  const isSelected = selectedPathKey === node.pathLabels.join(" / ");
-  const count = countForPath(node.pathLabels);
+  const path = getNodePath(node);
+  const isSelected = selectedPathKey === path.join(" / ");
+  const count = countForPath(path);
 
   return (
     <button
       type="button"
-      onClick={() => onSelectPath(node.pathLabels, node.label)}
+      onClick={() => onSelectPath(path, node.label)}
       className={`mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-xl border-l-2 px-3 py-2 text-left transition ${
         isSelected
           ? "border-teal-600 bg-teal-50"
@@ -94,4 +95,9 @@ function TreeNodeRow({
       </span>
     </button>
   );
+}
+
+function getNodePath(node: KnowledgeTreeNode): string[] {
+  const legacyNode = node as KnowledgeTreeNode & { pathLabels?: string[]; pathNames?: string[] };
+  return legacyNode.pathLabels ?? legacyNode.pathNames ?? [];
 }
