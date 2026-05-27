@@ -72,7 +72,7 @@ interface Props {
   embedded?: boolean;
 }
 
-export function DatabasePage({ onBack }: Props) {
+export function DatabasePage({ onBack, embedded = false }: Props) {
   const [tab, setTab] = useState<Tab>("contacts");
   const [expandedTag, setExpandedTag] = useState<string | null>(null);
   const [tags, setTags] = useState<TagItem[]>(INITIAL_TAGS);
@@ -143,7 +143,7 @@ export function DatabasePage({ onBack }: Props) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-5" style={{ backgroundColor: "#F3F4F6" }}>
+    <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">

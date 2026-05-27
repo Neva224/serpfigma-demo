@@ -46,7 +46,7 @@ interface Props {
   embedded?: boolean;
 }
 
-export function PermissionsPage({ onBack }: Props) {
+export function PermissionsPage({ onBack, embedded = false }: Props) {
   const [perms, setPerms] = useState(PERMISSIONS);
   const [editing, setEditing] = useState(false);
   const [activeRole, setActiveRole] = useState<Role | "all">("all");
@@ -61,7 +61,7 @@ export function PermissionsPage({ onBack }: Props) {
   const filteredPerms = activeRole === "all" ? perms : perms;
 
   return (
-    <div className="flex-1 overflow-y-auto px-6 py-5" style={{ backgroundColor: "#F3F4F6" }}>
+    <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">

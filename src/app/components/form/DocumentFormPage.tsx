@@ -43,8 +43,11 @@ export function DocumentFormPage({ onBack, embedded = false, editingDoc = null }
     );
   }
 
+  const showStandaloneHeader = !embedded;
+
   return (
     <div className={`${embedded ? "pb-24" : "min-h-screen pb-24"}`} style={{ backgroundColor: "#F3F4F6" }}>
+      {showStandaloneHeader && (
       <header className="sticky top-0 z-20 border-b border-gray-100 bg-white shadow-sm">
         <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-6">
           <div className="flex items-center gap-4">
@@ -81,8 +84,9 @@ export function DocumentFormPage({ onBack, embedded = false, editingDoc = null }
           </div>
         </div>
       </header>
+      )}
 
-      <div className="mx-auto max-w-screen-xl px-6 pt-6 pb-4">
+      <div className={`mx-auto max-w-screen-xl px-6 ${embedded ? "pt-4 pb-4" : "pt-6 pb-4"}`}>
         {editingDoc && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">

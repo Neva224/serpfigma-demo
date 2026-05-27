@@ -232,7 +232,7 @@ export function DocumentListPage({
   }
 
   return (
-    <div className="flex h-full min-h-[calc(100vh-56px)] overflow-hidden bg-slate-100">
+    <div className="flex h-full min-h-0 overflow-hidden bg-slate-100">
       <aside
         className={`flex-shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 ${
           sidebarCollapsed ? "w-[72px]" : "w-[320px]"
@@ -533,7 +533,7 @@ function getViewTitle(view: ViewMode) {
     case "documentUpload":
       return "新增文件";
     case "signingProgress":
-      return "文件簽核單進度查詢";
+      return "文件簽核進度查詢";
     case "database":
       return "資料庫";
     case "systemAdmin":
@@ -567,7 +567,7 @@ function getViewDescription(view: ViewMode) {
     case "documentUpload":
       return "新增文件流程";
     case "signingProgress":
-      return "查詢簽核單號、文件名稱與申請日期";
+      return "查詢簽核單號、文件名稱、主旨與申請日期";
     case "database":
       return "文件知識管理總覽：窗口對應、點擊統計與標籤索引";
     case "systemAdmin":

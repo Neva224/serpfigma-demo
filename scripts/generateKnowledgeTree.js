@@ -4,12 +4,15 @@ import { fileURLToPath } from "node:url";
 
 let XLSX;
 try {
-  XLSX = await import("xlsx");
+  const xlsxModule = await import("xlsx");
+  XLSX = xlsxModule.default ?? xlsxModule;
+  if (typeof XLSX.read !== "function" || typeof XLSX.utils?.sheet_to_json !== "function") {
+    throw new Error("Unexpected xlsx module shape.");
+  }
 } catch (error) {
-  console.error(
-    "Missing dependency: xlsx. Run `npm install` after adding the dependency so this generator can read .xlsx files.",
-  );
-  process.exit(0);
+  const message = error instanceof Error ? error.message : String(error);
+  console.error(`Failed to load xlsx module: ${message}`);
+  process.exit(1);
 }
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,7 +30,7 @@ if (!fs.existsSync(inputPath)) {
   throw new Error(`Knowledge tree source file not found: ${inputPath}`);
 }
 
-const workbook = XLSX.readFile(inputPath);
+const workbook = XLSX.read(fs.readFileSync(inputPath), { type: "buffer" });
 const firstSheetName = workbook.SheetNames[0];
 if (!firstSheetName) {
   throw new Error("The workbook does not contain any sheets.");

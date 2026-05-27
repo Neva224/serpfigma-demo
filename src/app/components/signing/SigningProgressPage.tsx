@@ -68,7 +68,7 @@ interface Props {
   embedded?: boolean;
 }
 
-export function SigningProgressPage({ onBack }: Props) {
+export function SigningProgressPage({ onBack, embedded = false }: Props) {
   const [signingNo, setSigningNo] = useState("");
   const [docName, setDocName] = useState("");
   const [subject, setSubject] = useState("");
@@ -141,7 +141,7 @@ export function SigningProgressPage({ onBack }: Props) {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-slate-100 px-6 py-5">
+    <div className={embedded ? "h-full overflow-y-auto bg-slate-100 px-6 py-5" : "flex-1 overflow-y-auto bg-slate-100 px-6 py-5"}>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
