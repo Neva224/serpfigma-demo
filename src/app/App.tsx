@@ -9,6 +9,7 @@ import {
   createDemoUser,
   deleteWorkflowDocument,
   markNotificationRead,
+  restoreWorkflowDocument,
   submitDocument,
   type ApprovalStage,
   type WorkflowDocument,
@@ -169,6 +170,21 @@ export default function App() {
     toast.success("文件已刪除");
   }
 
+  function handleRestoreVoided(doc: WorkflowDocument) {
+    const result = restoreWorkflowDocument(documents, notifications, {
+      doc,
+      actor: currentUser,
+    });
+
+    setDocuments(result.documents);
+    setNotifications(result.notifications);
+    if (result.document.status === "上架") {
+      toast.success("文件已還原並恢復上架");
+    } else {
+      toast.success("文件已還原");
+    }
+  }
+
   const canVoidPublishedDocs =
     currentUser.roles.includes("system_admin") ||
     currentUser.roles.includes("signing_manager") ||
@@ -205,6 +221,7 @@ export default function App() {
           onReEdit={openReEdit}
           onVoidPublished={handleVoidPublished}
           onDeletePublished={handleDeletePublished}
+          onRestoreVoided={handleRestoreVoided}
           canVoidPublishedDocs={canVoidPublishedDocs}
           canDeletePublishedDocs={canDeletePublishedDocs}
         />

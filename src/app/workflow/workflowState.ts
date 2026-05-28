@@ -44,6 +44,7 @@ export interface WorkflowDocument extends DocumentRecord {
   ownershipDepartmentPath?: string[];
   attachments?: WorkflowAttachment[];
   isPublished?: boolean;
+  voidedFromStatus?: DocumentStatus;
   history: WorkflowHistoryEntry[];
 }
 
@@ -208,6 +209,14 @@ function cloneDoc(doc: WorkflowDocument): WorkflowDocument {
   };
 }
 
+function deriveCurrentHandlerForStatus(doc: WorkflowDocument, status: DocumentStatus) {
+  if (status === "上架") return "已上架";
+  if (status === "待主管簽核") return "主管審核";
+  if (status === "待文管審核" || status === "待新主管簽核") return "文管審核";
+  if (status === "退回" || status === "作廢") return doc.uploaderName || doc.requestor || "上傳者";
+  return status;
+}
+
 export function submitDocument(
   docs: WorkflowDocument[],
   notifications: WorkflowNotification[],
@@ -257,7 +266,7 @@ export function submitDocument(
         subject: summary,
         requestor: input.ownerName || input.uploaderName,
         requestorCode: input.uploaderCode,
-        currentHandler: "待主管簽核",
+        currentHandler: "主管審核",
         ownerName: input.ownerName || input.uploaderName,
         summary,
         validFrom: input.validFrom || undefined,
@@ -294,7 +303,7 @@ export function submitDocument(
     attachments: [...input.attachments],
     isPublished: false,
     history: nextHistory,
-    currentHandler: "待主管簽核",
+    currentHandler: "主管審核",
     requestor: input.ownerName || input.uploaderName,
     requestorCode: input.uploaderCode,
     uploaderName: input.uploaderName,
@@ -436,17 +445,9 @@ export function applyWorkflowDecision(
   const updatedDoc: WorkflowDocument = {
     ...doc,
     status: after,
-    currentHandler:
-      after === "待文管審核"
-        ? "待文管審核"
-        : after === "上架"
-          ? "已上架"
-          : after === "退回"
-            ? doc.uploaderName || doc.requestor || "上傳者"
-            : after === "作廢"
-              ? doc.uploaderName || doc.requestor || "上傳者"
-              : doc.currentHandler,
+    currentHandler: deriveCurrentHandlerForStatus(doc, after),
     isPublished: after === "上架",
+    voidedFromStatus: after === "作廢" ? before : doc.voidedFromStatus,
     updatedAt: timestamp,
     history: [
       ...doc.history,
@@ -505,7 +506,7 @@ export function applyWorkflowTransfer(
   const updatedDoc: WorkflowDocument = {
     ...doc,
     status: "待文管審核",
-    currentHandler: "待文管審核",
+    currentHandler: "文管審核",
     categoryId: input.transferCategoryId,
     categoryPath: [...nextCategoryPath],
     knowledgePath: [...nextCategoryPath],
@@ -548,6 +549,49 @@ export function applyWorkflowTransfer(
     notifications: [...notifications, nextNotification],
     document: updatedDoc,
     notification: nextNotification,
+  };
+}
+
+export function restoreWorkflowDocument(
+  docs: WorkflowDocument[],
+  notifications: WorkflowNotification[],
+  input: { doc: WorkflowDocument; actor: WorkflowUser },
+) {
+  const timestamp = nowIso();
+  const index = docs.findIndex((item) => item.id === input.doc.id);
+  if (index < 0) {
+    return { documents: docs, notifications };
+  }
+
+  const doc = cloneDoc(docs[index]);
+  if (doc.status !== "作廢") {
+    return { documents: docs, notifications };
+  }
+
+  const restoredStatus = doc.voidedFromStatus ?? "上架";
+  const updatedDoc: WorkflowDocument = {
+    ...doc,
+    status: restoredStatus,
+    currentHandler: deriveCurrentHandlerForStatus(doc, restoredStatus),
+    isPublished: restoredStatus === "上架",
+    voidedFromStatus: undefined,
+    updatedAt: timestamp,
+    history: [
+      ...doc.history,
+      {
+        action: "還原文件",
+        actor: input.actor.name,
+        timestamp,
+        statusFrom: "作廢",
+        statusTo: restoredStatus,
+      },
+    ],
+  };
+
+  return {
+    documents: docs.map((item, currentIndex) => (currentIndex === index ? updatedDoc : item)),
+    notifications,
+    document: updatedDoc,
   };
 }
 

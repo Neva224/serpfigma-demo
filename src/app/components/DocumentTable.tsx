@@ -5,6 +5,7 @@ import {
   Download,
   FileText,
   History,
+  RotateCcw,
   X,
   ChevronLeft,
   ChevronRight,
@@ -23,6 +24,7 @@ interface Props {
   onReEdit: (doc: DocumentRecord) => void;
   onVoidPublished: (doc: DocumentRecord) => void;
   onDeletePublished: (doc: DocumentRecord) => void;
+  onRestoreVoided: (doc: DocumentRecord) => void;
   canVoidPublishedDocs: boolean;
   canDeletePublishedDocs: boolean;
 }
@@ -83,6 +85,7 @@ export function DocumentTable({
   onReEdit,
   onVoidPublished,
   onDeletePublished,
+  onRestoreVoided,
   canVoidPublishedDocs,
   canDeletePublishedDocs,
 }: Props) {
@@ -228,6 +231,7 @@ export function DocumentTable({
               const status = STATUS_STYLES[doc.status];
               const needsApproval = doc.status === STATUS_MANAGER_PENDING || doc.status === STATUS_DOCADMIN_PENDING;
               const canReEdit = doc.status === STATUS_RETURNED;
+              const canRestore = doc.status === STATUS_VOIDED && canVoidPublishedDocs;
               const canManagePublished = doc.status === STATUS_PUBLISHED && canVoidPublishedDocs;
               const canDeletePublished = doc.status === STATUS_PUBLISHED && canDeletePublishedDocs;
 
@@ -300,6 +304,14 @@ export function DocumentTable({
                           label="作廢"
                           warn
                           onClick={() => onVoidPublished(doc)}
+                        />
+                      )}
+                      {canRestore && (
+                        <ActionButton
+                          icon={<RotateCcw size={13} />}
+                          label="還原"
+                          primary
+                          onClick={() => onRestoreVoided(doc)}
                         />
                       )}
                       {canDeletePublished && (

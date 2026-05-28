@@ -44,6 +44,7 @@ interface Props {
   onReEdit: (doc: DocumentRecord) => void;
   onVoidPublished: (doc: DocumentRecord) => void;
   onDeletePublished: (doc: DocumentRecord) => void;
+  onRestoreVoided: (doc: DocumentRecord) => void;
   canVoidPublishedDocs: boolean;
   canDeletePublishedDocs: boolean;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
@@ -68,6 +69,7 @@ export function DocumentListPage({
   onReEdit,
   onVoidPublished,
   onDeletePublished,
+  onRestoreVoided,
   canVoidPublishedDocs,
   canDeletePublishedDocs,
   onSubmitDocument,
@@ -509,6 +511,7 @@ export function DocumentListPage({
                   onReEdit={onReEdit}
                   onVoidPublished={onVoidPublished}
                   onDeletePublished={onDeletePublished}
+                  onRestoreVoided={onRestoreVoided}
                   canVoidPublishedDocs={canVoidPublishedDocs}
                   canDeletePublishedDocs={canDeletePublishedDocs}
                 />

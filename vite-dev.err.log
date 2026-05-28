@@ -331,11 +331,31 @@ E:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts:562:0: ERROR: 
       at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
       at Readable.push (node:internal/streams/readable:394:5)
       at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
-valDoc || !approval) return;[39m
+[2m下午5:44:34[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Unexpected token, expected "," (35:46)
+
+[0m [90m 33 |[31m }
+ [90m 34 |[31m
+[31m[1m>[22m[31m[90m 35 |[31m [36mconst[31m [33mREJECT_REASONS[31m [33m=[31m [[32m"?批捆銝泵"[31m[33m,[31m [32m"?澆?銝迤蝣?, "[31m鞈[33m?[31m蝻箸[33m?[31m[32m", "[31m甈痊銝[33m?[31m[32m", "[31m[33m?[31m辣銝雲[32m", "[31m[33m?[31m嗡[33m?[31m[32m"];[31m
+ [90m    |[31m                                               [31m[1m^[22m[31m
+ [90m 36 |[31m
+ [90m 37 |[31m [36mexport[31m [36mfunction[31m [33mApprovalDrawer[31m({ doc[33m,[31m role[33m,[31m onClose[33m,[31m onApprove[33m,[31m onReject }[33m:[31m [33mProps[31m) {
+ [90m 38 |[31m   [36mconst[31m [expanded[33m,[31m setExpanded] [33m=[31m useState[33m<[31m[33mSet[31m[33m<[31m[33mstring[31m[33m>>[31m([36mnew[31m [33mSet[31m([[32m"basic"[31m]))[33m;[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:35:46
+[33m  33 |  }
+  34 |  
+  35 |  const REJECT_REASONS = ["?批捆銝泵", "?澆?銝迤蝣?, "鞈?蝻箸?", "甈痊銝?", "?辣銝雲", "?嗡?"];
+     |                                                                                  ^
+  36 |  
+  37 |  export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Props) {[39m
       at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
       at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
       at TypeScriptParserMixin.unexpected (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6636:16)
-      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11459:22)
+      at TypeScriptParserMixin.expect (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6916:12)
+      at TypeScriptParserMixin.parseExprList (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12158:14)
+      at TypeScriptParserMixin.parseArrayLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12074:26)
+      at TypeScriptParserMixin.parseArrayLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9210:24)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11352:23)
       at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
       at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
       at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
@@ -347,71 +367,12 @@ valDoc || !approval) return;[39m
       at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
       at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
       at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
-      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
       at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
-      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10908:30)
-      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
-      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
-      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
-      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
-      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10806:36)
-      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
-      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
-      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12912:23)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
-      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
-      at TypeScriptParserMixin.parseStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12777:17)
-      at TypeScriptParserMixin.parseLabeledStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13295:95)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12914:19)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
-      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
-      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
-      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
-      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
-      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
-      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
-      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12103:10)
-      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9189:18)
-      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13462:12
-      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12420:14)
-      at TypeScriptParserMixin.parseFunction (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13461:10)
-      at TypeScriptParserMixin.parseExportDefaultExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13924:19)
-      at TypeScriptParserMixin.parseExportDefaultExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9419:18)
-      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13845:25)
-      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9402:20)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12895:27)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
-[2m下午4:50:23[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\App.tsx: Unexpected token (190:6)
-
-[0m [90m 188 |[31m   )[33m;[31m
- [90m 189 |[31m }
-[31m[1m>[22m[31m[90m 190 |[31m       )}
- [90m     |[31m       [31m[1m^[22m[31m
- [90m 191 |[31m     [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
- [90m 192 |[31m   )[33m;[31m
- [90m 193 |[31m }[0m[39m
-  Plugin: [35mvite:react-babel[39m
-  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/App.tsx[39m:190:6
-      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
-      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
-      at TypeScriptParserMixin.unexpected (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6636:16)
-      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11459:22)
-      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
-      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
-      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
-      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
-      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
-      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
-      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
-      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
-      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
-      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
-      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
-      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
-      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
-      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
-      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseVar (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12868:23)
       at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
       at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
       at TypeScriptParserMixin.parseModuleItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12761:17)
@@ -437,67 +398,668 @@ valDoc || !approval) return;[39m
       at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\core\lib\gensync-utils\async.js:67:7
       at E:\Data\nevahsieh\Desktop\figma\node_modules\gensync\index.js:113:33
       at step (E:\Data\nevahsieh\Desktop\figma\node_modules\gensync\index.js:287:14)
-      at E:\Data\nevahsieh\Desktop\figma\node_modules\gensync\index.js:273:13
-      at async.call.result.err.err (E:\Data\nevahsieh\Desktop\figma\node_modules\gensync\index.js:223:11)
-[2m下午4:51:00[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Transform failed with 1 error:
-E:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts:553:0: ERROR: Unexpected "}"
-  Plugin: [35mvite:esbuild[39m
-  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts[39m:553:0
-[33m  
-  [33mUnexpected "}"[33m
-  551|    };
-  552|  }
-  553|  }
-     |  ^
-  554|  
-  555|  export function markNotificationRead(notifications: WorkflowNotification[], id: number) {
-  [39m
-[2m下午4:53:33[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Transform failed with 1 error:
-E:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts:562:0: ERROR: Unexpected "export"
-  Plugin: [35mvite:esbuild[39m
-  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts[39m:562:0
-[33m  
-  [33mUnexpected "export"[33m
-  560|    return doc.status === "上架";
-  561|  
-  562|  export function getPublishedDocuments(docs: WorkflowDocument[]) {
-     |  ^
-  563|    return docs.filter(isPublishedDocument);
-  564|  }
-  [39m
-[2m下午4:53:33[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m Pre-transform error: Transform failed with 1 error:
-E:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts:562:0: ERROR: Unexpected "export"
-  Plugin: [35mvite:esbuild[39m
-  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts[39m:562:0
-[33m  
-  [33mUnexpected "export"[33m
-  560|    return doc.status === "上架";
-  561|  
-  562|  export function getPublishedDocuments(docs: WorkflowDocument[]) {
-     |  ^
-  563|    return docs.filter(isPublishedDocument);
-  564|  }
-  [39m
-[2m下午4:53:34[22m [31m[1m[vite][22m[39m [31mInternal server error: Transform failed with 1 error:
-E:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts:562:0: ERROR: Unexpected "export"[39m
-  Plugin: [35mvite:esbuild[39m
-  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/workflow/workflowState.ts[39m:562:0
-[33m  
-  [33mUnexpected "export"[33m
-  560|    return doc.status === "上架";
-  561|  
-  562|  export function getPublishedDocuments(docs: WorkflowDocument[]) {
-     |  ^
-  563|    return docs.filter(isPublishedDocument);
-  564|  }
-  [39m
-      at failureErrorWithLog (E:\Data\nevahsieh\Desktop\figma\node_modules\esbuild\lib\main.js:1467:15)
-      at E:\Data\nevahsieh\Desktop\figma\node_modules\esbuild\lib\main.js:736:50
-      at responseCallbacks.<computed> (E:\Data\nevahsieh\Desktop\figma\node_modules\esbuild\lib\main.js:603:9)
-      at handleIncomingPacket (E:\Data\nevahsieh\Desktop\figma\node_modules\esbuild\lib\main.js:658:12)
-      at Socket.readFromStdout (E:\Data\nevahsieh\Desktop\figma\node_modules\esbuild\lib\main.js:581:7)
-      at Socket.emit (node:events:508:28)
-      at addChunk (node:internal/streams/readable:563:12)
-      at readableAddChunkPushByteMode (node:internal/streams/readable:514:3)
-      at Readable.push (node:internal/streams/readable:394:5)
-      at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)
+[2m下午5:45:25[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Unexpected token, expected ":" (97:84)
+
+[0m [90m  95 |[31m   [36mconst[31m previewSummary [33m=[31m doc[33m.[31msummary [33m?[31m[33m?[31m doc[33m.[31msubject [33m?[31m[33m?[31m [32m"撠??"[31m[33m;[31m
+ [90m  96 |[31m   [36mconst[31m actionLabel [33m=[31m
+[31m[1m>[22m[31m[90m  97 |[31m     rejectMode [33m===[31m [32m"transfer"[31m [33m?[31m [32m"蝘餉?"[31m [33m:[31m rejectMode [33m===[31m [32m"return"[31m [33m?[31m [32m"??? : role === "[31mmanager[32m" ? "[31m銝餌恣蝪賣[33m?[31m[33m?[31m[32m" : "[31m[33m?[31m恣撖拇[33m?[31m[33m?[31m[32m";[31m
+ [90m     |[31m                                                                                     [31m[1m^[22m[31m
+ [90m  98 |[31m
+ [90m  99 |[31m   [36mreturn[31m (
+ [90m 100 |[31m     [33m<[31m[33mDrawerShell[31m onClose[33m=[31m{onClose}[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:97:84
+[33m  99 |    return (
+  100|      <DrawerShell onClose={onClose}>
+  101|        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3" style={{ backgroundColor: "#0D9488" }}>
+     |            ^
+  102|          <div>
+  103|            <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.expect (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6916:12)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10909:12)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10910:29)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseVar (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13401:91)
+      at TypeScriptParserMixin.parseVarStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13247:10)
+      at TypeScriptParserMixin.parseVarStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9425:31)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12868:23)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9189:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12639:10)
+[2m下午5:45:53[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Unexpected token, expected ":" (97:84)
+
+[0m [90m  95 |[31m   [36mconst[31m previewSummary [33m=[31m doc[33m.[31msummary [33m?[31m[33m?[31m doc[33m.[31msubject [33m?[31m[33m?[31m [32m"撠??"[31m[33m;[31m
+ [90m  96 |[31m   [36mconst[31m actionLabel [33m=[31m rejectMode [33m===[31m [32m"transfer"[31m [33m?[31m [32m"\u79fb\u8f49"[31m [33m:[31m rejectMode [33m===[31m [32m"return"[31m [33m?[31m [32m"\u9000\u56de"[31m [33m:[31m role [33m===[31m [32m"manager"[31m [33m?[31m [32m"\u4e3b\u7ba1\u7c3d\u6838\u901a\u904e"[31m [33m:[31m [32m"\u6587\u7ba1\u5be9\u6838\u901a\u904e"[31m[33m;[31m
+[31m[1m>[22m[31m[90m  97 |[31m     rejectMode [33m===[31m [32m"transfer"[31m [33m?[31m [32m"蝘餉?"[31m [33m:[31m rejectMode [33m===[31m [32m"return"[31m [33m?[31m [32m"??? : role === "[31mmanager[32m" ? "[31m銝餌恣蝪賣[33m?[31m[33m?[31m[32m" : "[31m[33m?[31m恣撖拇[33m?[31m[33m?[31m[32m";[31m
+ [90m     |[31m                                                                                     [31m[1m^[22m[31m
+ [90m  98 |[31m
+ [90m  99 |[31m   [36mreturn[31m (
+ [90m 100 |[31m     [33m<[31m[33mDrawerShell[31m onClose[33m=[31m{onClose}[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:97:84
+[33m  99 |    return (
+  100|      <DrawerShell onClose={onClose}>
+  101|        <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3" style={{ backgroundColor: "#0D9488" }}>
+     |            ^
+  102|          <div>
+  103|            <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.unexpected (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6636:16)
+      at TypeScriptParserMixin.expect (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6916:12)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10909:12)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10910:29)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12912:23)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9189:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13462:12
+      at TypeScriptParserMixin.withSmartMixTopicForbiddingContext (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12420:14)
+      at TypeScriptParserMixin.parseFunction (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13461:10)
+      at TypeScriptParserMixin.parseFunctionStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13142:17)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12808:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13951:17)
+      at TypeScriptParserMixin.parseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9646:85)
+      at TypeScriptParserMixin.maybeParseExportDeclaration (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13910:31)
+      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13829:29)
+      at TypeScriptParserMixin.parseExport (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9402:20)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12895:27)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseModuleItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12761:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:36)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseProgram (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12639:10)
+      at TypeScriptParserMixin.parseTopLevel (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12629:25)
+      at TypeScriptParserMixin.parse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:14505:25)
+[2m下午5:46:17[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Unexpected character ''. (121:29)
+
+[0m [90m 119 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"?"[31m value[33m=[31m{doc[33m.[31mversion} [33m/[31m[33m>[31m
+ [90m 120 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"銝?? value={`${doc.uploaderName} (${doc.uploaderCode})`} />[31m
+[31m[1m>[22m[31m[90m 121 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"銝?交?"[31m value[33m=[31m{doc[33m.[31muploadDate} [33m/[31m[33m>[31m
+ [90m     |[31m                              [31m[1m^[22m[31m
+ [90m 122 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"?桀???? value={doc.status} />[31m
+ [90m 123 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"?撅祇?"[31m value[33m=[31m{doc[33m.[31mdepartment} [33m/[31m[33m>[31m
+ [90m 124 |[31m             [33m<[31m[33mInfoRow[31m label[33m=[31m[32m"?辣??"[31m value[33m=[31m{[33mLEVEL_META[31m[doc[33m.[31mlevel][33m.[31mlabel} [33m/[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:121:29
+[33m  121|              <InfoRow label="銝?交?" value={doc.uploadDate} />
+  122|              <InfoRow label="?桀???? value={doc.status} />
+  123|              <InfoRow label="?撅祇?" value={doc.department} />
+     |                               ^
+  124|              <InfoRow label="?辣??" value={LEVEL_META[doc.level].label} />
+  125|              <InfoRow label="?? / 隤芣?" value={previewSummary} />[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6323:16)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.jsxParseIdentifier (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4583:10)
+      at TypeScriptParserMixin.jsxParseNamespacedName (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4588:23)
+      at TypeScriptParserMixin.jsxParseAttribute (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4664:22)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4679:28)
+      at TypeScriptParserMixin.jsxParseOpeningElementAfterName (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10060:18)
+      at TypeScriptParserMixin.jsxParseOpeningElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4674:17)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4698:33)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+[2m下午5:47:45[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Expected corresponding JSX closing tag for <option>. (158:24)
+
+[0m [90m 156 |[31m                             [33m<[31m[33m/[31m[33moption[31m[33m>[31m
+ [90m 157 |[31m                           ))}
+[31m[1m>[22m[31m[90m 158 |[31m                         [33m<[31m[33m/[31m[33mselect[31m[33m>[31m
+ [90m     |[31m                         [31m[1m^[22m[31m
+ [90m 159 |[31m                         [33m<[31m[33mChevronDown[31m
+ [90m 160 |[31m                           size[33m=[31m{[35m13[31m}
+ [90m 161 |[31m                           className[33m=[31m[32m"pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-amber-400"[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:158:24
+[33m  159|                          <ChevronDown
+  160|                            size={13}
+  161|                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-amber-400"
+     |                                                                            ^
+  162|                          />
+  163|                        </div>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4739:16)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4644:31)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4723:36)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+[2m下午5:48:27[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Unexpected character ''. (177:86)
+
+[0m [90m 175 |[31m                         onChange[33m=[31m{(e) [33m=>[31m setRejectReason(e[33m.[31mtarget[33m.[31mvalue)}
+ [90m 176 |[31m                         rows[33m=[31m{[35m3[31m}
+[31m[1m>[22m[31m[90m 177 |[31m                         placeholder[33m=[31m{rejectMode [33m===[31m [32m"return"[31m [33m?[31m [32m"隢撓?亥??牧?? : "[31m[33m?[31m航撓[33m?[31m亦宏頧[33m?[31m[33m?[31m牧[33m?[31m[33m?[31m}
+ [90m     |[31m                                                                                       [31m[1m^[22m[31m
+ [90m 178 |[31m                         className[33m=[31m[32m"w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"[31m
+ [90m 179 |[31m                         style[33m=[31m{{ fontSize[33m:[31m [32m"12px"[31m }}
+ [90m 180 |[31m                       [33m/[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:177:86
+[33m  176|                          rows={3}
+  177|                          placeholder={rejectMode === "return" ? "隢撓?亥??牧?? : "?航撓?亦宏頧??牧??}
+  178|                          className="w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"
+     |                                                                                                                                                                         ^
+  179|                          style={{ fontSize: "12px" }}
+  180|                        />[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6323:16)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4809:11)
+      at TypeScriptParserMixin.getTokenFromCode (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10004:11)
+      at TypeScriptParserMixin.nextToken (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:5799:10)
+      at TypeScriptParserMixin.next (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:5709:10)
+      at TypeScriptParserMixin.parseIdentifierName (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12230:10)
+      at TypeScriptParserMixin.parseIdentifier (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12198:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11433:27)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10908:30)
+      at TypeScriptParserMixin.parseConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9620:18)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10902:17)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4644:31)
+      at TypeScriptParserMixin.jsxParseAttributeValue (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4616:21)
+[2m下午5:49:09[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Expected corresponding JSX closing tag for <div>. (317:16)
+
+[0m [90m 315 |[31m                     [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 316 |[31m                   )}
+[31m[1m>[22m[31m[90m 317 |[31m                 [33m<[31m[33m/[31m[33m>[31m
+ [90m     |[31m                 [31m[1m^[22m[31m
+ [90m 318 |[31m               )}
+ [90m 319 |[31m             [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 320 |[31m           [33m<[31m[33m/[31m[33mAccordionSection[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:317:16
+[33m  323|          <div className="flex flex-1 flex-col bg-slate-800">
+  324|            <div className="flex items-center justify-between border-b border-slate-600 bg-slate-900 px-4 py-2">
+  325|              <p className="truncate text-xs text-slate-300">?辣?批捆?汗</p>
+     |                                                             ^
+  326|              <div className="flex items-center gap-2">
+  327|                <span className="text-[11px] text-slate-400">{attachments.length} ??隞?/span>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4734:14)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOpBaseRightExpr (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11003:34)
+      at TypeScriptParserMixin.parseExprOpRightExpr (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10998:21)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10964:27)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9323:18)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10970:21)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9323:18)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10970:21)
+      at TypeScriptParserMixin.parseExprOp (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9323:18)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10925:17)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.jsxParseExpressionContainer (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4644:31)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4723:36)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+[2m下午5:49:38[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Expected corresponding JSX closing tag for <span>. (328:12)
+
+[0m [90m 326 |[31m             [33m<[31m[33mdiv[31m className[33m=[31m[32m"flex items-center gap-2"[31m[33m>[31m
+ [90m 327 |[31m               [33m<[31m[33mspan[31m className[33m=[31m[32m"text-[11px] text-slate-400"[31m[33m>[31m{attachments[33m.[31mlength} [33m?[31m[33m?[31m隞[33m?[31m[33m/[31mspan[33m>[31m
+[31m[1m>[22m[31m[90m 328 |[31m             [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m     |[31m             [31m[1m^[22m[31m
+ [90m 329 |[31m           [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 330 |[31m
+ [90m 331 |[31m           [33m<[31m[33mdiv[31m className[33m=[31m[32m"flex flex-1 items-start justify-center overflow-auto px-4 py-6"[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:328:12
+[33m  332|              <div className="rounded bg-white p-6 shadow-2xl" style={{ width: "min(100%, 720px)", minWidth: "360px" }}>
+  333|                              <DocumentPreviewPane doc={doc} attachments={attachments} />
+  334|              </div>
+     |      ^
+  335|            </div>
+  336|          </div>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4739:16)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseReturnStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13159:28)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12815:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+[2m下午5:50:11[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Expected corresponding JSX closing tag for <p>. (429:6)
+
+[0m [90m 427 |[31m         [33m<[31m[33mh3[31m className[33m=[31m[32m"mt-2 text-2xl font-semibold text-slate-900"[31m[33m>[31m{doc[33m.[31mname}[33m<[31m[33m/[31m[33mh3[31m[33m>[31m
+ [90m 428 |[31m         [33m<[31m[33mp[31m className[33m=[31m[32m"mt-2 text-sm leading-7 text-slate-600"[31m[33m>[31m甇文[33m?[31m憛[33m?[31m仿＊蝷箏祕[33m?[31m[33m?[31m[33m?[31m喲[33m?[31m隞塚[33m?[31m銝[33m?[31m雿輻[33m?[31m[33m?[31m隞嗅摰嫘[33m?[31m[33m/[31mp[33m>[31m
+[31m[1m>[22m[31m[90m 429 |[31m       [33m<[31m[33m/[31m[33mheader[31m[33m>[31m
+ [90m     |[31m       [31m[1m^[22m[31m
+ [90m 430 |[31m
+ [90m 431 |[31m       {primary [33m?[31m (
+ [90m 432 |[31m         [33m<[31m[33mdiv[31m className[33m=[31m[32m"space-y-4"[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:429:6
+[33m  435|                <p className="truncate text-sm font-semibold text-slate-800">{primary.name}</p>
+  436|                <p className="text-xs text-slate-400">
+  437|                  {primary.size} / {primary.type.toUpperCase()} / {primary.uploadedAt.slice(0, 10)}
+     |                                            ^
+  438|                </p>
+  439|              </div>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4739:16)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseReturnStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13159:28)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12815:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9189:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13462:12
+   [31m[1m^[22m[31m
+ [90m 329 |[31m           [33m<[31m[33m/[31m[33mdiv[31m[33m>[31m
+ [90m 330 |[31m
+ [90m 331 |[31m           [33m<[31m[33mdiv[31m className[33m=[31m[32m"flex flex-1 items-start justify-center overflow-auto px-4 py-6"[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:328:12
+[33m  332|              <div className="rounded bg-white p-6 shadow-2xl" style={{ width: "min(100%, 720px)", minWidth: "360px" }}>
+  333|                              <DocumentPreviewPane doc={doc} attachments={attachments} />
+  334|              </div>
+     |      ^
+  335|            </div>
+  336|          </div>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4739:16)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseReturnStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13159:28)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12815:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+[2m下午5:50:11[22m [31m[1m[vite][22m[39m [31mInternal server error: E:\Data\nevahsieh\Desktop\figma\src\app\components\approval\ApprovalDrawer.tsx: Expected corresponding JSX closing tag for <p>. (429:6)
+
+[0m [90m 427 |[31m         [33m<[31m[33mh3[31m className[33m=[31m[32m"mt-2 text-2xl font-semibold text-slate-900"[31m[33m>[31m{doc[33m.[31mname}[33m<[31m[33m/[31m[33mh3[31m[33m>[31m
+ [90m 428 |[31m         [33m<[31m[33mp[31m className[33m=[31m[32m"mt-2 text-sm leading-7 text-slate-600"[31m[33m>[31m甇文[33m?[31m憛[33m?[31m仿＊蝷箏祕[33m?[31m[33m?[31m[33m?[31m喲[33m?[31m隞塚[33m?[31m銝[33m?[31m雿輻[33m?[31m[33m?[31m隞嗅摰嫘[33m?[31m[33m/[31mp[33m>[31m
+[31m[1m>[22m[31m[90m 429 |[31m       [33m<[31m[33m/[31m[33mheader[31m[33m>[31m
+ [90m     |[31m       [31m[1m^[22m[31m
+ [90m 430 |[31m
+ [90m 431 |[31m       {primary [33m?[31m (
+ [90m 432 |[31m         [33m<[31m[33mdiv[31m className[33m=[31m[32m"space-y-4"[31m[33m>[31m[0m[39m
+  Plugin: [35mvite:react-babel[39m
+  File: [36mE:/Data/nevahsieh/Desktop/figma/src/app/components/approval/ApprovalDrawer.tsx[39m:429:6
+[33m  435|                <p className="truncate text-sm font-semibold text-slate-800">{primary.name}</p>
+  436|                <p className="text-xs text-slate-400">
+  437|                  {primary.size} / {primary.type.toUpperCase()} / {primary.uploadedAt.slice(0, 10)}
+     |                                            ^
+  438|                </p>
+  439|              </div>[39m
+      at constructor (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:365:19)
+      at TypeScriptParserMixin.raise (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6616:19)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4739:16)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElementAt (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4710:32)
+      at TypeScriptParserMixin.jsxParseElement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4761:17)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4771:19)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:39
+      at TypeScriptParserMixin.tryParse (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:6924:20)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9792:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12443:12)
+      at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10817:17)
+      at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12510:17)
+      at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11692:28)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11348:23)
+      at TypeScriptParserMixin.parseExprAtom (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:4776:20)
+      at TypeScriptParserMixin.parseExprSubscripts (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11098:23)
+      at TypeScriptParserMixin.parseUpdate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11083:21)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:11063:23)
+      at TypeScriptParserMixin.parseMaybeUnary (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9854:18)
+      at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10916:61)
+      at TypeScriptParserMixin.parseExprOps (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10921:23)
+      at TypeScriptParserMixin.parseMaybeConditional (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10898:23)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10848:21)
+      at TypeScriptParserMixin.parseMaybeAssign (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9803:20)
+      at TypeScriptParserMixin.parseExpressionBase (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10801:23)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:39
+      at TypeScriptParserMixin.allowInAnd (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12438:16)
+      at TypeScriptParserMixin.parseExpression (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:10797:17)
+      at TypeScriptParserMixin.parseReturnStatement (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13159:28)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12815:21)
+      at TypeScriptParserMixin.parseStatementContent (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9525:18)
+      at TypeScriptParserMixin.parseStatementLike (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12784:17)
+      at TypeScriptParserMixin.parseStatementListItem (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12764:17)
+      at TypeScriptParserMixin.parseBlockOrModuleBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13333:61)
+      at TypeScriptParserMixin.parseBlockBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13326:10)
+      at TypeScriptParserMixin.parseBlock (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13314:10)
+      at TypeScriptParserMixin.parseFunctionBody (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12117:24)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:12103:10)
+      at TypeScriptParserMixin.parseFunctionBodyAndFinish (E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:9189:18)
+      at E:\Data\nevahsieh\Desktop\figma\node_modules\@babel\parser\lib\index.js:13462:12
