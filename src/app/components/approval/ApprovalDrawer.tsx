@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { CheckCircle2, ChevronDown, ChevronRight, MoveRight, RotateCcw, X } from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronRight, Download, ExternalLink, FileImage, FileText, MoveRight, RotateCcw, X } from "lucide-react";
 import {
   CATEGORY_NODES,
   buildCategoryPayload as resolveCategoryPayload,
@@ -14,7 +14,7 @@ import {
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
 import { LEVEL_META } from "../document-management/mockData";
-import type { WorkflowDocument } from "../../workflow/workflowState";
+import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
 
 type RejectMode = "none" | "return" | "transfer";
 
@@ -308,42 +308,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
           <div className="flex flex-1 items-start justify-center overflow-auto px-4 py-6">
             <div className="rounded bg-white p-6 shadow-2xl" style={{ width: "min(100%, 720px)", minWidth: "360px" }}>
-              <article className="space-y-5">
-                <header className="border-b border-slate-200 pb-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">文件內容</p>
-                  <h3 className="mt-2 text-2xl font-semibold text-slate-900">{doc.name}</h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">{previewSummary}</p>
-                </header>
-
-                <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold text-slate-800">附件</h4>
-                    <span className="text-xs text-slate-400">{attachments.length} 個</span>
-                  </div>
-                  {attachments.length > 0 ? (
-                    <div className="space-y-2">
-                      {attachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
-                        >
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium text-slate-800">{attachment.name}</p>
-                            <p className="text-xs text-slate-400">
-                              {attachment.size} / {attachment.type.toUpperCase()}
-                            </p>
-                          </div>
-                          <p className="flex-shrink-0 text-xs text-slate-400">{attachment.uploadedAt.slice(0, 10)}</p>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                      尚無可預覽的實際附件
-                    </div>
-                  )}
-                </section>
-              </article>
+                            <DocumentPreviewPane doc={doc} attachments={attachments} />
             </div>
           </div>
         </div>
@@ -423,6 +388,102 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   );
 }
 
+function DocumentPreviewPane({
+  doc,
+  attachments,
+}: {
+  doc: WorkflowDocument;
+  attachments: WorkflowAttachment[];
+}) {
+  const primary = attachments[0] ?? null;
+  const previewKind = primary ? getPreviewKind(primary.type) : "none";
+
+  return (
+    <article className="space-y-5">
+      <header className="border-b border-slate-200 pb-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">文件內容預覽</p>
+        <h3 className="mt-2 text-2xl font-semibold text-slate-900">{doc.name}</h3>
+        <p className="mt-2 text-sm leading-7 text-slate-600">此區塊直接顯示實際上傳附件，不再使用假文件內容。</p>
+      </header>
+
+      {primary ? (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-800">{primary.name}</p>
+              <p className="text-xs text-slate-400">
+                {primary.size} / {primary.type.toUpperCase()} / {primary.uploadedAt.slice(0, 10)}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {primary.downloadUrl && (
+                <a
+                  href={primary.downloadUrl}
+                  download={primary.name}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
+                >
+                  <Download size={13} />
+                  下載
+                </a>
+              )}
+              {primary.downloadUrl && (
+                <a
+                  href={primary.downloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                >
+                  <ExternalLink size={13} />
+                  開啟
+                </a>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+            {previewKind === "image" && primary.downloadUrl ? (
+              <img src={primary.downloadUrl} alt={primary.name} className="max-h-[620px] w-full object-contain bg-slate-100" />
+            ) : previewKind === "pdf" && primary.downloadUrl ? (
+              <iframe title={primary.name} src={primary.downloadUrl} className="h-[620px] w-full bg-white" />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center text-slate-500">
+                {previewKind === "file" ? <FileText size={40} className="text-slate-400" /> : <FileImage size={40} className="text-slate-400" />}
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">目前無法內嵌預覽此檔案類型</p>
+                  <p className="mt-1 text-xs text-slate-400">請使用「開啟」或「下載」查看實際附件內容</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {attachments.length > 1 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">其他附件</p>
+              <div className="space-y-2">
+                {attachments.slice(1).map((attachment) => (
+                  <div key={attachment.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                    <p className="truncate font-medium">{attachment.name}</p>
+                    <p className="text-xs text-slate-400">{attachment.size} / {attachment.type.toUpperCase()}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+          目前沒有可預覽的實際附件
+        </div>
+      )}
+    </article>
+  );
+}
+function getPreviewKind(ext: string): "image" | "pdf" | "file" {
+  const normalized = ext.toLowerCase();
+  if (["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"].includes(normalized)) return "image";
+  if (normalized === "pdf") return "pdf";
+  return "file";
+}
 function DrawerShell({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex">

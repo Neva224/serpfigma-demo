@@ -137,8 +137,8 @@ export default function App() {
       toast.success("文件已退回，請重新編輯後送出");
     } else if (result.document.status === "上架") {
       toast.success("文件已審核通過並上架");
-    } else if (result.document.status === "待新主管簽核") {
-      toast.success("文件已移轉，等待新主管簽核");
+    } else if (result.document.status === "待文管審核") {
+      toast.success("文件已移轉，等待文管審核");
     } else {
       toast.success("簽核處理完成");
     }
@@ -168,7 +168,7 @@ export default function App() {
             setView({ kind: "documentUpload" });
           }}
           onApprove={(doc) => {
-            const stage: ApprovalStage = doc.status === "待文管審核" ? "docadmin" : "manager";
+            const stage: ApprovalStage = doc.status === "待文管審核" || doc.status === "待新主管簽核" ? "docadmin" : "manager";
             openApproval(doc.id, stage);
           }}
           onReEdit={openReEdit}

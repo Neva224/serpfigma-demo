@@ -1,4 +1,4 @@
-import type { DocumentLevel, DocumentRecord, DocumentStatus } from "../components/document-management/mockData";
+﻿import type { DocumentLevel, DocumentRecord, DocumentStatus } from "../components/document-management/mockData";
 
 export type ApprovalStage = "manager" | "docadmin";
 export type WorkflowAction = "create" | "resubmit" | "manager_approve" | "manager_reject" | "manager_void" | "docadmin_approve" | "docadmin_reject" | "docadmin_void";
@@ -442,9 +442,9 @@ export function applyWorkflowDecision(
         : after === "上架"
           ? "已上架"
           : after === "退回"
-            ? "待重新編輯"
+            ? doc.uploaderName || doc.requestor || "上傳者"
             : after === "作廢"
-              ? "已作廢"
+              ? doc.uploaderName || doc.requestor || "上傳者"
               : doc.currentHandler,
     isPublished: after === "上架",
     updatedAt: timestamp,
@@ -504,8 +504,8 @@ export function applyWorkflowTransfer(
 
   const updatedDoc: WorkflowDocument = {
     ...doc,
-    status: "待新主管簽核",
-    currentHandler: "待新主管簽核",
+    status: "待文管審核",
+    currentHandler: "待文管審核",
     categoryId: input.transferCategoryId,
     categoryPath: [...nextCategoryPath],
     knowledgePath: [...nextCategoryPath],
@@ -520,7 +520,7 @@ export function applyWorkflowTransfer(
         actor: input.actor.name,
         timestamp,
         statusFrom: doc.status,
-        statusTo: "待新主管簽核",
+        statusTo: "待文管審核",
         ...(input.reason ? { reason: input.reason } : {}),
         ...(historyComment ? { comment: historyComment } : {}),
         categoryPathBefore: previousCategoryPath,
@@ -533,12 +533,12 @@ export function applyWorkflowTransfer(
 
   const nextNotification: WorkflowNotification = {
     id: baseNotificationId(notifications),
-    type: "manager_approval_pending",
-    title: "文件已移轉，請新主管簽核",
-    message: `${doc.name} 已移轉，等待新主管處理`,
+    type: "docadmin_approval_pending",
+    title: "文件已移轉，請文管審核",
+    message: `${doc.name} 已移轉，請文管審核`,
     docId: doc.id,
     signingNo: doc.signingNo ?? "",
-    targetStage: "manager",
+    targetStage: "docadmin",
     unread: true,
     createdAt: timestamp,
   };

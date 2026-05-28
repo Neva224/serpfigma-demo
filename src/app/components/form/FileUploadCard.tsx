@@ -18,15 +18,6 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
     currentFilesRef.current = files;
   }, [files]);
 
-  useEffect(
-    () => () => {
-      currentFilesRef.current.forEach((file) => {
-        if (file.downloadUrl) URL.revokeObjectURL(file.downloadUrl);
-      });
-    },
-    [],
-  );
-
   function handleDrag(event: DragEvent<HTMLDivElement>, active: boolean) {
     event.preventDefault();
     event.stopPropagation();
