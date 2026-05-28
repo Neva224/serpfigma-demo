@@ -15,7 +15,12 @@ export interface WorkflowHistoryEntry {
   timestamp: string;
   statusFrom: DocumentStatus;
   statusTo: DocumentStatus;
+  reason?: string;
   comment?: string;
+  categoryPathBefore?: string[];
+  categoryPathAfter?: string[];
+  ownershipDepartmentPathBefore?: string[];
+  ownershipDepartmentPathAfter?: string[];
 }
 
 export interface WorkflowAttachment {
@@ -89,12 +94,14 @@ export interface WorkflowDecisionInput {
   stage: ApprovalStage;
   action: "approve" | "reject" | "void";
   actor: WorkflowUser;
+  reason?: string;
   comment?: string;
 }
 
 export interface WorkflowTransferInput {
   doc: WorkflowDocument;
   actor: WorkflowUser;
+  reason?: string;
   comment?: string;
   transferCategoryId: string;
   transferCategoryPath: string[];
@@ -316,7 +323,6 @@ export function submitDocument(
     notification,
   };
 }
-
 export function applyWorkflowDecision(
   docs: WorkflowDocument[],
   notifications: WorkflowNotification[],
@@ -356,10 +362,10 @@ export function applyWorkflowDecision(
         id: baseNotificationId(notifications),
         type: "rejected",
         title: "文件已被主管退回，請重新編輯後送出",
-        message: `${doc.name} 已被主管退回`,
+        message: `${doc.name} 已退回，請重新編輯`,
         docId: doc.id,
         signingNo: doc.signingNo ?? "",
-        targetStage: "manager",
+        targetStage: "uploader",
         unread: true,
         createdAt: timestamp,
       };
@@ -373,7 +379,7 @@ export function applyWorkflowDecision(
         message: `${doc.name} 已作廢`,
         docId: doc.id,
         signingNo: doc.signingNo ?? "",
-        targetStage: "manager",
+        targetStage: "uploader",
         unread: true,
         createdAt: timestamp,
       };
@@ -400,10 +406,10 @@ export function applyWorkflowDecision(
         id: baseNotificationId(notifications),
         type: "rejected",
         title: "文件已被文管退回，請重新編輯後送出",
-        message: `${doc.name} 已被文管退回`,
+        message: `${doc.name} 已退回，請重新編輯`,
         docId: doc.id,
         signingNo: doc.signingNo ?? "",
-        targetStage: "docadmin",
+        targetStage: "uploader",
         unread: true,
         createdAt: timestamp,
       };
@@ -417,16 +423,15 @@ export function applyWorkflowDecision(
         message: `${doc.name} 已作廢`,
         docId: doc.id,
         signingNo: doc.signingNo ?? "",
-        targetStage: "docadmin",
+        targetStage: "uploader",
         unread: true,
         createdAt: timestamp,
       };
     }
   }
 
-  const historyAction =
-    actionLabel ||
-    (input.action === "approve" ? "核准" : input.action === "reject" ? "退回" : "作廢");
+  const historyAction = actionLabel || (input.action === "approve" ? "核准" : input.action === "reject" ? "退回" : "作廢");
+  const historyComment = [input.reason?.trim(), input.comment?.trim()].filter(Boolean).join(" / ") || undefined;
 
   const updatedDoc: WorkflowDocument = {
     ...doc,
@@ -437,9 +442,9 @@ export function applyWorkflowDecision(
         : after === "上架"
           ? "已上架"
           : after === "退回"
-            ? "退回編修"
+            ? "待重新編輯"
             : after === "作廢"
-              ? "文件作廢"
+              ? "已作廢"
               : doc.currentHandler,
     isPublished: after === "上架",
     updatedAt: timestamp,
@@ -451,7 +456,8 @@ export function applyWorkflowDecision(
         timestamp,
         statusFrom: before,
         statusTo: after,
-        ...(input.comment ? { comment: input.comment } : {}),
+        ...(input.reason ? { reason: input.reason } : {}),
+        ...(historyComment ? { comment: historyComment } : {}),
       },
       ...(after === "上架"
         ? [
@@ -490,44 +496,46 @@ export function applyWorkflowTransfer(
   }
 
   const doc = cloneDoc(docs[index]);
+  const previousCategoryPath = [...doc.categoryPath];
+  const previousDepartmentPath = doc.ownershipDepartmentPath ? [...doc.ownershipDepartmentPath] : [];
   const nextCategoryPath = normalizePath(input.transferCategoryPath);
   const nextDepartmentPath = normalizePath(input.transferOwnershipDepartmentPath);
-  const historyComment = [
-    input.comment?.trim(),
-    nextCategoryPath.length > 0 ? `知識樹分類：${nextCategoryPath.join(" / ")}` : "",
-    nextDepartmentPath.length > 0 ? `所屬部門：${nextDepartmentPath.join(" / ")}` : "",
-  ]
-    .filter(Boolean)
-    .join("；");
+  const historyComment = [input.reason?.trim(), input.comment?.trim()].filter(Boolean).join(" / ") || undefined;
 
   const updatedDoc: WorkflowDocument = {
     ...doc,
-    status: "退回",
-    currentHandler: "重新編修",
+    status: "待新主管簽核",
+    currentHandler: "待新主管簽核",
     categoryId: input.transferCategoryId,
     categoryPath: [...nextCategoryPath],
     knowledgePath: [...nextCategoryPath],
     department: nextDepartmentPath.join(" / "),
     ownershipDepartmentPath: [...nextDepartmentPath],
     updatedAt: timestamp,
+    isPublished: false,
     history: [
       ...doc.history,
       {
-        action: "移轉",
+        action: "移轉單位",
         actor: input.actor.name,
         timestamp,
         statusFrom: doc.status,
-        statusTo: "退回",
+        statusTo: "待新主管簽核",
+        ...(input.reason ? { reason: input.reason } : {}),
         ...(historyComment ? { comment: historyComment } : {}),
+        categoryPathBefore: previousCategoryPath,
+        categoryPathAfter: [...nextCategoryPath],
+        ownershipDepartmentPathBefore: previousDepartmentPath,
+        ownershipDepartmentPathAfter: [...nextDepartmentPath],
       },
     ],
   };
 
   const nextNotification: WorkflowNotification = {
     id: baseNotificationId(notifications),
-    type: "rejected",
-    title: "文件已被主管移轉，請重新編輯後送出",
-    message: `${doc.name} 已完成移轉`,
+    type: "manager_approval_pending",
+    title: "文件已移轉，請新主管簽核",
+    message: `${doc.name} 已移轉，等待新主管處理`,
     docId: doc.id,
     signingNo: doc.signingNo ?? "",
     targetStage: "manager",

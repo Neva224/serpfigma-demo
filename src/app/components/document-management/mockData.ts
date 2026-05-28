@@ -1,6 +1,14 @@
 export type DocumentLevel = "level1" | "level2" | "level3" | "level4" | "level5" | "level6";
 
-export type DocumentStatus = "草稿" | "待主管簽核" | "待文管審核" | "上架" | "退回" | "作廢" | "下架";
+export type DocumentStatus =
+  | "草稿"
+  | "待主管簽核"
+  | "待文管審核"
+  | "待新主管簽核"
+  | "上架"
+  | "退回"
+  | "作廢"
+  | "下架";
 
 export interface DocumentRecord {
   id: number;
@@ -73,7 +81,7 @@ export const LEVEL_META: Record<DocumentLevel, LevelMeta> = Object.fromEntries(
   LEVEL_OPTIONS.map((option) => [option.value, option]),
 ) as Record<DocumentLevel, LevelMeta>;
 
-export const STATUS_OPTIONS: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "下架"];
+export const STATUS_OPTIONS: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "待新主管簽核", "上架", "退回", "作廢", "下架"];
 
 export const LEFT_RAIL_PRESETS = [
   { label: "全部文件", path: [] as string[] },

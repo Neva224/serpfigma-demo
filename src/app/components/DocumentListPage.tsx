@@ -110,7 +110,7 @@ export function DocumentListPage({
     } else if (view.kind === "signing") {
       const statuses: DocumentStatus[] =
         view.variant === "manager"
-          ? ["待主管簽核"]
+          ? ["待主管簽核", "待新主管簽核"]
           : view.variant === "docadmin"
             ? ["待文管審核"]
             : ["作廢"];
@@ -514,6 +514,7 @@ function countForSigningSection(docs: DocumentRecord[]) {
     (doc) =>
       doc.status === "待主管簽核" ||
       doc.status === "待文管審核" ||
+      doc.status === "待新主管簽核" ||
       doc.status === "上架" ||
       doc.status === "作廢",
   ).length;

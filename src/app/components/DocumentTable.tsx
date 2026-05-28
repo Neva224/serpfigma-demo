@@ -11,12 +11,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import {
-  LEVEL_META,
-  STATUS_OPTIONS,
-  type DocumentRecord,
-  type DocumentStatus,
-} from "./document-management/mockData";
+import { LEVEL_META, STATUS_OPTIONS, type DocumentRecord, type DocumentStatus } from "./document-management/mockData";
 import type { WorkflowAttachment } from "../workflow/workflowState";
 
 export type DocRecord = DocumentRecord;
@@ -39,7 +34,12 @@ type WorkflowAuditEntry = {
   timestamp: string;
   statusFrom: string;
   statusTo: string;
+  reason?: string;
   comment?: string;
+  categoryPathBefore?: string[];
+  categoryPathAfter?: string[];
+  ownershipDepartmentPathBefore?: string[];
+  ownershipDepartmentPathAfter?: string[];
 };
 
 type WorkflowDocLike = DocumentRecord & {
@@ -54,6 +54,7 @@ const [
   STATUS_DRAFT,
   STATUS_MANAGER_PENDING,
   STATUS_DOCADMIN_PENDING,
+  STATUS_TRANSFER_PENDING,
   STATUS_PUBLISHED,
   STATUS_RETURNED,
   STATUS_VOIDED,
@@ -64,6 +65,7 @@ const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: str
   [STATUS_DRAFT]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
   [STATUS_MANAGER_PENDING]: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: "待主管簽核" },
   [STATUS_DOCADMIN_PENDING]: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: "待文管審核" },
+  [STATUS_TRANSFER_PENDING]: { bg: "bg-cyan-50", text: "text-cyan-700", dot: "bg-cyan-500", label: "待新主管簽核" },
   [STATUS_PUBLISHED]: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
   [STATUS_RETURNED]: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
   [STATUS_VOIDED]: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
@@ -442,12 +444,21 @@ function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
   const workflowDoc = doc as WorkflowDocLike;
   const items =
     workflowDoc.history && workflowDoc.history.length > 0
-      ? workflowDoc.history.map((entry) => ({
-          time: entry.timestamp.slice(0, 16).replace("T", " "),
-          actor: entry.actor,
-          action: entry.action,
-          note: entry.comment || `${entry.statusFrom} → ${entry.statusTo}`,
-        }))
+      ? workflowDoc.history.map((entry) => {
+          const transition = `${entry.statusFrom} → ${entry.statusTo}`;
+          const detailParts = [entry.reason, entry.comment, transition].filter(Boolean);
+          if (entry.categoryPathAfter || entry.ownershipDepartmentPathAfter) {
+            const categoryPart = entry.categoryPathAfter ? `分類：${entry.categoryPathAfter.join(" / ")}` : "";
+            const deptPart = entry.ownershipDepartmentPathAfter ? `部門：${entry.ownershipDepartmentPathAfter.join(" / ")}` : "";
+            detailParts.unshift([categoryPart, deptPart].filter(Boolean).join("；"));
+          }
+          return {
+            time: entry.timestamp.slice(0, 16).replace("T", " "),
+            actor: entry.actor,
+            action: entry.action,
+            note: detailParts.filter(Boolean).join(" ｜ "),
+          };
+        })
       : [];
 
   return (

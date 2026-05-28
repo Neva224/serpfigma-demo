@@ -102,6 +102,7 @@ export default function App() {
 
   function handleApproveDecision(
     action: "approve" | "reject",
+    reason?: string,
     comment?: string,
     transfer?: { categoryId: string; categoryPath: string[]; ownershipDepartmentPath: string[] },
   ) {
@@ -111,6 +112,7 @@ export default function App() {
       ? applyWorkflowTransfer(documents, notifications, {
           doc: approvalDoc,
           actor: currentUser,
+          ...(reason ? { reason } : {}),
           comment,
           transferCategoryId: transfer.categoryId,
           transferCategoryPath: transfer.categoryPath,
@@ -121,6 +123,7 @@ export default function App() {
           stage: approval.stage,
           action,
           actor: currentUser,
+          ...(reason ? { reason } : {}),
           ...(comment ? { comment } : {}),
         });
 
@@ -131,11 +134,13 @@ export default function App() {
     }
     setApproval(null);
     if (result.document.status === "退回") {
-      toast.success("文件已退回，請重新編輯");
+      toast.success("文件已退回，請重新編輯後送出");
     } else if (result.document.status === "上架") {
       toast.success("文件已審核通過並上架");
+    } else if (result.document.status === "待新主管簽核") {
+      toast.success("文件已移轉，等待新主管簽核");
     } else {
-      toast.success("簽核狀態已更新");
+      toast.success("簽核處理完成");
     }
   }
 
@@ -176,7 +181,7 @@ export default function App() {
           role={approval.stage}
           onClose={() => setApproval(null)}
           onApprove={() => handleApproveDecision("approve")}
-          onReject={(reason, transfer) => handleApproveDecision("reject", reason, transfer)}
+          onReject={(reason, comment, transfer) => handleApproveDecision("reject", reason, comment, transfer)}
         />
       )}
     </div>

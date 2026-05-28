@@ -1,12 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import {
-  CheckCircle2,
-  ChevronDown,
-  ChevronRight,
-  MoveRight,
-  RotateCcw,
-  X,
-} from "lucide-react";
+import { CheckCircle2, ChevronDown, ChevronRight, MoveRight, RotateCcw, X } from "lucide-react";
 import {
   CATEGORY_NODES,
   buildCategoryPayload as resolveCategoryPayload,
@@ -36,7 +29,7 @@ interface Props {
   role: "manager" | "docadmin";
   onClose: () => void;
   onApprove: () => void;
-  onReject: (reason: string, transfer?: ApprovalTransferTarget) => void;
+  onReject: (reason: string, comment?: string, transfer?: ApprovalTransferTarget) => void;
 }
 
 const REJECT_REASONS = ["內容不符", "格式不正確", "資料缺漏", "權責不明", "附件不足", "其他"];
@@ -59,10 +52,8 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   const departmentPayload = useMemo(() => buildHrScopePayload(HR_SCOPE_ROWS, transferDepartment), [transferDepartment]);
   const isOtherReason = rejectType === "其他";
   const rejectReady = rejectType.length > 0 && (!isOtherReason || rejectReason.trim().length > 0);
-  const transferReady =
-    categoryPayload.categoryPath.length > 0 &&
-    departmentPayload.scopePath.length > 0 &&
-    (!isOtherReason || rejectReason.trim().length > 0);
+  const transferReady = categoryPayload.categoryPath.length > 0 && departmentPayload.scopePath.length > 0;
+  const showReasonTextarea = rejectMode === "return" ? isOtherReason : rejectMode === "transfer";
 
   function toggle(id: string) {
     setExpanded((current) => {
@@ -85,13 +76,15 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   }
 
   function submitReject() {
-    const reason = isOtherReason ? rejectReason.trim() : rejectType;
-    onReject(reason);
+    const reason = rejectType || "內容不符";
+    const comment = isOtherReason ? rejectReason.trim() : undefined;
+    onReject(reason, comment);
   }
 
   function submitTransfer() {
-    const reason = isOtherReason ? rejectReason.trim() : rejectType;
-    onReject(reason, {
+    const reason = rejectType || "移轉單位";
+    const comment = rejectReason.trim() || undefined;
+    onReject(reason, comment, {
       categoryId: categoryPayload.categoryId,
       categoryPath: categoryPayload.categoryPath,
       ownershipDepartmentPath: departmentPayload.scopePath,
@@ -99,6 +92,8 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   }
 
   const previewSummary = doc.summary ?? doc.subject ?? "尚無摘要";
+  const actionLabel =
+    rejectMode === "transfer" ? "移轉" : rejectMode === "return" ? "退回" : role === "manager" ? "主管簽核通過" : "文管審核通過";
 
   return (
     <DrawerShell onClose={onClose}>
@@ -124,29 +119,27 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             <InfoRow label="版本" value={doc.version} />
             <InfoRow label="上傳者" value={`${doc.uploaderName} (${doc.uploaderCode})`} />
             <InfoRow label="上傳日期" value={doc.uploadDate} />
+            <InfoRow label="目前狀態" value={doc.status} />
             <InfoRow label="所屬部門" value={doc.department} />
             <InfoRow label="文件階級" value={LEVEL_META[doc.level].label} />
-            <InfoRow label="說明 / 摘要" value={previewSummary} />
-            <InfoRow label="有效起日" value={doc.validFrom || "未填寫"} />
-            <InfoRow label="有效迄日" value={doc.validTo || "未填寫"} />
+            <InfoRow label="摘要 / 說明" value={previewSummary} />
+            <InfoRow label="有效起日" value={doc.validFrom || "未設定"} />
+            <InfoRow label="有效迄日" value={doc.validTo || "未設定"} />
           </AccordionSection>
 
           <AccordionSection id="decision" label="退回 / 移轉" expanded={expanded} onToggle={toggle}>
             <div className="space-y-3 p-1">
               <div className="flex gap-1">
                 <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label="退回" />
-                <ModeBtn
-                  active={rejectMode === "transfer"}
-                  onClick={() => setRejectMode("transfer")}
-                  label="移轉"
-                />
+                <ModeBtn active={rejectMode === "transfer"} onClick={() => setRejectMode("transfer")} label="移轉" />
               </div>
 
               {rejectMode !== "none" && (
                 <>
                   <div>
                     <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      原因 <span className="text-red-500">*</span>
+                      原因
+                      {rejectMode === "return" && <span className="text-red-500"> *</span>}
                     </label>
                     <select
                       value={rejectType}
@@ -163,16 +156,17 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                     </select>
                   </div>
 
-                  {isOtherReason && (
+                  {showReasonTextarea && (
                     <div>
                       <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                        自訂說明 <span className="text-red-500">*</span>
+                        {rejectMode === "return" ? "其他說明" : "移轉說明（選填）"}
+                        {rejectMode === "return" && isOtherReason && <span className="text-red-500"> *</span>}
                       </label>
                       <textarea
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                         rows={3}
-                        placeholder="請輸入退回或移轉的補充說明"
+                        placeholder={rejectMode === "return" ? "請輸入補充說明" : "可輸入移轉補充說明"}
                         className="w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"
                         style={{ fontSize: "12px" }}
                       />
@@ -188,7 +182,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                             label: "第一層",
                             options: getCategoryLevelOptions(CATEGORY_NODES, []),
                             value: transferCategory.l1,
-                            placeholder: "請選擇第一層分類",
+                            placeholder: "請選擇第一層",
                             onChange: (l1) =>
                               setTransferCategory({
                                 l1,
@@ -201,7 +195,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                             label: "第二層",
                             options: transferCategory.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1]) : [],
                             value: transferCategory.l2,
-                            placeholder: transferCategory.l1 ? "請選擇第二層分類" : "請先選擇第一層",
+                            placeholder: transferCategory.l1 ? "請選擇第二層" : "請先選擇第一層",
                             onChange: (l2) =>
                               setTransferCategory({
                                 ...transferCategory,
@@ -216,7 +210,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1, transferCategory.l2])
                               : [],
                             value: transferCategory.l3,
-                            placeholder: transferCategory.l2 ? "請選擇第三層分類" : "請先選擇第二層",
+                            placeholder: transferCategory.l2 ? "請選擇第三層" : "請先選擇第二層",
                             onChange: (l3) =>
                               setTransferCategory({
                                 ...transferCategory,
@@ -227,14 +221,10 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                           {
                             label: "第四層",
                             options: transferCategory.l3
-                              ? getCategoryLevelOptions(CATEGORY_NODES, [
-                                  transferCategory.l1,
-                                  transferCategory.l2,
-                                  transferCategory.l3,
-                                ])
+                              ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1, transferCategory.l2, transferCategory.l3])
                               : [],
                             value: transferCategory.l4,
-                            placeholder: transferCategory.l3 ? "請選擇第四層分類" : "請先選擇第三層",
+                            placeholder: transferCategory.l3 ? "請選擇第四層" : "請先選擇第三層",
                             onChange: (l4) => setTransferCategory({ ...transferCategory, l4 }),
                           },
                         ]}
@@ -296,7 +286,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                       />
 
                       <div className="rounded-lg border border-teal-100 bg-white p-3 text-xs text-teal-700">
-                        <div className="mb-1 font-semibold text-teal-700">目前移轉目標</div>
+                        <div className="mb-1 font-semibold text-teal-700">已選擇路徑</div>
                         <p>{categoryPayload.categoryPath.length > 0 ? categoryPayload.categoryPath.join(" / ") : "尚未選擇知識樹分類"}</p>
                         <p>{departmentPayload.scopePath.length > 0 ? departmentPayload.scopePath.join(" / ") : "尚未選擇所屬部門"}</p>
                       </div>
@@ -349,7 +339,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                     </div>
                   ) : (
                     <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                      目前尚無附件，僅顯示文件摘要與實際上傳資訊。
+                      尚無可預覽的實際附件
                     </div>
                   )}
                 </section>
@@ -381,11 +371,11 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
           }}
         >
           <RotateCcw size={15} />
-          {rejectMode !== "none" ? "取消退回" : "退回"}
+          {rejectMode === "return" ? "取消退回" : rejectMode === "transfer" ? "取消移轉" : "退回"}
         </button>
 
         <div className="flex items-center gap-3">
-          {rejectMode !== "none" && (
+          {(rejectMode === "return" || rejectMode === "transfer") && (
             <button
               type="button"
               onClick={() => {
@@ -399,7 +389,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             </button>
           )}
 
-          {rejectMode !== "none" && (
+          {(rejectMode === "return" || rejectMode === "transfer") && (
             <button
               type="button"
               disabled={rejectMode === "return" ? !rejectReady : !transferReady}
@@ -414,7 +404,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
               style={{ fontSize: "13px" }}
             >
               {rejectMode === "transfer" ? <MoveRight size={15} /> : <RotateCcw size={15} />}
-              {rejectMode === "transfer" ? "移轉" : "退回"}
+              {actionLabel}
             </button>
           )}
 
@@ -527,12 +517,12 @@ function SelectField({
   onChange: (value: string) => void;
 }) {
   return (
-    <label className="space-y-1.5">
-      <span className="text-xs font-semibold text-slate-600">{label}</span>
+    <label className="space-y-1">
+      <span className="block text-[11px] font-semibold text-slate-500">{label}</span>
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-teal-500 focus:outline-none"
+        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-teal-500 focus:outline-none"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
@@ -545,16 +535,24 @@ function SelectField({
   );
 }
 
-function ModeBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function ModeBtn({
+  active,
+  onClick,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="rounded px-2 py-0.5 text-xs font-medium transition-all"
-      style={{
-        backgroundColor: active ? "#0D9488" : "#E5E7EB",
-        color: active ? "#ffffff" : "#6B7280",
-      }}
+      className={`flex-1 rounded-lg border px-3 py-2 text-sm font-semibold transition ${
+        active
+          ? "border-teal-500 bg-teal-50 text-teal-700"
+          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+      }`}
     >
       {label}
     </button>
