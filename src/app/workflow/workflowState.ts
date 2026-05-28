@@ -91,6 +91,15 @@ export interface WorkflowDecisionInput {
   comment?: string;
 }
 
+export interface WorkflowTransferInput {
+  doc: WorkflowDocument;
+  actor: WorkflowUser;
+  comment?: string;
+  transferCategoryId: string;
+  transferCategoryPath: string[];
+  transferOwnershipDepartmentPath: string[];
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -126,72 +135,24 @@ function toWorkflowHistory(action: string, actor: WorkflowUser | "系統", statu
 }
 
 export function buildInitialWorkflowDocuments(docs: DocumentRecord[]): WorkflowDocument[] {
-  return docs.map((doc) => {
-    const history = buildInitialHistory(doc);
-    return {
-      ...doc,
-      ownerName: doc.requestor ?? doc.uploaderName,
-      summary: doc.subject ?? doc.name,
-      createdAt: doc.uploadDate,
-      updatedAt: doc.uploadDate,
-      approvalNo: doc.signingNo,
-      attachments: [],
-      isPublished: doc.status === "上架",
-      ownershipDepartmentPath: normalizePath(doc.department.split(" / ")),
-      history,
-    };
-  });
+  return docs.map((doc) => ({
+    ...doc,
+    ownerName: doc.requestor ?? doc.uploaderName,
+    summary: doc.subject ?? doc.name,
+    createdAt: doc.uploadDate,
+    updatedAt: doc.uploadDate,
+    approvalNo: doc.signingNo,
+    attachments: [],
+    isPublished: doc.status === "上架",
+    ownershipDepartmentPath: normalizePath(doc.department.split(" / ")),
+    history: [],
+  }));
 }
 
 export function buildInitialNotifications(docs: WorkflowDocument[]): WorkflowNotification[] {
-  const notifications: WorkflowNotification[] = [];
-  let nextId = 1;
-
-  for (const doc of docs) {
-    if (doc.status === "待主管簽核" && doc.signingNo) {
-      notifications.push({
-        id: nextId++,
-        type: "manager_approval_pending",
-        title: "有一筆文件待主管簽核，請盡快處理",
-        message: `${doc.name} 等待主管簽核`,
-        docId: doc.id,
-        signingNo: doc.signingNo,
-        targetStage: "manager",
-        unread: true,
-        createdAt: doc.createdAt ?? nowIso(),
-      });
-    }
-    if (doc.status === "待文管審核" && doc.signingNo) {
-      notifications.push({
-        id: nextId++,
-        type: "docadmin_approval_pending",
-        title: "有一筆文件待文管審核，請盡快處理",
-        message: `${doc.name} 等待文管審核`,
-        docId: doc.id,
-        signingNo: doc.signingNo,
-        targetStage: "docadmin",
-        unread: true,
-        createdAt: doc.createdAt ?? nowIso(),
-      });
-    }
-    if (doc.status === "退回" && doc.signingNo) {
-      notifications.push({
-        id: nextId++,
-        type: "rejected",
-        title: "文件已被退回，請重新編輯後送出",
-        message: `${doc.name} 已退回`,
-        docId: doc.id,
-        signingNo: doc.signingNo,
-        targetStage: "manager",
-        unread: true,
-        createdAt: doc.updatedAt ?? doc.createdAt ?? nowIso(),
-      });
-    }
-  }
-
-  return notifications;
+  void docs;
+  return [];
 }
-
 export function createDemoUser(demoMode = true): WorkflowUser {
   return {
     id: "demo-user",
@@ -202,43 +163,9 @@ export function createDemoUser(demoMode = true): WorkflowUser {
 }
 
 export function buildInitialHistory(doc: DocumentRecord): WorkflowHistoryEntry[] {
-  const initialSubmitted = toWorkflowHistory("送出簽核", "系統", "草稿", doc.status);
-  if (doc.status === "待主管簽核") return [initialSubmitted];
-  if (doc.status === "待文管審核") {
-    return [
-      initialSubmitted,
-      toWorkflowHistory("主管簽核通過", "系統", "待主管簽核", "待文管審核"),
-    ];
-  }
-  if (doc.status === "上架") {
-    return [
-      initialSubmitted,
-      toWorkflowHistory("主管簽核通過", "系統", "待主管簽核", "待文管審核"),
-      toWorkflowHistory("文管審核通過", "系統", "待文管審核", "上架"),
-      toWorkflowHistory("上架", "系統", "待文管審核", "上架"),
-    ];
-  }
-  if (doc.status === "退回") {
-    return [
-      initialSubmitted,
-      toWorkflowHistory("退回", "系統", "待主管簽核", "退回"),
-    ];
-  }
-  if (doc.status === "作廢") {
-    return [
-      initialSubmitted,
-      toWorkflowHistory("作廢", "系統", "待主管簽核", "作廢"),
-    ];
-  }
-  if (doc.status === "下架") {
-    return [
-      initialSubmitted,
-      toWorkflowHistory("下架", "系統", "上架", "下架"),
-    ];
-  }
-  return [initialSubmitted];
+  void doc;
+  return [];
 }
-
 function createDocumentNo(nextSequence: number) {
   return `DOC-${buildDateStamp()}-${pad(nextSequence)}`;
 }
@@ -545,6 +472,71 @@ export function applyWorkflowDecision(
   return {
     documents: nextDocuments,
     notifications: nextNotifications,
+    document: updatedDoc,
+    notification: nextNotification,
+  };
+}
+
+export function applyWorkflowTransfer(
+  docs: WorkflowDocument[],
+  notifications: WorkflowNotification[],
+  input: WorkflowTransferInput,
+) {
+  const timestamp = nowIso();
+  const index = docs.findIndex((item) => item.id === input.doc.id);
+  if (index < 0) {
+    return { documents: docs, notifications };
+  }
+
+  const doc = cloneDoc(docs[index]);
+  const nextCategoryPath = normalizePath(input.transferCategoryPath);
+  const nextDepartmentPath = normalizePath(input.transferOwnershipDepartmentPath);
+  const historyComment = [
+    input.comment?.trim(),
+    nextCategoryPath.length > 0 ? `知識樹分類：${nextCategoryPath.join(" / ")}` : "",
+    nextDepartmentPath.length > 0 ? `所屬部門：${nextDepartmentPath.join(" / ")}` : "",
+  ]
+    .filter(Boolean)
+    .join("；");
+
+  const updatedDoc: WorkflowDocument = {
+    ...doc,
+    status: "退回",
+    currentHandler: "重新編修",
+    categoryId: input.transferCategoryId,
+    categoryPath: [...nextCategoryPath],
+    knowledgePath: [...nextCategoryPath],
+    department: nextDepartmentPath.join(" / "),
+    ownershipDepartmentPath: [...nextDepartmentPath],
+    updatedAt: timestamp,
+    history: [
+      ...doc.history,
+      {
+        action: "移轉",
+        actor: input.actor.name,
+        timestamp,
+        statusFrom: doc.status,
+        statusTo: "退回",
+        ...(historyComment ? { comment: historyComment } : {}),
+      },
+    ],
+  };
+
+  const nextNotification: WorkflowNotification = {
+    id: baseNotificationId(notifications),
+    type: "rejected",
+    title: "文件已被主管移轉，請重新編輯後送出",
+    message: `${doc.name} 已完成移轉`,
+    docId: doc.id,
+    signingNo: doc.signingNo ?? "",
+    targetStage: "manager",
+    unread: true,
+    createdAt: timestamp,
+  };
+
+  return {
+    documents: docs.map((item, currentIndex) => (currentIndex === index ? updatedDoc : item)),
+    notifications: [...notifications, nextNotification],
     document: updatedDoc,
     notification: nextNotification,
   };

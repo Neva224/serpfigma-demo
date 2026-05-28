@@ -5,6 +5,7 @@ import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/Doc
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import {
   applyWorkflowDecision,
+  applyWorkflowTransfer,
   createDemoUser,
   markNotificationRead,
   submitDocument,
@@ -99,16 +100,29 @@ export default function App() {
     toast.success(formDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
   }
 
-  function handleApproveDecision(action: "approve" | "reject", comment?: string) {
+  function handleApproveDecision(
+    action: "approve" | "reject",
+    comment?: string,
+    transfer?: { categoryId: string; categoryPath: string[]; ownershipDepartmentPath: string[] },
+  ) {
     if (!approvalDoc || !approval) return;
 
-    const result = applyWorkflowDecision(documents, notifications, {
-      doc: approvalDoc,
-      stage: approval.stage,
-      action,
-      actor: currentUser,
-      ...(comment ? { comment } : {}),
-    });
+    const result = transfer
+      ? applyWorkflowTransfer(documents, notifications, {
+          doc: approvalDoc,
+          actor: currentUser,
+          comment,
+          transferCategoryId: transfer.categoryId,
+          transferCategoryPath: transfer.categoryPath,
+          transferOwnershipDepartmentPath: transfer.ownershipDepartmentPath,
+        })
+      : applyWorkflowDecision(documents, notifications, {
+          doc: approvalDoc,
+          stage: approval.stage,
+          action,
+          actor: currentUser,
+          ...(comment ? { comment } : {}),
+        });
 
     setDocuments(result.documents);
     setNotifications(result.notifications);
@@ -162,7 +176,7 @@ export default function App() {
           role={approval.stage}
           onClose={() => setApproval(null)}
           onApprove={() => handleApproveDecision("approve")}
-          onReject={(reason) => handleApproveDecision("reject", reason)}
+          onReject={(reason, transfer) => handleApproveDecision("reject", reason, transfer)}
         />
       )}
     </div>
