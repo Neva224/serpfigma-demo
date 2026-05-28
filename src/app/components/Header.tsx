@@ -27,6 +27,15 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
     () => notifications.filter((notification) => notification.unread).length,
     [notifications],
   );
+  const orderedNotifications = useMemo(
+    () =>
+      [...notifications].sort((a, b) => {
+        const timeCompare = b.createdAt.localeCompare(a.createdAt);
+        if (timeCompare !== 0) return timeCompare;
+        return b.id - a.id;
+      }),
+    [notifications],
+  );
 
   useEffect(() => {
     if (notificationPulse > 0) {
@@ -117,7 +126,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
             </div>
 
             <div className="max-h-[420px] overflow-y-auto">
-              {notifications.map((item) => (
+              {orderedNotifications.map((item) => (
                 <div
                   key={item.id}
                   className="border-b border-slate-50 px-4 py-3"
@@ -142,7 +151,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
                         onClick={() => handleNotificationClick(item)}
                         className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-teal-600 transition hover:text-teal-500"
                       >
-                        前往處理
+                        Go
                         <ChevronRight size={14} />
                       </button>
                     )}

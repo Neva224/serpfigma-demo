@@ -7,6 +7,7 @@ import {
   applyWorkflowDecision,
   applyWorkflowTransfer,
   createDemoUser,
+  deleteWorkflowDocument,
   markNotificationRead,
   submitDocument,
   type ApprovalStage,
@@ -144,6 +145,36 @@ export default function App() {
     }
   }
 
+  function handleVoidPublished(doc: WorkflowDocument) {
+    const result = applyWorkflowDecision(documents, notifications, {
+      doc,
+      stage: "docadmin",
+      action: "void",
+      actor: currentUser,
+    });
+
+    setDocuments(result.documents);
+    setNotifications(result.notifications);
+    if (result.notification) {
+      setNotificationPulse((current) => current + 1);
+    }
+    toast.success("文件已作廢");
+  }
+
+  function handleDeletePublished(doc: WorkflowDocument) {
+    const result = deleteWorkflowDocument(documents, notifications, doc.id);
+    setDocuments(result.documents);
+    setNotifications(result.notifications);
+    setApproval((current) => (current?.docId === doc.id ? null : current));
+    toast.success("文件已刪除");
+  }
+
+  const canVoidPublishedDocs =
+    currentUser.roles.includes("system_admin") ||
+    currentUser.roles.includes("signing_manager") ||
+    currentUser.roles.includes("doc_admin");
+  const canDeletePublishedDocs = currentUser.roles.includes("system_admin");
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
       <Toaster position="top-right" richColors closeButton />
@@ -172,6 +203,10 @@ export default function App() {
             openApproval(doc.id, stage);
           }}
           onReEdit={openReEdit}
+          onVoidPublished={handleVoidPublished}
+          onDeletePublished={handleDeletePublished}
+          canVoidPublishedDocs={canVoidPublishedDocs}
+          canDeletePublishedDocs={canDeletePublishedDocs}
         />
       </div>
 

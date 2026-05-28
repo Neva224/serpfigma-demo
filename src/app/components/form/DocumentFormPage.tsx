@@ -89,6 +89,34 @@ export function DocumentFormPage({
   const categoryPayload = buildCategoryPayload(classification);
   const canShowBackButton = showBackButton ?? false;
   const showStandaloneHeader = !embedded;
+  const workflowNotice = useMemo(() => {
+    if (!editingDoc) return null;
+
+    const history = [...(editingDoc.history ?? [])].reverse();
+    const rejectEntry = history.find((entry) => entry.statusTo === "退回");
+    const transferEntry = history.find((entry) => entry.action === "移轉單位");
+    const entry = rejectEntry ?? transferEntry;
+    if (!entry) return null;
+
+    const isTransfer = entry.action === "移轉單位";
+    const reason = entry.reason?.trim() || entry.comment?.trim() || "未提供";
+    const pathLabel = isTransfer
+      ? [
+          entry.categoryPathAfter?.length ? `分類：${entry.categoryPathAfter.join(" / ")}` : "",
+          entry.ownershipDepartmentPathAfter?.length ? `部門：${entry.ownershipDepartmentPathAfter.join(" / ")}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ｜ ")
+      : "";
+
+    return {
+      tone: isTransfer ? "transfer" : "reject",
+      title: isTransfer ? "被移轉提醒" : "被退回提醒",
+      reasonLabel: isTransfer ? "被移轉原因" : "被退回原因",
+      reason,
+      pathLabel,
+    };
+  }, [editingDoc]);
   const initialBasicInfo: BasicInfoValue = useMemo(
     () => ({
       title: editingDoc?.name ?? "",
@@ -209,6 +237,30 @@ export function DocumentFormPage({
       )}
 
       <div className={`mx-auto max-w-screen-xl px-6 ${embedded ? "pt-4 pb-4" : "pt-6 pb-4"}`}>
+        {workflowNotice && (
+          <div
+            className={`mb-4 rounded-2xl border px-4 py-3 ${
+              workflowNotice.tone === "transfer"
+                ? "border-cyan-200 bg-cyan-50"
+                : "border-amber-200 bg-amber-50"
+            }`}
+          >
+            <div className="flex flex-wrap items-start gap-2">
+              <span
+                className={`text-sm font-semibold ${
+                  workflowNotice.tone === "transfer" ? "text-cyan-700" : "text-amber-700"
+                }`}
+              >
+                {workflowNotice.title}
+              </span>
+              <span className="text-sm text-slate-700">
+                {workflowNotice.reasonLabel}：{workflowNotice.reason}
+              </span>
+              {workflowNotice.pathLabel && <span className="text-sm text-slate-600">{workflowNotice.pathLabel}</span>}
+            </div>
+          </div>
+        )}
+
         {editingDoc && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">

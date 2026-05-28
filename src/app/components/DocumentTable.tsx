@@ -21,6 +21,10 @@ interface Props {
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
+  onVoidPublished: (doc: DocumentRecord) => void;
+  onDeletePublished: (doc: DocumentRecord) => void;
+  canVoidPublishedDocs: boolean;
+  canDeletePublishedDocs: boolean;
 }
 
 type TablePanel =
@@ -72,7 +76,16 @@ const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: str
   [STATUS_ARCHIVED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: "下架" },
 };
 
-export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
+export function DocumentTable({
+  docs,
+  onAdd,
+  onApprove,
+  onReEdit,
+  onVoidPublished,
+  onDeletePublished,
+  canVoidPublishedDocs,
+  canDeletePublishedDocs,
+}: Props) {
   const DEFAULT_PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
   const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_PAGE_SIZE));
@@ -215,6 +228,8 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
               const status = STATUS_STYLES[doc.status];
               const needsApproval = doc.status === STATUS_MANAGER_PENDING || doc.status === STATUS_DOCADMIN_PENDING;
               const canReEdit = doc.status === STATUS_RETURNED;
+              const canManagePublished = doc.status === STATUS_PUBLISHED && canVoidPublishedDocs;
+              const canDeletePublished = doc.status === STATUS_PUBLISHED && canDeletePublishedDocs;
 
               return (
                 <tr
@@ -279,6 +294,22 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <ActionButton icon={<Download size={13} />} label="下載" onClick={() => handleDownload(doc)} />
                       <ActionButton icon={<History size={13} />} label="版本歷程" onClick={() => setPanel({ kind: "version", doc })} />
                       <ActionButton icon={<Clock3 size={13} />} label="審核歷程" onClick={() => setPanel({ kind: "audit", doc })} />
+                      {canManagePublished && (
+                        <ActionButton
+                          icon={<X size={13} />}
+                          label="作廢"
+                          warn
+                          onClick={() => onVoidPublished(doc)}
+                        />
+                      )}
+                      {canDeletePublished && (
+                        <ActionButton
+                          icon={<X size={13} />}
+                          label="刪除"
+                          warn
+                          onClick={() => onDeletePublished(doc)}
+                        />
+                      )}
                       {needsApproval && (
                         <ActionButton icon={<CheckCircle2 size={13} />} label="審核" primary onClick={() => onApprove(doc)} />
                       )}

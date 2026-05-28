@@ -52,7 +52,8 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   const departmentPayload = useMemo(() => buildHrScopePayload(HR_SCOPE_ROWS, transferDepartment), [transferDepartment]);
   const isOtherReason = rejectType === "其他";
   const rejectReady = rejectType.length > 0 && (!isOtherReason || rejectReason.trim().length > 0);
-  const transferReady = categoryPayload.categoryPath.length > 0 && departmentPayload.scopePath.length > 0;
+  const transferReady =
+    categoryPayload.categoryPath.length > 0 && departmentPayload.scopePath.length > 0 && rejectReason.trim().length > 0;
   const showReasonTextarea = rejectMode === "return" ? isOtherReason : rejectMode === "transfer";
 
   function toggle(id: string) {
@@ -82,9 +83,8 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   }
 
   function submitTransfer() {
-    const reason = rejectType || "移轉單位";
-    const comment = rejectReason.trim() || undefined;
-    onReject(reason, comment, {
+    const reason = rejectReason.trim() || "移轉單位";
+    onReject(reason, undefined, {
       categoryId: categoryPayload.categoryId,
       categoryPath: categoryPayload.categoryPath,
       ownershipDepartmentPath: departmentPayload.scopePath,
@@ -138,25 +138,33 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                 <>
                   <div>
                     <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      原因
-                      {rejectMode === "return" && <span className="text-red-500"> *</span>}
+                      {rejectMode === "transfer" ? "移轉原因" : "退回原因"}
+                      {rejectMode === "transfer" || rejectMode === "return" ? <span className="text-red-500"> *</span> : null}
                     </label>
-                    <select
-                      value={rejectType}
-                      onChange={(e) => setRejectType(e.target.value)}
-                      className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-gray-700 focus:border-amber-400 focus:outline-none"
-                      style={{ fontSize: "12px" }}
-                    >
-                      <option value="">請選擇原因</option>
-                      {REJECT_REASONS.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
+                    {rejectMode === "return" ? (
+                      <div className="relative">
+                        <select
+                          value={rejectType}
+                          onChange={(e) => setRejectType(e.target.value)}
+                          className="w-full appearance-none rounded-lg border border-amber-200 bg-white px-3 py-2 pr-9 text-gray-700 focus:border-amber-400 focus:outline-none"
+                          style={{ fontSize: "12px" }}
+                        >
+                          <option value="">請選擇原因</option>
+                          {REJECT_REASONS.map((item) => (
+                            <option key={item} value={item}>
+                              {item}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown
+                          size={13}
+                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-amber-400"
+                        />
+                      </div>
+                    ) : null}
                   </div>
 
-                  {showReasonTextarea && (
+                  {showReasonTextarea && rejectMode === "return" && (
                     <div>
                       <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
                         {rejectMode === "return" ? "其他說明" : "移轉說明（選填）"}
@@ -175,6 +183,20 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
                   {rejectMode === "transfer" && (
                     <div className="space-y-4 rounded-xl border border-teal-100 bg-teal-50/60 p-3">
+                      <div>
+                        <label className="mb-1 block text-teal-700" style={{ fontSize: "11px", fontWeight: 600 }}>
+                          移轉原因說明 <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          rows={3}
+                          placeholder="請輸入移轉原因與補充說明"
+                          className="w-full resize-none rounded-lg border border-teal-200 bg-white px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-teal-400 focus:outline-none"
+                          style={{ fontSize: "12px" }}
+                        />
+                      </div>
+
                       <SelectorGroup
                         title="知識樹分類"
                         rows={[
@@ -417,14 +439,14 @@ function DocumentPreviewPane({
             </div>
             <div className="flex items-center gap-2">
               {primary.downloadUrl && (
-                <a
-                  href={primary.downloadUrl}
-                  download={primary.name}
+                <button
+                  type="button"
+                  onClick={() => triggerAttachmentDownload(primary)}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
                 >
                   <Download size={13} />
                   下載
-                </a>
+                </button>
               )}
               {primary.downloadUrl && (
                 <a
@@ -483,6 +505,18 @@ function getPreviewKind(ext: string): "image" | "pdf" | "file" {
   if (["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg"].includes(normalized)) return "image";
   if (normalized === "pdf") return "pdf";
   return "file";
+}
+
+function triggerAttachmentDownload(attachment: WorkflowAttachment) {
+  if (!attachment.downloadUrl) return;
+
+  const link = document.createElement("a");
+  link.href = attachment.downloadUrl;
+  link.download = attachment.name;
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 function DrawerShell({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (

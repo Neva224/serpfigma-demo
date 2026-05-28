@@ -551,6 +551,17 @@ export function applyWorkflowTransfer(
   };
 }
 
+export function deleteWorkflowDocument(
+  docs: WorkflowDocument[],
+  notifications: WorkflowNotification[],
+  docId: number,
+) {
+  return {
+    documents: docs.filter((doc) => doc.id !== docId),
+    notifications: notifications.filter((notification) => notification.docId !== docId),
+  };
+}
+
 export function markNotificationRead(notifications: WorkflowNotification[], id: number) {
   return notifications.map((item) => (item.id === id ? { ...item, unread: false } : item));
 }

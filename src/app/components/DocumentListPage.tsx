@@ -42,6 +42,10 @@ interface Props {
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
+  onVoidPublished: (doc: DocumentRecord) => void;
+  onDeletePublished: (doc: DocumentRecord) => void;
+  canVoidPublishedDocs: boolean;
+  canDeletePublishedDocs: boolean;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
   formDoc: WorkflowDocument | null;
   view: ViewMode;
@@ -62,6 +66,10 @@ export function DocumentListPage({
   onAdd,
   onApprove,
   onReEdit,
+  onVoidPublished,
+  onDeletePublished,
+  canVoidPublishedDocs,
+  canDeletePublishedDocs,
   onSubmitDocument,
   formDoc,
   view,
@@ -494,11 +502,15 @@ export function DocumentListPage({
               />
 
               <div className="mt-4">
-                <DocumentTable
+              <DocumentTable
                   docs={docsForView}
                   onAdd={onAdd}
                   onApprove={onApprove}
                   onReEdit={onReEdit}
+                  onVoidPublished={onVoidPublished}
+                  onDeletePublished={onDeletePublished}
+                  canVoidPublishedDocs={canVoidPublishedDocs}
+                  canDeletePublishedDocs={canDeletePublishedDocs}
                 />
               </div>
             </>
