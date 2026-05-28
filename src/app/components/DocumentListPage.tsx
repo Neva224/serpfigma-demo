@@ -11,14 +11,14 @@ import {
   Settings,
 } from "lucide-react";
 import { DocumentTable } from "./DocumentTable";
-import { DocumentFormPage } from "./form/DocumentFormPage";
+import { DocumentFormPage, type DocumentFormSubmitPayload } from "./form/DocumentFormPage";
 import { SigningProgressPage } from "./signing/SigningProgressPage";
 import { DatabasePage } from "./database/DatabasePage";
 import { PermissionsPage } from "./settings/PermissionsPage";
 import { KnowledgeTree } from "./knowledge/KnowledgeTree";
-import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../mocks/knowledgeTreeData";
+import { buildLegacyKnowledgeTreeFromGenerated, type LegacyKnowledgeTreeNode } from "../data/catalogModels";
+import type { WorkflowDocument } from "../workflow/workflowState";
 import {
-  DOCUMENTS,
   LEVEL_OPTIONS,
   STATUS_OPTIONS,
   includesPathPrefix,
@@ -38,15 +38,19 @@ export type ViewMode =
   | { kind: "systemAdmin" };
 
 interface Props {
+  documents: DocumentRecord[];
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
-  formDoc: DocumentRecord | null;
+  onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
+  formDoc: WorkflowDocument | null;
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
 }
 
 export const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
+
+const KNOWLEDGE_TREE = buildLegacyKnowledgeTreeFromGenerated();
 
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
@@ -54,9 +58,11 @@ const QUERY_ITEMS = [
 ];
 
 export function DocumentListPage({
+  documents,
   onAdd,
   onApprove,
   onReEdit,
+  onSubmitDocument,
   formDoc,
   view,
   onViewChange,
@@ -80,6 +86,7 @@ export function DocumentListPage({
   const [docNo, setDocNo] = useState("");
   const [department, setDepartment] = useState("");
   const [tag, setTag] = useState("");
+  const publishedDocs = useMemo(() => documents.filter((doc) => doc.status === "上架"), [documents]);
 
   const selectedPathKey = view.kind === "category" ? view.path.join(" / ") : null;
 
@@ -97,7 +104,7 @@ export function DocumentListPage({
     if (view.kind === "systemAdmin") return [];
     if (view.kind === "signing" && view.variant === "transfer") return [];
 
-    let baseDocs = DOCUMENTS;
+    let baseDocs = view.kind === "signing" ? documents : publishedDocs;
     if (view.kind === "category") {
       baseDocs = baseDocs.filter((doc) => includesPathPrefix(doc, view.path));
     } else if (view.kind === "signing") {
@@ -165,6 +172,8 @@ export function DocumentListPage({
       .sort((a, b) => b.uploadDate.localeCompare(a.uploadDate));
   }, [
     view,
+    documents,
+    publishedDocs,
     keywordQuery,
     level,
     status,
@@ -246,7 +255,7 @@ export function DocumentListPage({
   }
 
   function countForPath(path: string[]) {
-    return DOCUMENTS.filter((doc) => includesPathPrefix(doc, path)).length;
+    return publishedDocs.filter((doc) => includesPathPrefix(doc, path)).length;
   }
 
   return (
@@ -281,13 +290,13 @@ export function DocumentListPage({
             title="知識樹分類"
             subtitle="來自 Excel 的分類樹"
             icon={<LayoutGrid size={16} />}
-            badge={String(KNOWLEDGE_TREE.length)}
+            badge={String(publishedDocs.length)}
             open={knowledgeOpen}
             onToggle={() => setKnowledgeOpen((current) => !current)}
             onHeaderClick={activateKnowledgeOverview}
           >
             <KnowledgeTree
-              totalCount={DOCUMENTS.length}
+              totalCount={publishedDocs.length}
               selectedPathKey={selectedPathKey}
               onSelectPath={activateCategory}
               countForPath={countForPath}
@@ -299,7 +308,7 @@ export function DocumentListPage({
             title="一般文件查詢"
             subtitle="一般文件與 FAQ 查詢"
             icon={<Search size={16} />}
-            badge={String(DOCUMENTS.length)}
+            badge={String(publishedDocs.length)}
             open={queryOpen}
             onToggle={() => setQueryOpen((current) => !current)}
             onHeaderClick={() => activateQuery("general")}
@@ -340,7 +349,7 @@ export function DocumentListPage({
             title="文件簽核專區"
             subtitle="查詢簽核進度、處理退件與移轉"
             icon={<Clock3 size={16} />}
-            badge={String(countForSigningSection())}
+            badge={String(countForSigningSection(documents))}
             open={signingOpen}
             onToggle={() => setSigningOpen((current) => !current)}
             onHeaderClick={() => onViewChange({ kind: "signingProgress" })}
@@ -417,9 +426,10 @@ export function DocumentListPage({
               onBack={activateKnowledgeOverview}
               embedded
               editingDoc={formDoc}
+              onSubmit={onSubmitDocument}
             />
           ) : view.kind === "signingProgress" ? (
-            <SigningProgressPage onBack={activateKnowledgeOverview} embedded />
+            <SigningProgressPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : view.kind === "database" ? (
             <DatabasePage onBack={activateKnowledgeOverview} embedded />
           ) : view.kind === "systemAdmin" ? (
@@ -499,8 +509,8 @@ export function DocumentListPage({
   );
 }
 
-function countForSigningSection() {
-  return DOCUMENTS.filter(
+function countForSigningSection(docs: DocumentRecord[]) {
+  return docs.filter(
     (doc) =>
       doc.status === "待主管簽核" ||
       doc.status === "待文管審核" ||
@@ -509,7 +519,7 @@ function countForSigningSection() {
   ).length;
 }
 
-function findNodeByPath(nodes: KnowledgeTreeNode[], path: string[]): KnowledgeTreeNode | null {
+function findNodeByPath(nodes: LegacyKnowledgeTreeNode[], path: string[]): LegacyKnowledgeTreeNode | null {
   for (const node of nodes) {
     if (getNodePath(node).join(" / ") === path.join(" / ")) return node;
     const children = node.children ?? [];
@@ -906,7 +916,7 @@ function FolderCard({
   node,
   onClick,
 }: {
-  node: KnowledgeTreeNode;
+  node: LegacyKnowledgeTreeNode;
   onClick: () => void;
 }) {
   return (
@@ -947,7 +957,7 @@ function KnowledgeOverview({
   onOpenCategory,
 }: {
   roots: Array<{
-    node: KnowledgeTreeNode;
+    node: LegacyKnowledgeTreeNode;
     childPreview: Array<{ label: string; count: number; id: string }>;
   }>;
   onOpenCategory: (path: string[], label: string) => void;
@@ -1005,7 +1015,6 @@ function EmptyState({ title, description }: { title: string; description: string
   );
 }
 
-function getNodePath(node: KnowledgeTreeNode): string[] {
-  const legacyNode = node as KnowledgeTreeNode & { pathLabels?: string[]; pathNames?: string[] };
-  return legacyNode.pathLabels ?? legacyNode.pathNames ?? [];
+function getNodePath(node: LegacyKnowledgeTreeNode): string[] {
+  return node.pathLabels ?? node.pathNames ?? [];
 }

@@ -1,14 +1,20 @@
+import { HR_SCOPE_NODES, type HrScopeNode } from "./catalogModels";
+
 export interface HrScopeSourceRow {
-  empId: string;
-  name: string;
-  englishAlias: string;
-  region: string;
-  company: string;
-  group: string;
-  division: string;
-  department: string;
-  team: string;
-  title: string;
+  sourceId: string;
+  rawRowRef: string;
+  pathNames: string[];
+  region: string | null;
+  company: string | null;
+  group: string | null;
+  division: string | null;
+  department: string | null;
+  team: string | null;
+  empId: string | null;
+  name: string | null;
+  englishAlias: string | null;
+  title: string | null;
+  isSelectable: boolean;
 }
 
 export interface HrScopeSelection {
@@ -16,7 +22,6 @@ export interface HrScopeSelection {
   groupName: string;
   divisionName: string;
   departmentName: string;
-  teamName: string;
 }
 
 export interface HrScopePayload {
@@ -27,10 +32,13 @@ export interface HrScopePayload {
   divisionName: string | null;
   departmentName: string | null;
   teamName: string | null;
+  empId: string | null;
+  name: string | null;
+  englishAlias: string | null;
+  title: string | null;
+  region: string | null;
   matchedRow: HrScopeSourceRow | null;
 }
-
-const HIERARCHY_KEYS = ["companyName", "groupName", "divisionName", "departmentName", "teamName"] as const;
 
 export const HR_SCOPE_COLUMNS = {
   empId: "員編",
@@ -45,117 +53,59 @@ export const HR_SCOPE_COLUMNS = {
   title: "職稱",
 } as const;
 
-export const HR_SCOPE_ROWS: HrScopeSourceRow[] = [
-  {
-    empId: "250341",
-    name: "王小明",
-    englishAlias: "Ming Wang",
-    region: "北區",
-    company: "台北總公司",
-    group: "營運群",
-    division: "行政處",
-    department: "人資部",
-    team: "招募組",
-    title: "招募專員",
-  },
-  {
-    empId: "250343",
-    name: "陳怡君",
-    englishAlias: "Yijun Chen",
-    region: "北區",
-    company: "台北總公司",
-    group: "營運群",
-    division: "行政處",
-    department: "總務部",
-    team: "庶務組",
-    title: "總務管理師",
-  },
-  {
-    empId: "250345",
-    name: "林建宏",
-    englishAlias: "JH Lin",
-    region: "北區",
-    company: "台北總公司",
-    group: "資訊群",
-    division: "平台處",
-    department: "系統部",
-    team: "開發組",
-    title: "系統分析師",
-  },
-  {
-    empId: "250347",
-    name: "張雅婷",
-    englishAlias: "Yating Chang",
-    region: "中區",
-    company: "台中分公司",
-    group: "業務群",
-    division: "銷售處",
-    department: "北區部",
-    team: "業務組",
-    title: "業務主任",
-  },
-  {
-    empId: "250350",
-    name: "劉志豪",
-    englishAlias: "CH Liu",
-    region: "南區",
-    company: "高雄分公司",
-    group: "客服群",
-    division: "服務處",
-    department: "客服部",
-    team: "客服組",
-    title: "客服主管",
-  },
-  {
-    empId: "250352",
-    name: "吳佩珊",
-    englishAlias: "Pei Shan Wu",
-    region: "北區",
-    company: "台北總公司",
-    group: "法務群",
-    division: "合規處",
-    department: "法務部",
-    team: "",
-    title: "法務專員",
-  },
-];
-
 function normalize(value: string | null | undefined) {
   return String(value ?? "").trim();
 }
 
-function prefixMatches(row: HrScopeSourceRow, selection: HrScopeSelection, keyIndex: number) {
-  for (let index = 0; index < keyIndex; index += 1) {
-    const key = HIERARCHY_KEYS[index];
-    const rowValue = normalize(row[keyToRowField(key)]);
-    const selectionValue = normalize(selection[key]);
+function mapNode(node: HrScopeNode): HrScopeSourceRow {
+  return {
+    sourceId: node.id,
+    rawRowRef: node.rawRowRef,
+    pathNames: [...node.pathNames],
+    region: normalize(node.regionName) || null,
+    company: normalize(node.companyName) || null,
+    group: normalize(node.businessGroupName) || null,
+    division: normalize(node.divisionName) || null,
+    department: normalize(node.departmentName) || null,
+    team: normalize(node.teamName) || null,
+    empId: normalize(node.empId) || null,
+    name: normalize(node.name) || null,
+    englishAlias: normalize(node.englishAlias) || null,
+    title: normalize(node.titleName) || null,
+    isSelectable: node.isSelectable,
+  };
+}
+
+export const HR_SCOPE_ROWS: HrScopeSourceRow[] = HR_SCOPE_NODES.map(mapNode);
+
+const LEVEL_KEYS = ["company", "group", "division", "department"] as const;
+const LEVEL_SELECTION_KEYS = ["companyName", "groupName", "divisionName", "departmentName"] as const;
+
+export function createEmptyHrScopeSelection(): HrScopeSelection {
+  return {
+    companyName: "",
+    groupName: "",
+    divisionName: "",
+    departmentName: "",
+  };
+}
+
+function matchesPrefix(row: HrScopeSourceRow, selection: HrScopeSelection, levelIndex: number) {
+  for (let index = 0; index < levelIndex; index += 1) {
+    const selectionValue = normalize(selection[LEVEL_SELECTION_KEYS[index]]);
+    const rowValue = normalize(row[LEVEL_KEYS[index]]);
     if (!selectionValue || rowValue !== selectionValue) return false;
   }
   return true;
 }
 
-function keyToRowField(key: (typeof HIERARCHY_KEYS)[number]): keyof HrScopeSourceRow {
-  switch (key) {
-    case "companyName":
-      return "company";
-    case "groupName":
-      return "group";
-    case "divisionName":
-      return "division";
-    case "departmentName":
-      return "department";
-    case "teamName":
-      return "team";
-  }
-}
-
 export function getHrScopeLevelOptions(rows: HrScopeSourceRow[], selection: HrScopeSelection, levelIndex: number) {
-  const field = keyToRowField(HIERARCHY_KEYS[levelIndex]);
   const seen = new Set<string>();
   const options: string[] = [];
+  const field = LEVEL_KEYS[levelIndex];
 
   for (const row of rows) {
-    if (!prefixMatches(row, selection, levelIndex)) continue;
+    if (!matchesPrefix(row, selection, levelIndex)) continue;
     const nextValue = normalize(row[field]);
     if (!nextValue || seen.has(nextValue)) continue;
     seen.add(nextValue);
@@ -166,35 +116,40 @@ export function getHrScopeLevelOptions(rows: HrScopeSourceRow[], selection: HrSc
 }
 
 export function buildHrScopePayload(rows: HrScopeSourceRow[], selection: HrScopeSelection): HrScopePayload {
-  const resolvedPath = HIERARCHY_KEYS.map((key) => normalize(selection[key])).filter(Boolean);
-  const exactRow = rows.find((row) =>
-    HIERARCHY_KEYS.every((key) => normalize(row[keyToRowField(key)]) === normalize(selection[key])),
-  );
+  const companyName = normalize(selection.companyName);
+  const groupName = normalize(selection.groupName);
+  const divisionName = normalize(selection.divisionName);
+  const departmentName = normalize(selection.departmentName);
+
+  const scopePath = [companyName, groupName, divisionName, departmentName].filter(Boolean);
+  const matchedRow =
+    [...rows]
+      .filter((row) => {
+        if (companyName && normalize(row.company) !== companyName) return false;
+        if (groupName && normalize(row.group) !== groupName) return false;
+        if (divisionName && normalize(row.division) !== divisionName) return false;
+        if (departmentName && normalize(row.department) !== departmentName) return false;
+        return true;
+      })
+      .sort((left, right) => {
+        const leftScore = [left.company, left.group, left.division, left.department, left.team].filter(Boolean).length;
+        const rightScore = [right.company, right.group, right.division, right.department, right.team].filter(Boolean).length;
+        return rightScore - leftScore;
+      })[0] ?? null;
 
   return {
-    scopeId: exactRow ? `${exactRow.empId}:${exactRow.title}` : resolvedPath.join(" / "),
-    scopePath: resolvedPath,
-    companyName: normalize(selection.companyName) || null,
-    groupName: normalize(selection.groupName) || null,
-    divisionName: normalize(selection.divisionName) || null,
-    departmentName: normalize(selection.departmentName) || null,
-    teamName: normalize(selection.teamName) || null,
-    matchedRow: exactRow ?? null,
-  };
-}
-
-export function hasLowerLevelOptions(rows: HrScopeSourceRow[], selection: HrScopeSelection, levelIndex: number) {
-  const nextIndex = levelIndex + 1;
-  if (nextIndex >= HIERARCHY_KEYS.length) return false;
-  return getHrScopeLevelOptions(rows, selection, nextIndex).length > 0;
-}
-
-export function createEmptyHrScopeSelection(): HrScopeSelection {
-  return {
-    companyName: "",
-    groupName: "",
-    divisionName: "",
-    departmentName: "",
-    teamName: "",
+    scopeId: matchedRow ? `${matchedRow.sourceId}:${matchedRow.rawRowRef}` : scopePath.join(" / "),
+    scopePath,
+    companyName: companyName || null,
+    groupName: groupName || null,
+    divisionName: divisionName || null,
+    departmentName: departmentName || null,
+    teamName: matchedRow?.team ?? null,
+    empId: matchedRow?.empId ?? null,
+    name: matchedRow?.name ?? null,
+    englishAlias: matchedRow?.englishAlias ?? null,
+    title: matchedRow?.title ?? null,
+    region: matchedRow?.region ?? null,
+    matchedRow: matchedRow ?? null,
   };
 }

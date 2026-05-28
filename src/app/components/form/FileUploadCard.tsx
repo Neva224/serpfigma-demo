@@ -1,5 +1,5 @@
-import { useState, useRef, DragEvent } from "react";
-import { CloudUpload, FileText, FileSpreadsheet, File, Trash2, CheckCircle2 } from "lucide-react";
+import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { CloudUpload, File, FileSpreadsheet, FileText, Trash2, CheckCircle2 } from "lucide-react";
 import { Card } from "./BasicInfoCard";
 
 interface UploadedFile {
@@ -11,77 +11,68 @@ interface UploadedFile {
 }
 
 const SAMPLE_FILES: UploadedFile[] = [
-  { id: 1, name: "2024年度財務報告書_最終版.pdf", size: "3.2 MB", type: "pdf", progress: 100 },
+  { id: 1, name: "2024年度制度文件清單.pdf", size: "3.2 MB", type: "pdf", progress: 100 },
 ];
 
 export function FileUploadCard() {
   const [files, setFiles] = useState<UploadedFile[]>(SAMPLE_FILES);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const MAX_FILES = 10;
+  const maxFiles = 10;
 
-  function handleDrag(e: DragEvent<HTMLDivElement>, active: boolean) {
-    e.preventDefault();
-    e.stopPropagation();
+  function handleDrag(event: DragEvent<HTMLDivElement>, active: boolean) {
+    event.preventDefault();
+    event.stopPropagation();
     setDragging(active);
   }
 
-  function handleDrop(e: DragEvent<HTMLDivElement>) {
-    e.preventDefault();
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault();
     setDragging(false);
-    const dropped = Array.from(e.dataTransfer.files);
-    addFiles(dropped);
+    addFiles(Array.from(event.dataTransfer.files));
   }
 
-  function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const selected = Array.from(e.target.files ?? []);
-    addFiles(selected);
+  function handleInput(event: ChangeEvent<HTMLInputElement>) {
+    addFiles(Array.from(event.target.files ?? []));
     if (inputRef.current) inputRef.current.value = "";
   }
 
   function addFiles(raw: File[]) {
-    if (files.length >= MAX_FILES) return;
-    const newEntries: UploadedFile[] = raw.slice(0, MAX_FILES - files.length).map((f, i) => ({
-      id: Date.now() + i,
-      name: f.name,
-      size: formatSize(f.size),
-      type: extension(f.name),
+    if (files.length >= maxFiles) return;
+    const newEntries: UploadedFile[] = raw.slice(0, maxFiles - files.length).map((file, index) => ({
+      id: Date.now() + index,
+      name: file.name,
+      size: formatSize(file.size),
+      type: extension(file.name),
       progress: 100,
     }));
-    setFiles((prev) => [...prev, ...newEntries]);
+    setFiles((current) => [...current, ...newEntries]);
   }
 
   function removeFile(id: number) {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
+    setFiles((current) => current.filter((file) => file.id !== id));
   }
 
   return (
-    <Card title="附件上傳" icon="📎">
+    <Card title="文件附件上傳" icon="📎">
       <div className="space-y-4">
-        {/* Drop zone */}
         <div
-          onDragEnter={(e) => handleDrag(e, true)}
-          onDragOver={(e) => handleDrag(e, true)}
-          onDragLeave={(e) => handleDrag(e, false)}
+          onDragEnter={(event) => handleDrag(event, true)}
+          onDragOver={(event) => handleDrag(event, true)}
+          onDragLeave={(event) => handleDrag(event, false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className="relative rounded-xl border-2 border-dashed transition-all cursor-pointer select-none"
+          className="relative cursor-pointer select-none rounded-xl border-2 border-dashed transition-all"
           style={{
             borderColor: dragging ? "#0D9488" : "#D1D5DB",
             backgroundColor: dragging ? "#F0FDFA" : "#FAFAFA",
           }}
         >
-          <input
-            ref={inputRef}
-            type="file"
-            multiple
-            className="hidden"
-            onChange={handleInput}
-          />
+          <input ref={inputRef} type="file" multiple className="hidden" onChange={handleInput} />
 
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+          <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
             <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-colors"
+              className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl transition-colors"
               style={{ backgroundColor: dragging ? "#CCFBF1" : "#F0FDFA" }}
             >
               <CloudUpload
@@ -90,39 +81,40 @@ export function FileUploadCard() {
                 style={{ color: dragging ? "#0D9488" : "#5EEAD4" }}
               />
             </div>
-            <p className="text-gray-700 mb-1" style={{ fontSize: "14px", fontWeight: 600 }}>
-              拖曳檔案至此，或{" "}
-              <span style={{ color: "#0D9488" }}>點擊從本機上傳</span>
+            <p className="mb-1 text-sm font-semibold text-gray-700">
+              點擊或拖曳檔案到這裡
+              <span className="text-teal-600"> 進行上傳</span>
             </p>
-            <p className="text-gray-400 text-xs">
-              單檔上限 200MB，最多 {MAX_FILES} 筆 · 支援 PDF、Word、Excel、PPT、ZIP
+            <p className="text-xs text-gray-400">
+              每個檔案上限 200MB，最多 {maxFiles} 個，支援 PDF、Word、Excel、PPT 與 ZIP
             </p>
           </div>
 
           {dragging && (
             <div
-              className="absolute inset-0 rounded-xl flex items-center justify-center"
+              className="absolute inset-0 flex items-center justify-center rounded-xl"
               style={{ backgroundColor: "#0D948810", borderColor: "#0D9488" }}
             >
-              <p className="text-teal-700 font-semibold">放開以上傳檔案</p>
+              <p className="font-semibold text-teal-700">放開即可開始上傳</p>
             </div>
           )}
         </div>
 
-        {/* File counter */}
         <div className="flex items-center justify-between text-xs text-gray-400">
-          <span>已上傳 {files.length} / {MAX_FILES} 筆</span>
+          <span>
+            已選檔案 {files.length} / {maxFiles}
+          </span>
           {files.length > 0 && (
             <button
+              type="button"
               onClick={() => setFiles([])}
-              className="text-red-400 hover:text-red-600 transition-colors"
+              className="text-red-400 transition-colors hover:text-red-600"
             >
               清除全部
             </button>
           )}
         </div>
 
-        {/* File list */}
         {files.length > 0 && (
           <div className="space-y-2">
             {files.map((file) => (
@@ -131,11 +123,8 @@ export function FileUploadCard() {
           </div>
         )}
 
-        {/* Empty state hint */}
         {files.length === 0 && (
-          <div className="text-center py-4 text-gray-400 text-xs">
-            尚未上傳任何附件
-          </div>
+          <div className="py-4 text-center text-xs text-gray-400">目前尚未加入任何附件</div>
         )}
       </div>
     </Card>
@@ -147,43 +136,32 @@ function FileRow({ file, onRemove }: { file: UploadedFile; onRemove: () => void 
   const color = fileColor(file.type);
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-sm transition-all group">
-      {/* Icon */}
-      <div
-        className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: `${color}15` }}
-      >
+    <div className="group flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 transition-all hover:bg-white hover:shadow-sm">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${color}15` }}>
         <Icon size={20} style={{ color }} strokeWidth={1.5} />
       </div>
 
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <p className="text-gray-800 text-sm truncate" style={{ fontWeight: 500 }}>
-          {file.name}
-        </p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-gray-400 text-xs">{file.size}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-gray-800">{file.name}</p>
+        <div className="mt-0.5 flex items-center gap-2">
+          <span className="text-xs text-gray-400">{file.size}</span>
           {file.progress === 100 && (
             <span className="flex items-center gap-0.5 text-xs" style={{ color: "#10B981" }}>
               <CheckCircle2 size={11} />
-              上傳完成
+              已完成
             </span>
           )}
         </div>
       </div>
 
-      {/* Type badge */}
-      <span
-        className="text-xs px-2 py-0.5 rounded font-mono uppercase flex-shrink-0"
-        style={{ backgroundColor: `${color}15`, color }}
-      >
+      <span className="flex-shrink-0 rounded bg-transparent px-2 py-0.5 font-mono text-xs uppercase" style={{ backgroundColor: `${color}15`, color }}>
         {file.type}
       </span>
 
-      {/* Delete */}
       <button
+        type="button"
         onClick={onRemove}
-        className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+        className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
       >
         <Trash2 size={15} />
       </button>

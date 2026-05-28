@@ -6,7 +6,7 @@ import {
   getCategoryLevelOptions,
   type CategorySelectionPath,
 } from "../../data/catalogModels";
-import { LEVEL_OPTIONS } from "../document-management/mockData";
+import { LEVEL_OPTIONS, type DocumentLevel } from "../document-management/mockData";
 import { Card, Field } from "./BasicInfoCard";
 
 export interface ClassificationSelection extends CategorySelectionPath {
@@ -23,10 +23,11 @@ export function buildCategoryPayload(selection: ClassificationSelection) {
 interface Props {
   value: ClassificationSelection;
   onChange: (next: ClassificationSelection) => void;
+  initialLevel?: DocumentLevel;
 }
 
-export function ClassificationCard({ value, onChange }: Props) {
-  const [selectedLevel, setSelectedLevel] = useState("");
+export function ClassificationCard({ value, onChange, initialLevel }: Props) {
+  const [selectedLevel, setSelectedLevel] = useState(initialLevel ?? "");
 
   const l1Options = getCategoryLevelOptions(CATEGORY_NODES, []);
   const l2Options = value.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1]) : [];
@@ -35,11 +36,11 @@ export function ClassificationCard({ value, onChange }: Props) {
   const payload = buildCategoryPayload(value);
 
   return (
-    <Card title="文件分類與階級" icon="🗂">
+    <Card title="文件分類與階級" icon="🏷️">
       <div className="space-y-5">
         <div>
           <p className="mb-3 flex items-center gap-1 text-xs text-gray-400">
-            <span>知識樹分類使用 categoryId / categoryPath 對應，階級則使用下方統一 label。</span>
+            <span>此區塊使用 categoryId / categoryPath 來選擇知識樹分類，再搭配文件階級。</span>
           </p>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -107,8 +108,11 @@ export function ClassificationCard({ value, onChange }: Props) {
               onChange={setSelectedLevel}
             />
           </Field>
+          <input type="hidden" name="documentLevel" value={selectedLevel} />
+          <input type="hidden" name="categoryId" value={payload.categoryId} />
+          <input type="hidden" name="categoryPath" value={payload.categoryPath.join(" / ")} />
           <p className="mt-1.5 text-xs text-gray-400">
-            文件階級會影響顯示與查詢，並與 categoryId / categoryPath 對應。
+            文件階級僅是顯示用的共用 label，實際分類仍由上方 categoryId / categoryPath 決定。
           </p>
         </div>
       </div>
@@ -152,10 +156,7 @@ function Select({
           );
         })}
       </select>
-      <ChevronDown
-        size={14}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-      />
+      <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
     </div>
   );
 }

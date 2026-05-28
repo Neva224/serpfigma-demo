@@ -65,6 +65,9 @@ export interface LegacyKnowledgeTreeNode extends LegacyKnowledgeNode {
 
 export interface HrScopeNode {
   id: string;
+  empId: string | null;
+  name: string | null;
+  englishAlias: string | null;
   regionName: string | null;
   companyName: string | null;
   businessGroupName: string | null;

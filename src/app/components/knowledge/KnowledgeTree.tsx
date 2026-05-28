@@ -1,5 +1,7 @@
-﻿import { FolderOpen, LayoutGrid } from "lucide-react";
-import { KNOWLEDGE_TREE, type KnowledgeTreeNode } from "../../../mocks/knowledgeTreeData";
+import { FolderOpen, LayoutGrid } from "lucide-react";
+import { buildLegacyKnowledgeTreeFromGenerated, type LegacyKnowledgeTreeNode } from "../../data/catalogModels";
+
+const KNOWLEDGE_TREE = buildLegacyKnowledgeTreeFromGenerated();
 
 interface Props {
   totalCount: number;
@@ -8,12 +10,7 @@ interface Props {
   countForPath: (path: string[]) => number;
 }
 
-export function KnowledgeTree({
-  totalCount,
-  selectedPathKey,
-  onSelectPath,
-  countForPath,
-}: Props) {
+export function KnowledgeTree({ totalCount, selectedPathKey, onSelectPath, countForPath }: Props) {
   return (
     <div className="flex h-full flex-col border-r border-slate-200 bg-white">
       <div className="border-b border-slate-100 px-4 py-3">
@@ -55,7 +52,7 @@ function TreeNodeRow({
   onSelectPath,
   countForPath,
 }: {
-  node: KnowledgeTreeNode;
+  node: LegacyKnowledgeTreeNode;
   selectedPathKey: string | null;
   onSelectPath: (path: string[], label: string) => void;
   countForPath: (path: string[]) => number;
@@ -69,9 +66,7 @@ function TreeNodeRow({
       type="button"
       onClick={() => onSelectPath(path, node.label)}
       className={`mx-2 flex w-[calc(100%-1rem)] items-center gap-2 rounded-xl border-l-2 px-3 py-2 text-left transition ${
-        isSelected
-          ? "border-teal-600 bg-teal-50"
-          : "border-transparent hover:bg-slate-50"
+        isSelected ? "border-teal-600 bg-teal-50" : "border-transparent hover:bg-slate-50"
       }`}
       title={node.label}
     >
@@ -79,11 +74,7 @@ function TreeNodeRow({
         size={14}
         className={isSelected ? "flex-shrink-0 text-teal-600" : "flex-shrink-0 text-teal-500"}
       />
-      <span
-        className={`min-w-0 flex-1 truncate text-sm ${
-          isSelected ? "font-semibold text-teal-800" : "text-slate-700"
-        }`}
-      >
+      <span className={`min-w-0 flex-1 truncate text-sm ${isSelected ? "font-semibold text-teal-800" : "text-slate-700"}`}>
         {node.label}
       </span>
       <span
@@ -97,7 +88,6 @@ function TreeNodeRow({
   );
 }
 
-function getNodePath(node: KnowledgeTreeNode): string[] {
-  const legacyNode = node as KnowledgeTreeNode & { pathLabels?: string[]; pathNames?: string[] };
-  return legacyNode.pathLabels ?? legacyNode.pathNames ?? [];
+function getNodePath(node: LegacyKnowledgeTreeNode): string[] {
+  return node.pathLabels ?? node.pathNames ?? [];
 }

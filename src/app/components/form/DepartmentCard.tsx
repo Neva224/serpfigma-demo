@@ -4,13 +4,13 @@ import {
   buildHrScopePayload,
   createEmptyHrScopeSelection,
   getHrScopeLevelOptions,
+  HR_SCOPE_ROWS,
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
-import { HR_SCOPE_ROWS } from "../../data/hrScopeModel";
 
 export interface DepartmentSelection extends HrScopeSelection {}
 
-const LEVEL_LABELS = ["公司", "群", "處", "部", "組"] as const;
+const LEVEL_LABELS = ["公司", "群", "處", "部"] as const;
 
 interface Props {
   value: DepartmentSelection;
@@ -18,12 +18,10 @@ interface Props {
 }
 
 export function DepartmentCard({ value, onChange }: Props) {
-  const level1Options = getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 0);
-  const level2Options = value.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 1) : [];
-  const level3Options = value.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 2) : [];
-  const level4Options = value.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 3) : [];
-  const level5Options = value.departmentName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 4) : [];
-
+  const companyOptions = getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 0);
+  const groupOptions = value.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 1) : [];
+  const divisionOptions = value.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 2) : [];
+  const departmentOptions = value.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 3) : [];
   const payload = buildHrScopePayload(HR_SCOPE_ROWS, value);
 
   return (
@@ -31,13 +29,13 @@ export function DepartmentCard({ value, onChange }: Props) {
       <div className="space-y-4">
         <p className="flex items-center gap-1.5 text-xs text-gray-400">
           <GitBranch size={12} />
-          這一區使用獨立的 HR scope 資料結構，不使用知識樹分類資料。
+          這一區使用獨立的 HR scope 資料結構，不再混用知識樹分類。
         </p>
 
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
           <DeptSelect
             label={LEVEL_LABELS[0]}
-            options={level1Options}
+            options={companyOptions}
             placeholder="請選擇公司"
             value={value.companyName}
             onChange={(next) =>
@@ -50,7 +48,7 @@ export function DepartmentCard({ value, onChange }: Props) {
           />
           <DeptSelect
             label={LEVEL_LABELS[1]}
-            options={level2Options}
+            options={groupOptions}
             placeholder={value.companyName ? "請選擇群" : "請先選擇公司"}
             disabled={!value.companyName}
             value={value.groupName}
@@ -60,14 +58,13 @@ export function DepartmentCard({ value, onChange }: Props) {
                 groupName: next,
                 divisionName: "",
                 departmentName: "",
-                teamName: "",
               })
             }
             step={2}
           />
           <DeptSelect
             label={LEVEL_LABELS[2]}
-            options={level3Options}
+            options={divisionOptions}
             placeholder={value.groupName ? "請選擇處" : "請先選擇群"}
             disabled={!value.groupName}
             value={value.divisionName}
@@ -76,14 +73,13 @@ export function DepartmentCard({ value, onChange }: Props) {
                 ...value,
                 divisionName: next,
                 departmentName: "",
-                teamName: "",
               })
             }
             step={3}
           />
           <DeptSelect
             label={LEVEL_LABELS[3]}
-            options={level4Options}
+            options={departmentOptions}
             placeholder={value.divisionName ? "請選擇部" : "請先選擇處"}
             disabled={!value.divisionName}
             value={value.departmentName}
@@ -91,24 +87,9 @@ export function DepartmentCard({ value, onChange }: Props) {
               onChange({
                 ...value,
                 departmentName: next,
-                teamName: "",
               })
             }
             step={4}
-          />
-          <DeptSelect
-            label={LEVEL_LABELS[4]}
-            options={level5Options}
-            placeholder={value.departmentName ? "請選擇組" : "請先選擇部"}
-            disabled={!value.departmentName}
-            value={value.teamName}
-            onChange={(next) =>
-              onChange({
-                ...value,
-                teamName: next,
-              })
-            }
-            step={5}
           />
         </div>
 
@@ -122,8 +103,7 @@ export function DepartmentCard({ value, onChange }: Props) {
                     (index === 0 && value.companyName) ||
                     (index === 1 && value.groupName) ||
                     (index === 2 && value.divisionName) ||
-                    (index === 3 && value.departmentName) ||
-                    (index === 4 && value.teamName)
+                    (index === 3 && value.departmentName)
                       ? "#0D9488"
                       : "#E5E7EB",
                 }}
@@ -135,8 +115,7 @@ export function DepartmentCard({ value, onChange }: Props) {
                     borderColor:
                       (index === 0 && value.groupName) ||
                       (index === 1 && value.divisionName) ||
-                      (index === 2 && value.departmentName) ||
-                      (index === 3 && value.teamName)
+                      (index === 2 && value.departmentName)
                         ? "#0D9488"
                         : "#E5E7EB",
                   }}
@@ -151,19 +130,13 @@ export function DepartmentCard({ value, onChange }: Props) {
             className="flex flex-wrap items-center gap-2 rounded-lg border px-4 py-2.5 text-sm"
             style={{ backgroundColor: "#F0FDFA", borderColor: "#99F6E4" }}
           >
-            <span className="text-xs font-medium text-teal-600">已選部門：</span>
+            <span className="text-xs font-medium text-teal-600">目前部門路徑：</span>
             {payload.scopePath.map((segment, index) => (
               <span key={`${segment}-${index}`} className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-teal-800">{segment}</span>
                 {index < payload.scopePath.length - 1 && <span className="text-teal-300">/</span>}
               </span>
             ))}
-          </div>
-        )}
-
-        {payload.matchedRow && (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
-            對應員編：{payload.matchedRow.empId}，姓名：{payload.matchedRow.name}，職稱：{payload.matchedRow.title}
           </div>
         )}
       </div>
@@ -217,10 +190,7 @@ function DeptSelect({
             </option>
           ))}
         </select>
-        <ChevronDown
-          size={13}
-          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400"
-        />
+        <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
       </div>
     </div>
   );

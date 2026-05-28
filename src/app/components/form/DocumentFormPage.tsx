@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, Bell, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { BasicInfoCard } from "./BasicInfoCard";
+import { BasicInfoCard, type BasicInfoValue } from "./BasicInfoCard";
 import {
   ClassificationCard,
   buildCategoryPayload,
@@ -9,13 +9,32 @@ import {
 } from "./ClassificationCard";
 import { DepartmentCard, type DepartmentSelection } from "./DepartmentCard";
 import { FileUploadCard } from "./FileUploadCard";
-import { type DocRecord } from "../DocumentTable";
+import type { DocumentLevel } from "../document-management/mockData";
+import type { WorkflowDocument } from "../../workflow/workflowState";
+
+export interface DocumentFormSubmitPayload {
+  title: string;
+  ownerName: string;
+  validFrom: string;
+  validTo: string;
+  summary: string;
+  tags: string[];
+  categoryId: string;
+  categoryPath: string[];
+  ownershipDepartmentPath: string[];
+  level: DocumentLevel;
+}
 
 interface DocumentFormPageProps {
   onBack: () => void;
   embedded?: boolean;
   showBackButton?: boolean;
-  editingDoc?: DocRecord | null;
+  editingDoc?: WorkflowDocument | null;
+  onSubmit?: (payload: DocumentFormSubmitPayload) => void;
+}
+
+function splitPath(value?: string) {
+  return value ? value.split(" / ").map((segment) => segment.trim()).filter(Boolean) : [];
 }
 
 export function DocumentFormPage({
@@ -23,7 +42,9 @@ export function DocumentFormPage({
   embedded = false,
   showBackButton,
   editingDoc = null,
+  onSubmit,
 }: DocumentFormPageProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [classification, setClassification] = useState<ClassificationSelection>({
     l1: "",
     l2: "",
@@ -35,37 +56,115 @@ export function DocumentFormPage({
     groupName: "",
     divisionName: "",
     departmentName: "",
-    teamName: "",
   });
+
+  useEffect(() => {
+    if (!editingDoc) {
+      setClassification({ l1: "", l2: "", l3: "", l4: "" });
+      setDepartment({ companyName: "", groupName: "", divisionName: "", departmentName: "" });
+      return;
+    }
+
+    const categoryPath = editingDoc.categoryPath ?? editingDoc.knowledgePath ?? [];
+    setClassification({
+      l1: categoryPath[0] ?? "",
+      l2: categoryPath[1] ?? "",
+      l3: categoryPath[2] ?? "",
+      l4: categoryPath[3] ?? "",
+    });
+
+    const path = splitPath(editingDoc.department);
+    setDepartment({
+      companyName: path[0] ?? "",
+      groupName: path[1] ?? "",
+      divisionName: path[2] ?? "",
+      departmentName: path[3] ?? "",
+    });
+  }, [editingDoc]);
 
   const categoryPayload = buildCategoryPayload(classification);
   const canShowBackButton = showBackButton ?? false;
   const showStandaloneHeader = !embedded;
+  const initialBasicInfo: BasicInfoValue = useMemo(
+    () => ({
+      title: editingDoc?.name ?? "",
+      ownerName: editingDoc?.requestor ?? editingDoc?.ownerName ?? editingDoc?.uploaderName ?? "",
+      validFrom: editingDoc?.validFrom ?? "",
+      validTo: editingDoc?.validTo ?? "",
+      summary: editingDoc?.summary ?? editingDoc?.subject ?? "",
+      tags: editingDoc?.tags ?? [],
+    }),
+    [editingDoc],
+  );
 
   function handleSaveDraft() {
-    toast.success(
-      categoryPayload.categoryId
-        ? `已儲存草稿：${categoryPayload.categoryId}`
-        : "已儲存草稿",
-    );
+    toast.success(editingDoc ? `已儲存草稿：${editingDoc.name}` : "已儲存草稿");
   }
 
-  function handleSubmit() {
-    toast.success(
-      categoryPayload.categoryId
-        ? `已送出簽核：${categoryPayload.categoryId}`
-        : "已送出簽核",
-    );
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = formRef.current;
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const title = String(formData.get("title") ?? "").trim();
+    const ownerName = String(formData.get("ownerName") ?? "").trim();
+    const validFrom = String(formData.get("validFrom") ?? "").trim();
+    const validTo = String(formData.get("validTo") ?? "").trim();
+    const summary = String(formData.get("summary") ?? "").trim();
+    const tags = String(formData.get("tags") ?? "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const categoryPath = String(formData.get("categoryPath") ?? "")
+      .split(" / ")
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+    const level = String(formData.get("documentLevel") ?? "") as DocumentLevel;
+    const ownershipDepartmentPath = [
+      department.companyName,
+      department.groupName,
+      department.divisionName,
+      department.departmentName,
+    ].filter(Boolean) as string[];
+
+    if (!title || !ownerName || !categoryId || !level || ownershipDepartmentPath.length === 0) {
+      toast.error("請先完成必填欄位再送出");
+      return;
+    }
+
+    onSubmit?.({
+      title,
+      ownerName,
+      validFrom,
+      validTo,
+      summary,
+      tags,
+      categoryId,
+      categoryPath,
+      ownershipDepartmentPath,
+      level,
+    });
+
+    toast.success(editingDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
+    onBack();
   }
 
   return (
-    <div className={`${embedded ? "pb-8" : "min-h-screen pb-8"}`} style={{ backgroundColor: "#F3F4F6" }}>
+    <form
+      ref={formRef}
+      onSubmit={handleSubmit}
+      className={embedded ? "pb-8" : "min-h-screen pb-8"}
+      style={{ backgroundColor: "#F3F4F6" }}
+    >
       {showStandaloneHeader && (
         <header className="sticky top-0 z-20 border-b border-gray-100 bg-white shadow-sm">
           <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-6">
             <div className="flex items-center gap-4">
               {canShowBackButton ? (
                 <button
+                  type="button"
                   onClick={onBack}
                   className="group flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-800"
                 >
@@ -87,11 +186,14 @@ export function DocumentFormPage({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-50 hover:text-gray-600">
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition-all hover:bg-gray-50 hover:text-gray-600"
+              >
                 <Bell size={18} />
               </button>
               <div
-                className="ml-1 flex h-8 w-8 items-center justify-center rounded-full text-white text-xs font-semibold"
+                className="ml-1 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
                 style={{ backgroundColor: "#0D9488" }}
               >
                 SERP
@@ -105,9 +207,9 @@ export function DocumentFormPage({
         {editingDoc && (
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-semibold text-amber-700">編輯中</span>
-              <span className="text-sm text-amber-600">目前正在編輯文件：{editingDoc.name}</span>
-              <span className="ml-auto text-xs text-amber-500">未完成前請先儲存草稿再離開</span>
+              <span className="text-sm font-semibold text-amber-700">編修模式</span>
+              <span className="text-sm text-amber-600">目前文件：{editingDoc.name}</span>
+              <span className="ml-auto text-xs text-amber-500">送出後會沿用原文件編號與簽核號</span>
             </div>
           </div>
         )}
@@ -117,14 +219,14 @@ export function DocumentFormPage({
             <span>首頁</span>
             <span>/</span>
             {canShowBackButton ? (
-              <button onClick={onBack} className="hover:underline" style={{ color: "#0D9488" }}>
-                文件管理
+              <button type="button" onClick={onBack} className="hover:underline" style={{ color: "#0D9488" }}>
+                文件上傳專區
               </button>
             ) : (
-              <span className="text-gray-600">文件管理</span>
+              <span className="text-gray-600">文件上傳專區</span>
             )}
             <span>/</span>
-            <span className="text-gray-600">文件上傳專區</span>
+            <span className="text-gray-600">送出簽核</span>
           </div>
 
           <div className="flex items-start justify-between gap-4">
@@ -132,13 +234,13 @@ export function DocumentFormPage({
               <h2 className="text-gray-800" style={{ fontSize: "20px", fontWeight: 700 }}>
                 文件上傳專區
               </h2>
-              <p className="mt-0.5 text-sm text-gray-500">新增文件、選擇分類與送出簽核</p>
+              <p className="mt-0.5 text-sm text-gray-500">建立新文件、選擇分類與所屬部門後送出簽核</p>
             </div>
 
             <div className="hidden items-center gap-2 md:flex">
               {[
                 { n: 1, label: "基本資料" },
-                { n: 2, label: "文件分類" },
+                { n: 2, label: "文件階級" },
                 { n: 3, label: "所屬部門" },
                 { n: 4, label: "送出簽核" },
               ].map(({ n, label }, i, arr) => (
@@ -162,8 +264,8 @@ export function DocumentFormPage({
         </div>
 
         <div className="mx-auto max-w-screen-xl space-y-5 px-0">
-          <BasicInfoCard />
-          <ClassificationCard value={classification} onChange={setClassification} />
+          <BasicInfoCard key={editingDoc?.id ?? "new"} initialValue={initialBasicInfo} />
+          <ClassificationCard key={`classification-${editingDoc?.id ?? "new"}`} value={classification} onChange={setClassification} initialLevel={editingDoc?.level} />
           <DepartmentCard value={department} onChange={setDepartment} />
           <FileUploadCard />
         </div>
@@ -172,8 +274,8 @@ export function DocumentFormPage({
           <div className="rounded-2xl border border-teal-100 bg-teal-50/80 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">分類結果</p>
-                <h3 className="mt-1 text-sm font-semibold text-slate-800">目前選擇的 category payload</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">分類預覽</p>
+                <h3 className="mt-1 text-sm font-semibold text-slate-800">category payload</h3>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm">
                 categoryId {categoryPayload.categoryId || "尚未選擇"}
@@ -182,7 +284,7 @@ export function DocumentFormPage({
             <p className="mt-2 text-sm text-slate-600">
               {categoryPayload.categoryPath.length > 0
                 ? categoryPayload.categoryPath.join(" / ")
-                : "尚未選擇任何分類"}
+                : "請先選擇知識樹分類"}
             </p>
           </div>
         </div>
@@ -192,11 +294,12 @@ export function DocumentFormPage({
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-4">
           <div className="hidden items-center gap-2 text-xs text-gray-400 sm:flex">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
-            底部操作列會跟著頁面內容捲動，請往下滑到底部使用。
+            完成分類與部門選擇後，即可儲存草稿或送出簽核
           </div>
 
           <div className="ml-auto flex items-center gap-3">
             <button
+              type="button"
               onClick={onBack}
               className="rounded-lg border border-gray-200 px-5 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50"
               style={{ fontWeight: 500 }}
@@ -205,6 +308,7 @@ export function DocumentFormPage({
             </button>
 
             <button
+              type="button"
               className="rounded-lg border px-5 py-2 text-sm transition-all hover:bg-teal-50"
               style={{ borderColor: "#0D9488", color: "#0D9488", fontWeight: 500 }}
               onClick={handleSaveDraft}
@@ -213,9 +317,9 @@ export function DocumentFormPage({
             </button>
 
             <button
+              type="submit"
               className="flex items-center gap-2 rounded-lg px-6 py-2 text-sm text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: "#0D9488", fontWeight: 600 }}
-              onClick={handleSubmit}
             >
               <FileText size={14} />
               送出簽核
@@ -223,6 +327,6 @@ export function DocumentFormPage({
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

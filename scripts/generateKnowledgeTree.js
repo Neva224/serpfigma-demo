@@ -90,8 +90,8 @@ function buildKnowledgeCatalog(workbook) {
   const sourceFile = path.basename(knowledgeWorkbookPath);
   const maxLevel = 4;
 
-  for (const [index, row] of rows.slice(1).entries()) {
-    const rowNumber = index + 2;
+  for (const [index, row] of rows.slice(2).entries()) {
+    const rowNumber = index + 3;
     const level = toNumber(row[0], 0);
     const nodeName = normalizeText(row[1]);
     const nodeCode = normalizeText(row[2]);
@@ -213,76 +213,56 @@ function splitHrPath(titleName) {
 }
 
 function buildHrScopeCatalog(workbook) {
-  const sheet = workbook.Sheets.hr_scope_nodes;
+  const sheet = workbook.Sheets["員工資料報表"];
   if (!sheet) {
-    throw new Error("hr_scope_nodes sheet not found.");
+    throw new Error("員工資料報表 sheet not found.");
   }
 
   const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "" });
   const nodes = [];
   const errors = [];
-  const pathSet = new Set();
   const sourceFile = path.basename(hrWorkbookPath);
-  const maxLevel = 6;
 
-  for (const [index, row] of rows.slice(1).entries()) {
-    const rowNumber = index + 2;
-    const titleName = normalizeText(row[0]);
-    if (!titleName) {
+  const startIndex = rows.findIndex((row) => normalizeText(row[0]) === "員編");
+  const dataRows = startIndex >= 0 ? rows.slice(startIndex + 1) : rows.slice(1);
+
+  for (const [index, row] of dataRows.entries()) {
+    const rowNumber = index + (startIndex >= 0 ? startIndex + 2 : 2);
+    const empId = normalizeText(row[0]);
+    const name = normalizeText(row[1]);
+    const englishAlias = normalizeText(row[2]);
+    const regionName = normalizeText(row[3]);
+    const companyName = normalizeText(row[4]);
+    const businessGroupName = normalizeText(row[5]);
+    const divisionName = normalizeText(row[6]);
+    const departmentName = normalizeText(row[7]);
+    const teamName = normalizeText(row[8]);
+    const titleName = normalizeText(row[9]);
+
+    if (!companyName) {
       errors.push({
         sourceType: "hr_scope",
         rowNumber,
         rawRow: row,
-        errorType: "missing_title_name",
-        errorMessage: "缺少部門名稱",
+        errorType: "missing_company_name",
+        errorMessage: "缺少公司名稱",
       });
       continue;
     }
 
-    const pathNames = splitHrPath(titleName);
-    if (pathNames.length === 0) {
-      errors.push({
-        sourceType: "hr_scope",
-        rowNumber,
-        rawRow: row,
-        errorType: "invalid_path",
-        errorMessage: "無法從部門名稱解析路徑",
-      });
-      continue;
-    }
-
-    if (pathNames.length > maxLevel) {
-      errors.push({
-        sourceType: "hr_scope",
-        rowNumber,
-        rawRow: row,
-        errorType: "invalid_level",
-        errorMessage: `路徑層級 ${pathNames.length} 超出允許範圍 1-${maxLevel}`,
-      });
-      continue;
-    }
-
-    const pathKey = pathNames.join("\u0001");
-    if (pathSet.has(pathKey)) {
-      errors.push({
-        sourceType: "hr_scope",
-        rowNumber,
-        rawRow: row,
-        errorType: "duplicate_path",
-        errorMessage: `重複路徑：${pathNames.join(" / ")}`,
-      });
-      continue;
-    }
-
-    const id = createStableId("hr", [titleName, rowNumber].join("|"));
+    const pathNames = [companyName, businessGroupName, divisionName, departmentName, teamName].filter(Boolean);
+    const id = createStableId("hr", [empId, name, companyName, businessGroupName, divisionName, departmentName, teamName, rowNumber].join("|"));
     const node = {
       id,
-      regionName: pathNames[0] ?? null,
-      companyName: pathNames[1] ?? null,
-      businessGroupName: pathNames[2] ?? null,
-      divisionName: pathNames[3] ?? null,
-      departmentName: pathNames[4] ?? null,
-      teamName: pathNames[5] ?? null,
+      empId: empId || null,
+      name: name || null,
+      englishAlias: englishAlias || null,
+      regionName: regionName || null,
+      companyName: companyName || null,
+      businessGroupName: businessGroupName || null,
+      divisionName: divisionName || null,
+      departmentName: departmentName || null,
+      teamName: teamName || null,
       titleName,
       pathNames,
       level: pathNames.length,
@@ -293,17 +273,26 @@ function buildHrScopeCatalog(workbook) {
       windowOwnerEmpId: null,
       isActive: true,
       sourceFile,
-      rawRowRef: `hr_scope_nodes#row${rowNumber}`,
+      rawRowRef: `員工資料報表#row${rowNumber}`,
     };
 
     nodes.push(node);
-    pathSet.add(pathKey);
   }
+
+  const rules = workbook.SheetNames.includes("rules")
+    ? parseRules(workbook, "hr_scope")
+    : {
+        dataset: "hr_scope",
+        maxLevel: 5,
+        allowSelectWhenNoChild: true,
+        replaceMode: "replace",
+        errorPolicy: "skip_invalid_and_collect_errors",
+      };
 
   return {
     nodes,
     errors,
-    rules: parseRules(workbook, "hr_scope"),
+    rules,
   };
 }
 
@@ -318,12 +307,8 @@ if (!knowledgeWorkbook.SheetNames.includes("rules")) {
   throw new Error("rules sheet is missing from 知識樹分類.xlsx");
 }
 
-if (!hrWorkbook.SheetNames.includes("hr_scope_nodes")) {
-  throw new Error("hr_scope_nodes sheet is missing from 人資資料.xlsx");
-}
-
-if (!hrWorkbook.SheetNames.includes("rules")) {
-  throw new Error("rules sheet is missing from 人資資料.xlsx");
+if (!hrWorkbook.SheetNames.includes("員工資料報表")) {
+  throw new Error("員工資料報表 sheet is missing from 人資資料.xlsx");
 }
 
 const knowledgeCatalog = buildKnowledgeCatalog(knowledgeWorkbook);

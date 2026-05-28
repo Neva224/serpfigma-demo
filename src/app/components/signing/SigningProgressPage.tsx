@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { FileText, RotateCcw, Search } from "lucide-react";
+import { type DocumentStatus } from "../document-management/mockData";
+import { toApprovalQueryRecord, type WorkflowDocument } from "../../workflow/workflowState";
 
-type SigningStatus = "申請" | "會簽" | "結案";
+type SigningStatus = DocumentStatus | "";
 
 interface RecordItem {
   signingNo: string;
@@ -13,66 +15,19 @@ interface RecordItem {
   requestUnitCode: string;
   processUnitCode: string;
   company: string;
-  status: SigningStatus;
+  status: DocumentStatus;
   includeVoided: boolean;
   includeReturned: boolean;
   currentHandler: string;
 }
 
-const RECORDS: RecordItem[] = [
-  {
-    signingNo: "SGN-2026-001",
-    docName: "文件管理程序書",
-    requestor: "王小明",
-    requestorCode: "250341",
-    submitDate: "2026-05-08",
-    subject: "文件管理",
-    requestUnitCode: "1001",
-    processUnitCode: "2001",
-    company: "總管理處",
-    status: "申請",
-    includeVoided: true,
-    includeReturned: false,
-    currentHandler: "李文管",
-  },
-  {
-    signingNo: "SGN-2026-002",
-    docName: "請假申請單",
-    requestor: "陳怡君",
-    requestorCode: "250343",
-    submitDate: "2026-05-04",
-    subject: "請假申請",
-    requestUnitCode: "1002",
-    processUnitCode: "2001",
-    company: "人資部",
-    status: "會簽",
-    includeVoided: true,
-    includeReturned: true,
-    currentHandler: "林主管",
-  },
-  {
-    signingNo: "SGN-2026-003",
-    docName: "品質管理手冊",
-    requestor: "林建宏",
-    requestorCode: "250345",
-    submitDate: "2026-04-28",
-    subject: "品質管理",
-    requestUnitCode: "1003",
-    processUnitCode: "3001",
-    company: "品保處",
-    status: "結案",
-    includeVoided: false,
-    includeReturned: true,
-    currentHandler: "系統",
-  },
-];
-
 interface Props {
   onBack: () => void;
   embedded?: boolean;
+  documents: WorkflowDocument[];
 }
 
-export function SigningProgressPage({ onBack, embedded = false }: Props) {
+export function SigningProgressPage({ onBack, embedded = false, documents }: Props) {
   const [signingNo, setSigningNo] = useState("");
   const [docName, setDocName] = useState("");
   const [subject, setSubject] = useState("");
@@ -87,10 +42,21 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<RecordItem[]>([]);
 
-  const statusOptions: SigningStatus[] = ["申請", "會簽", "結案"];
+  const records = useMemo<RecordItem[]>(
+    () => documents.map((doc) => toApprovalQueryRecord(doc)),
+    [documents],
+  );
+
+  const statusOptions = useMemo(
+    () =>
+      Array.from(new Set(records.map((record) => record.status))).filter(Boolean).sort((a, b) =>
+        STATUS_ORDER.indexOf(a) - STATUS_ORDER.indexOf(b),
+      ),
+    [records],
+  );
 
   const filtered = useMemo(() => {
-    let list = RECORDS;
+    let list = records;
     if (signingNo) list = list.filter((item) => item.signingNo.includes(signingNo));
     if (docName) list = list.filter((item) => item.docName.includes(docName));
     if (subject) list = list.filter((item) => item.subject.includes(subject));
@@ -104,6 +70,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
     if (endDate) list = list.filter((item) => item.submitDate <= endDate);
     return list;
   }, [
+    records,
     signingNo,
     docName,
     subject,
@@ -154,23 +121,23 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
             </button>
             <span>/</span>
             <button type="button" onClick={onBack} className="hover:text-slate-600">
-              文件簽核
+              文件簽核專區
             </button>
             <span>/</span>
             <span>文件簽核進度查詢</span>
           </div>
           <h2 className="text-lg font-bold text-slate-800">文件簽核進度查詢</h2>
-          <p className="mt-1 text-sm text-slate-500">查詢簽核單進度、目前處理人與文件處理狀態</p>
+          <p className="mt-1 text-sm text-slate-500">可依簽核號、文件名稱、狀態與日期區間查詢簽核進度</p>
         </div>
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-3">
-          <Field label="簽核單號">
+          <Field label="簽核號">
             <input
               value={signingNo}
               onChange={(e) => setSigningNo(e.target.value)}
-              placeholder="請輸入簽核單號"
+              placeholder="請輸入簽核號"
               className={inputClass}
             />
           </Field>
@@ -182,7 +149,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
               className={inputClass}
             />
           </Field>
-          <Field label="申請主旨">
+          <Field label="主旨">
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
@@ -210,7 +177,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
             <input
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="請輸入公司"
+              placeholder="請輸入公司名稱"
               className={inputClass}
             />
           </Field>
@@ -220,7 +187,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
           <Field label="申請日期迄">
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputClass} />
           </Field>
-          <Field label="簽核狀態">
+          <Field label="狀態">
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((status) => (
                 <button
@@ -265,71 +232,74 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
         </div>
       </div>
 
-      {!searched ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">
-          請先設定條件後查詢
-        </div>
-      ) : results.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">
-          找不到符合條件的簽核資料
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-3">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <FileText size={15} className="text-teal-600" />
-              查詢結果
-            </div>
-            <div className="text-sm text-slate-500">
-              共 <span className="font-semibold text-slate-700">{results.length}</span> 筆
-            </div>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText size={16} className="text-teal-600" />
+            <h3 className="text-sm font-semibold text-slate-800">查詢結果</h3>
           </div>
-
-          <table className="w-full text-left">
-            <thead className="bg-teal-600">
-              <tr>
-                {["簽核單號", "文件名稱", "申請人", "申請日期", "狀態", "目前處理人", "操作"].map((header) => (
-                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((item) => (
-                <tr key={item.signingNo} className="border-b border-slate-100 hover:bg-teal-50/30">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.signingNo}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-slate-800">{item.docName}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                    {item.requestor} ({item.requestorCode})
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{item.submitDate}</td>
-                  <td className="px-4 py-3">
-                    <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.currentHandler}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <button className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
-                      <FileText size={12} />
-                      檢視
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+            {searched ? `${results.length} 筆` : "尚未查詢"}
+          </span>
         </div>
-      )}
+
+        {searched ? (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-left">
+              <thead className="bg-slate-50">
+                <tr>
+                  {["簽核號", "文件名稱", "申請人", "申請日期", "狀態", "當前處理者"].map((header) => (
+                    <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
+                      {header}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((item) => (
+                  <tr key={item.signingNo} className="border-b border-slate-100">
+                    <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{item.signingNo}</td>
+                    <td className="px-4 py-3">
+                      <div className="text-sm font-semibold text-slate-800">{item.docName}</div>
+                      <div className="text-xs text-slate-400">{item.subject}</div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                      {item.requestor} / {item.requestorCode}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.submitDate}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-teal-700">{item.status}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.currentHandler}</td>
+                  </tr>
+                ))}
+                {results.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-14 text-center text-sm text-slate-400">
+                      目前沒有符合條件的資料
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-5 py-12 text-center text-sm text-slate-400">
+            請先設定查詢條件後按下查詢
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+const STATUS_ORDER: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "下架"];
+
+const inputClass =
+  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white";
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-slate-500">{label}</span>
+    <label className="space-y-1.5">
+      <span className="block text-sm font-semibold text-slate-600">{label}</span>
       {children}
     </label>
   );
@@ -342,29 +312,17 @@ function Toggle({
 }: {
   label: string;
   checked: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (next: boolean) => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
-        checked
-          ? "border-teal-600 bg-teal-50 text-teal-700"
-          : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-      }`}
-    >
-      <span className={`relative h-4 w-8 rounded-full transition ${checked ? "bg-teal-600" : "bg-slate-300"}`}>
-        <span
-          className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition ${
-            checked ? "left-4" : "left-0.5"
-          }`}
-        />
-      </span>
+    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+      />
       {label}
-    </button>
+    </label>
   );
 }
-
-const inputClass =
-  "w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500 focus:bg-white";

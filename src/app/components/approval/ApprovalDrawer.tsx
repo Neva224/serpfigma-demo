@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { X, ChevronDown, ChevronRight, CheckCircle2, RotateCcw, MoveRight, ZoomIn, ZoomOut } from "lucide-react";
-import { DocRecord } from "../DocumentTable";
+import { useState, type ReactNode } from "react";
+import { CheckCircle2, ChevronDown, ChevronRight, MoveRight, RotateCcw, X, ZoomIn, ZoomOut } from "lucide-react";
+import { type DocRecord } from "../DocumentTable";
 import { LEVEL_META } from "../document-management/mockData";
 
 type RejectMode = "none" | "return" | "transfer";
@@ -10,51 +10,63 @@ interface Props {
   role: "manager" | "docadmin";
   onClose: () => void;
   onApprove: () => void;
-  onReject: () => void;
+  onReject: (reason: string) => void;
 }
 
-const REJECT_TYPES = ["格式不符規範", "內容有誤需修正", "簽核流程不完整", "附件資料不足", "分類設定錯誤", "其他原因"];
-const L1 = ["", "行政管理", "財務會計", "技術研發", "人力資源", "業務行銷"];
-const L2: Record<string, string[]> = {
-  行政管理: ["", "文書管理", "庶務管理", "資產管理"],
-  技術研發: ["", "系統架構", "產品開發", "資安管理"],
-  人力資源: ["", "招募甄選", "教育訓練", "薪酬福利"],
-};
+const REJECT_TYPES = ["格式不符", "內容需修正", "簽核流程不完整", "附件不足", "分類錯誤", "其他原因"];
 
 export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["basic"]));
   const [rejectMode, setRejectMode] = useState<RejectMode>("none");
   const [rejectType, setRejectType] = useState("");
   const [rejectReason, setRejectReason] = useState("");
-  const [transferL1, setTransferL1] = useState("");
   const [zoom, setZoom] = useState(100);
   const [confirmed, setConfirmed] = useState(false);
+  const [completedAction, setCompletedAction] = useState<"approve" | "reject" | null>(null);
 
   function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
+    setExpanded((current) => {
+      const next = new Set(current);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   }
 
-  const canReject = rejectType && rejectReason.length >= 10;
-  const canTransfer = transferL1 !== "";
+  const canReject = rejectType.length > 0 && rejectReason.trim().length >= 10;
+  const canTransfer = rejectReason.trim().length >= 10;
 
   if (confirmed) {
     return (
       <DrawerShell onClose={onClose}>
-        <div className="flex-1 flex items-center justify-center flex-col gap-4 text-center px-8">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: "#F0FDFA" }}>
-            <CheckCircle2 size={36} style={{ color: "#0D9488" }} strokeWidth={1.5} />
+        <div className="flex flex-1 items-center justify-center px-8 text-center">
+          <div className="space-y-4">
+            <div
+              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+              style={{ backgroundColor: "#F0FDFA" }}
+            >
+              <CheckCircle2 size={36} style={{ color: "#0D9488" }} strokeWidth={1.5} />
+            </div>
+            <h3 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>
+              {completedAction === "reject"
+                ? role === "manager"
+                  ? "主管退回已完成"
+                  : "文管退回已完成"
+                : role === "manager"
+                  ? "主管簽核已完成"
+                  : "文管審核已完成"}
+            </h3>
+            <p className="text-sm text-gray-500">
+              此文件的簽核狀態已更新，關閉後可繼續下一步處理。
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-2 rounded-lg px-6 py-2 font-medium text-white"
+              style={{ backgroundColor: "#0D9488" }}
+            >
+              關閉
+            </button>
           </div>
-          <h3 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>
-            {role === "manager" ? "已核准，已通知文管審核" : "文件已核准上架"}
-          </h3>
-          <p className="text-gray-500 text-sm">SERP Q 系統已自動發送通知給下一關審核人員。</p>
-          <button onClick={onClose} className="mt-2 px-6 py-2 rounded-lg text-white font-medium" style={{ backgroundColor: "#0D9488" }}>
-            返回列表
-          </button>
         </div>
       </DrawerShell>
     );
@@ -62,193 +74,139 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
   return (
     <DrawerShell onClose={onClose}>
-      {/* Drawer header */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 flex-shrink-0" style={{ backgroundColor: "#0D9488" }}>
+      <div
+        className="flex items-center justify-between border-b border-gray-200 px-5 py-3"
+        style={{ backgroundColor: "#0D9488" }}
+      >
         <div>
-          <h2 className="text-white font-bold" style={{ fontSize: "14px" }}>
+          <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>
             {role === "manager" ? "主管簽核畫面" : "文管審核畫面"}
           </h2>
           <p className="text-teal-100" style={{ fontSize: "11px" }}>
-            {doc.signingNo || "SGN-2024-XXXX"} · {doc.name}
+            {doc.signingNo || "SGN-XXXX"} / {doc.name}
           </p>
         </div>
-        <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+        <button type="button" onClick={onClose} className="text-white/75 transition hover:text-white">
           <X size={18} />
         </button>
       </div>
 
-      {/* Body: left accordion + right preview */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left: accordion sections */}
-        <div className="overflow-y-auto border-r border-gray-200 bg-white" style={{ width: "340px", flexShrink: 0 }}>
-          {/* Sections */}
-          <AccordionSection id="basic" label="文件基本資料預覽" expanded={expanded} onToggle={toggle}>
+        <div className="w-[340px] shrink-0 overflow-y-auto border-r border-gray-200 bg-white">
+          <AccordionSection id="basic" label="文件基本資料" expanded={expanded} onToggle={toggle}>
             <InfoRow label="文件名稱" value={doc.name} />
             <InfoRow label="文件編號" value={doc.docNo} />
             <InfoRow label="版本" value={doc.version} />
             <InfoRow label="上傳者" value={`${doc.uploaderName} (${doc.uploaderCode})`} />
             <InfoRow label="上傳日期" value={doc.uploadDate} />
-            <InfoRow label="歸屬部門" value={doc.department} />
+            <InfoRow label="部門" value={doc.department} />
           </AccordionSection>
 
-          <AccordionSection id="files" label="檔案預覽" expanded={expanded} onToggle={toggle}>
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 bg-gray-50">
-              <div className="w-8 h-8 rounded flex items-center justify-center bg-red-100 text-red-600 font-bold" style={{ fontSize: "10px" }}>PDF</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-700 truncate" style={{ fontSize: "12px", fontWeight: 500 }}>{doc.name}.pdf</p>
-                <p className="text-gray-400" style={{ fontSize: "10px" }}>3.2 MB · 已上傳</p>
-              </div>
-            </div>
+          <AccordionSection id="level" label="文件階級" expanded={expanded} onToggle={toggle}>
+            <InfoRow label="階級" value={LEVEL_META[doc.level].label} />
+            <InfoRow label="說明" value={LEVEL_META[doc.level].description} />
           </AccordionSection>
 
-          <AccordionSection id="tree" label="文件知識樹分層預覽" expanded={expanded} onToggle={toggle}>
-            {["第一層", "第二層", "第三層", "第四層"].map((l, i) => (
-              <InfoRow key={l} label={l} value={["技術研發", "系統架構", "架構設計", "v3.0"][i]} />
-            ))}
-          </AccordionSection>
-
-          <AccordionSection id="dept" label="文件所屬部門預覽" expanded={expanded} onToggle={toggle}>
-            {["群", "處", "部門", "組別"].map((l, i) => (
-              <InfoRow key={l} label={l} value={["技術事業群", "軟體開發處", "前端開發部", "UI/UX組"][i]} />
-            ))}
-          </AccordionSection>
-
-          <AccordionSection id="level" label="文件階層預覽" expanded={expanded} onToggle={toggle}>
-            <InfoRow label="文件階級" value={LEVEL_META[doc.level].label} />
-            <InfoRow label="分類說明" value={LEVEL_META[doc.level].description} />
-          </AccordionSection>
-
-          {/* Rejection form (conditional) */}
-          {rejectMode !== "none" && (
-            <div className="border-t-2 border-amber-200 bg-amber-50 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-amber-700 font-semibold" style={{ fontSize: "13px" }}>
-                  {rejectMode === "transfer" ? "移轉單位設定" : "退回原因填寫"}
-                </p>
-                <div className="flex gap-1">
-                  <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label="退回" />
-                  <ModeBtn active={rejectMode === "transfer"} onClick={() => setRejectMode("transfer")} label="移轉" />
-                </div>
+          <AccordionSection id="reject" label="退回設定" expanded={expanded} onToggle={toggle}>
+            <div className="space-y-3 p-1">
+              <div className="flex gap-1">
+                <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label="退回" />
+                <ModeBtn active={rejectMode === "transfer"} onClick={() => setRejectMode("transfer")} label="移轉" />
               </div>
 
-              {rejectMode === "return" && (
+              {rejectMode !== "none" && (
                 <>
                   <div>
-                    <label className="block text-amber-700 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>退回類別 <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                      <select
-                        value={rejectType}
-                        onChange={(e) => setRejectType(e.target.value)}
-                        className="w-full appearance-none px-3 py-2 pr-7 rounded-lg border border-amber-200 bg-white text-gray-700 focus:outline-none focus:border-amber-400 transition-all"
-                        style={{ fontSize: "12px" }}
-                      >
-                        <option value="">請選擇退回類別</option>
-                        {REJECT_TYPES.map((t) => <option key={t}>{t}</option>)}
-                      </select>
-                      <ChevronDown size={12} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                    </div>
+                    <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
+                      退回類別 <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      value={rejectType}
+                      onChange={(e) => setRejectType(e.target.value)}
+                      className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-gray-700 focus:border-amber-400 focus:outline-none"
+                      style={{ fontSize: "12px" }}
+                    >
+                      <option value="">請選擇退回類別</option>
+                      {REJECT_TYPES.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
+                    </select>
                   </div>
+
                   <div>
-                    <label className="block text-amber-700 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      備域說明（最少10字）<span className="text-red-500"> *</span>
+                    <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
+                      退回原因 <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       rows={3}
-                      placeholder="請詳細說明退回原因..."
-                      className="w-full px-3 py-2 rounded-lg border text-gray-700 placeholder:text-gray-400 focus:outline-none resize-none transition-all"
-                      style={{ fontSize: "12px", borderColor: rejectReason.length > 0 && rejectReason.length < 10 ? "#EF4444" : "#FCD34D" }}
+                      placeholder="請詳細說明退回原因"
+                      className="w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"
+                      style={{ fontSize: "12px" }}
                     />
-                    <p className="text-right text-gray-400 mt-0.5" style={{ fontSize: "10px" }}>{rejectReason.length} 字</p>
+                    <p className="mt-0.5 text-right text-[10px] text-gray-400">{rejectReason.length} 字</p>
                   </div>
                 </>
               )}
-
-              {rejectMode === "transfer" && (
-                <>
-                  <p className="text-amber-700" style={{ fontSize: "11px" }}>文件知識樹分層選擇</p>
-                  {["第一層*", "第二層*", "第三層*", "第四層*"].map((label, i) => (
-                    <div key={label}>
-                      <label className="block text-gray-600 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>{label}</label>
-                      <div className="relative">
-                        <select
-                          className="w-full appearance-none px-3 py-1.5 pr-7 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-teal-500 transition-all"
-                          style={{ fontSize: "12px" }}
-                          onChange={i === 0 ? (e) => setTransferL1(e.target.value) : undefined}
-                        >
-                          <option value="">請選擇 Item {i + 1}</option>
-                          {(i === 0 ? L1 : i === 1 ? (L2[transferL1] ?? []) : []).filter(Boolean).map((o) => <option key={o}>{o}</option>)}
-                        </select>
-                        <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                      </div>
-                    </div>
-                  ))}
-                  <p className="text-amber-700 mt-2" style={{ fontSize: "11px" }}>文件所屬部門填寫</p>
-                  {["第一層*", "第二層*", "第三層*", "第四層*"].map((label, i) => (
-                    <div key={`dept-${label}`}>
-                      <label className="block text-gray-600 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>{label}</label>
-                      <div className="relative">
-                        <select className="w-full appearance-none px-3 py-1.5 pr-7 rounded-lg border border-gray-200 bg-white text-gray-700 focus:outline-none focus:border-teal-500" style={{ fontSize: "12px" }}>
-                          <option>Item 0{i + 1}</option>
-                        </select>
-                        <ChevronDown size={11} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
             </div>
-          )}
+          </AccordionSection>
         </div>
 
-        {/* Right: document preview */}
-        <div className="flex-1 flex flex-col" style={{ backgroundColor: "#2D3748" }}>
-          {/* Preview toolbar */}
-          <div className="flex items-center justify-between px-4 py-2 border-b flex-shrink-0" style={{ backgroundColor: "#1A202C", borderColor: "#4A5568" }}>
-            <p className="text-gray-300 text-xs truncate">{doc.name} — 文件預覽</p>
+        <div className="flex flex-1 flex-col bg-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-600 bg-slate-900 px-4 py-2">
+            <p className="truncate text-xs text-slate-300">{doc.name} 預覽</p>
             <div className="flex items-center gap-2">
-              <button onClick={() => setZoom(z => Math.max(60, z - 10))} className="text-gray-400 hover:text-white transition-colors"><ZoomOut size={14} /></button>
-              <span className="text-gray-400 w-10 text-center" style={{ fontSize: "11px" }}>{zoom}%</span>
-              <button onClick={() => setZoom(z => Math.min(140, z + 10))} className="text-gray-400 hover:text-white transition-colors"><ZoomIn size={14} /></button>
+              <button type="button" onClick={() => setZoom((value) => Math.max(60, value - 10))} className="text-slate-400 transition hover:text-white">
+                <ZoomOut size={14} />
+              </button>
+              <span className="w-10 text-center text-[11px] text-slate-400">{zoom}%</span>
+              <button type="button" onClick={() => setZoom((value) => Math.min(140, value + 10))} className="text-slate-400 transition hover:text-white">
+                <ZoomIn size={14} />
+              </button>
             </div>
           </div>
-          {/* Page */}
-          <div className="flex-1 overflow-auto flex justify-center py-6 px-4">
-            <div className="bg-white rounded shadow-2xl p-8 space-y-4" style={{ width: `${zoom * 4}px`, minWidth: "320px", maxWidth: "560px" }}>
-              <div className="h-4 w-48 rounded bg-gray-800 mb-2" />
+
+          <div className="flex flex-1 items-start justify-center overflow-auto px-4 py-6">
+            <div
+              className="space-y-4 rounded bg-white p-8 shadow-2xl"
+              style={{ width: `${zoom * 4}px`, minWidth: "320px", maxWidth: "560px" }}
+            >
+              <div className="h-4 w-48 rounded bg-slate-800" />
               <div className="h-1 w-full rounded" style={{ backgroundColor: "#0D9488" }} />
-              {[100, 100, 80, 100, 75, 100, 85].map((w, i) => (
-                <div key={i} className="h-2 rounded bg-gray-200" style={{ width: `${w}%` }} />
+              {[100, 100, 80, 100, 75, 100, 85].map((w, index) => (
+                <div key={index} className="h-2 rounded bg-slate-200" style={{ width: `${w}%` }} />
               ))}
-              <div className="grid grid-cols-3 gap-2 border border-gray-200 rounded overflow-hidden">
-                {["項目", "說明", "狀態"].map((h) => (
-                  <div key={h} className="px-2 py-1.5 text-xs font-semibold text-white" style={{ backgroundColor: "#0D9488" }}>{h}</div>
+              <div className="grid grid-cols-3 gap-2 overflow-hidden rounded border border-slate-200">
+                {["欄位", "內容", "備註"].map((label) => (
+                  <div key={label} className="bg-teal-600 px-2 py-1.5 text-xs font-semibold text-white">
+                    {label}
+                  </div>
                 ))}
-                {[...Array(9)].map((_, i) => (
-                  <div key={i} className={`px-2 py-2 ${Math.floor(i / 3) % 2 ? "bg-gray-50" : "bg-white"}`}>
-                    <div className="h-1.5 rounded bg-gray-200" style={{ width: `${40 + (i % 3) * 20}%` }} />
+                {[...Array(9)].map((_, index) => (
+                  <div key={index} className={`px-2 py-2 ${Math.floor(index / 3) % 2 ? "bg-slate-50" : "bg-white"}`}>
+                    <div className="h-1.5 rounded bg-slate-200" style={{ width: `${40 + (index % 3) * 20}%` }} />
                   </div>
                 ))}
               </div>
-              {[100, 83, 100, 66].map((w, i) => (
-                <div key={i} className="h-2 rounded bg-gray-200" style={{ width: `${w}%` }} />
-              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer action bar */}
-      <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 bg-white flex-shrink-0">
+      <div className="flex items-center justify-between border-t border-gray-200 bg-white px-5 py-3">
         <button
-          onClick={() => setRejectMode(rejectMode === "none" ? "return" : "none")}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg border-2 transition-all"
+          type="button"
+          onClick={() => setRejectMode((current) => (current === "none" ? "return" : "none"))}
+          className="flex items-center gap-2 rounded-lg border-2 px-5 py-2 transition-all"
           style={{
             borderColor: rejectMode !== "none" ? "#EF4444" : "#E5E7EB",
             color: rejectMode !== "none" ? "#EF4444" : "#6B7280",
             backgroundColor: rejectMode !== "none" ? "#FEF2F2" : "transparent",
-            fontWeight: 600, fontSize: "13px",
+            fontWeight: 600,
+            fontSize: "13px",
           }}
         >
           <RotateCcw size={15} />
@@ -258,22 +216,33 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
         <div className="flex items-center gap-3">
           {rejectMode !== "none" && (
             <button
+              type="button"
               disabled={rejectMode === "return" ? !canReject : !canTransfer}
-              onClick={onReject}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg border-2 border-red-500 text-red-600 font-semibold transition-all hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              onClick={() => {
+                onReject(rejectReason);
+                setCompletedAction("reject");
+                setConfirmed(true);
+              }}
+              className="flex items-center gap-2 rounded-lg border-2 border-red-500 px-5 py-2 font-semibold text-red-600 transition-all hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
               style={{ fontSize: "13px" }}
             >
               {rejectMode === "transfer" ? <MoveRight size={15} /> : <RotateCcw size={15} />}
-              {rejectMode === "transfer" ? "送交文管審先行移轉" : "確認退回"}
+              {rejectMode === "transfer" ? "送交文管審" : "確認退回"}
             </button>
           )}
+
           <button
-            onClick={() => setConfirmed(true)}
-            className="flex items-center gap-2 px-6 py-2 rounded-lg text-white font-semibold transition-all hover:opacity-90 active:scale-95"
+            type="button"
+            onClick={() => {
+              onApprove();
+              setCompletedAction("approve");
+              setConfirmed(true);
+            }}
+            className="flex items-center gap-2 rounded-lg px-6 py-2 font-semibold text-white transition-all hover:opacity-90 active:scale-95"
             style={{ backgroundColor: "#0D9488", fontSize: "13px" }}
           >
             <CheckCircle2 size={15} />
-            {role === "manager" ? "同意 — 送往文管" : "核准上架"}
+            {role === "manager" ? "同意 - 送往文管" : "核准上架"}
           </button>
         </div>
       </div>
@@ -281,33 +250,47 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   );
 }
 
-function DrawerShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function DrawerShell({ children, onClose }: { children: ReactNode; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      {/* Drawer panel */}
-      <div className="relative ml-auto flex flex-col bg-white shadow-2xl" style={{ width: "min(95vw, 1100px)", height: "100vh" }}>
+      <div
+        className="relative ml-auto flex h-screen flex-col bg-white shadow-2xl"
+        style={{ width: "min(95vw, 1100px)" }}
+      >
         {children}
       </div>
     </div>
   );
 }
 
-function AccordionSection({ id, label, expanded, onToggle, children }: {
-  id: string; label: string; expanded: Set<string>; onToggle: (id: string) => void; children: React.ReactNode;
+function AccordionSection({
+  id,
+  label,
+  expanded,
+  onToggle,
+  children,
+}: {
+  id: string;
+  label: string;
+  expanded: Set<string>;
+  onToggle: (id: string) => void;
+  children: ReactNode;
 }) {
   const isOpen = expanded.has(id);
   return (
     <div className="border-b border-gray-100">
       <button
+        type="button"
         onClick={() => onToggle(id)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+        className="flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50"
       >
-        <span className="text-gray-700" style={{ fontSize: "12px", fontWeight: 600 }}>{label}</span>
+        <span className="text-gray-700" style={{ fontSize: "12px", fontWeight: 600 }}>
+          {label}
+        </span>
         {isOpen ? <ChevronDown size={14} className="text-gray-400" /> : <ChevronRight size={14} className="text-gray-400" />}
       </button>
-      {isOpen && <div className="px-4 pb-3 space-y-1.5">{children}</div>}
+      {isOpen && <div className="space-y-1.5 px-4 pb-3">{children}</div>}
     </div>
   );
 }
@@ -315,8 +298,12 @@ function AccordionSection({ id, label, expanded, onToggle, children }: {
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-3">
-      <span className="text-gray-400 flex-shrink-0" style={{ fontSize: "11px" }}>{label}</span>
-      <span className="text-gray-700 text-right" style={{ fontSize: "11px", fontWeight: 500 }}>{value}</span>
+      <span className="flex-shrink-0 text-gray-400" style={{ fontSize: "11px" }}>
+        {label}
+      </span>
+      <span className="text-right text-gray-700" style={{ fontSize: "11px", fontWeight: 500 }}>
+        {value}
+      </span>
     </div>
   );
 }
@@ -324,8 +311,9 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function ModeBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className="px-2 py-0.5 rounded text-xs font-medium transition-all"
+      className="rounded px-2 py-0.5 text-xs font-medium transition-all"
       style={{
         backgroundColor: active ? "#0D9488" : "#E5E7EB",
         color: active ? "#ffffff" : "#6B7280",

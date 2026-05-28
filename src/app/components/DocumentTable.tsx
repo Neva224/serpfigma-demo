@@ -32,23 +32,19 @@ type TablePanel =
   | { kind: "audit"; doc: DocumentRecord }
   | null;
 
-const STATUS_STYLES: Record<
-  DocumentStatus,
-  { bg: string; text: string; dot: string; label: string }
-> = {
+type WorkflowAuditEntry = {
+  action: string;
+  actor: string;
+  timestamp: string;
+  statusFrom: string;
+  statusTo: string;
+  comment?: string;
+};
+
+const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: string; label: string }> = {
   草稿: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
-  "待主管簽核": {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    dot: "bg-amber-500",
-    label: "待主管簽核",
-  },
-  "待文管審核": {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    dot: "bg-blue-500",
-    label: "待文管審核",
-  },
+  "待主管簽核": { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: "待主管簽核" },
+  "待文管審核": { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: "待文管審核" },
   上架: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
   退回: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
   作廢: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
@@ -101,15 +97,14 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
         <div className="flex items-center gap-3">
           <div>
             <p className="text-sm font-semibold text-slate-700">文件清單</p>
-            <p className="text-xs text-slate-400">
-              目前共 {docs.length} 筆，頁面顯示 {pageSize} 筆
-            </p>
+            <p className="text-xs text-slate-400">共 {docs.length} 筆，分頁顯示每頁 {pageSize} 筆</p>
           </div>
           <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
             共 {docs.length} 筆
           </span>
         </div>
         <button
+          type="button"
           onClick={onAdd}
           className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-500 active:scale-[0.98]"
         >
@@ -138,11 +133,11 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">
-                  {panel.kind === "version" ? "版本歷程" : "審核紀錄"}
+                  {panel.kind === "version" ? "版本歷程" : "稽核歷程"}
                 </p>
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">{panel.doc.name}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {panel.doc.docNo} ・ 版本 {panel.doc.version} ・ {panel.doc.status}
+                  {panel.doc.docNo} / {panel.doc.version} / {panel.doc.status}
                 </p>
               </div>
               <button
@@ -194,7 +189,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <button
                         type="button"
                         className="w-fit text-left text-sm font-semibold text-slate-800 transition hover:text-teal-700"
-                        onClick={() => setNotice(`已開啟「${doc.name}」的文件預覽（mock）。`)}
+                        onClick={() => setNotice(`已點選文件：${doc.name}`)}
                       >
                         {doc.name}
                       </button>
@@ -221,9 +216,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${status.bg} ${status.text}`}
-                    >
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${status.bg} ${status.text}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
                       {status.label}
                     </span>
@@ -245,7 +238,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <ActionButton
                         icon={<Download size={13} />}
                         label="下載"
-                        onClick={() => setNotice(`已觸發「${doc.name}」的下載（mock）。`)}
+                        onClick={() => setNotice(`已準備下載：${doc.name}`)}
                       />
                       <ActionButton
                         icon={<History size={13} />}
@@ -254,7 +247,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       />
                       <ActionButton
                         icon={<Clock3 size={13} />}
-                        label="審核紀錄"
+                        label="稽核歷程"
                         onClick={() => setPanel({ kind: "audit", doc })}
                       />
                       {needsApproval && (
@@ -268,7 +261,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       {canReEdit && (
                         <ActionButton
                           icon={<FileText size={13} />}
-                          label="重新編輯"
+                          label="重新編修"
                           warn
                           onClick={() => onReEdit(doc)}
                         />
@@ -282,7 +275,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             {pagedDocs.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-16 text-center text-sm text-slate-400">
-                  找不到符合條件的文件
+                  目前沒有符合條件的文件
                 </td>
               </tr>
             )}
@@ -314,29 +307,13 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             <span className="font-semibold text-slate-700">{docs.length}</span> 筆
           </div>
           <div className="flex items-center gap-1">
-            <PagerButton
-              icon={<ChevronsLeft size={14} />}
-              disabled={safePage === 1}
-              onClick={() => gotoPage(1)}
-            />
-            <PagerButton
-              icon={<ChevronLeft size={14} />}
-              disabled={safePage === 1}
-              onClick={() => gotoPage(safePage - 1)}
-            />
+            <PagerButton icon={<ChevronsLeft size={14} />} disabled={safePage === 1} onClick={() => gotoPage(1)} />
+            <PagerButton icon={<ChevronLeft size={14} />} disabled={safePage === 1} onClick={() => gotoPage(safePage - 1)} />
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
               第 {safePage} / {totalPages} 頁
             </div>
-            <PagerButton
-              icon={<ChevronRight size={14} />}
-              disabled={safePage === totalPages}
-              onClick={() => gotoPage(safePage + 1)}
-            />
-            <PagerButton
-              icon={<ChevronsRight size={14} />}
-              disabled={safePage === totalPages}
-              onClick={() => gotoPage(totalPages)}
-            />
+            <PagerButton icon={<ChevronRight size={14} />} disabled={safePage === totalPages} onClick={() => gotoPage(safePage + 1)} />
+            <PagerButton icon={<ChevronsRight size={14} />} disabled={safePage === totalPages} onClick={() => gotoPage(totalPages)} />
           </div>
         </div>
       </div>
@@ -402,10 +379,10 @@ function PagerButton({
 
 function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
   const items = [
-    { version: doc.version, date: doc.uploadDate, title: "目前版本", note: "最新上傳文件版本。", active: true },
-    { version: "v1.2", date: "2026-04-18", title: "歷史版本", note: "前一版內容與調整紀錄。" },
-    { version: "v1.1", date: "2026-03-09", title: "歷史版本", note: "過往修訂內容。" },
-    { version: "v1.0", date: "2026-02-12", title: "初始版本", note: "文件初版。" },
+    { version: doc.version, date: doc.uploadDate, title: "目前版本", note: "最新版本，已在清單中顯示", active: true },
+    { version: "v1.2", date: "2026-04-18", title: "前一版本", note: "內容調整與文字修正" },
+    { version: "v1.1", date: "2026-03-09", title: "前一版本", note: "補充細節與格式更新" },
+    { version: "v1.0", date: "2026-02-12", title: "初版", note: "文件首次建立" },
   ];
 
   return (
@@ -441,32 +418,21 @@ function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
 }
 
 function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
-  const items = [
-    {
-      time: `${doc.uploadDate} 09:18`,
-      actor: doc.uploaderName,
-      action: "建立草稿",
-      note: "文件已建立並進入文件管理流程。",
-    },
-    {
-      time: `${doc.uploadDate} 11:05`,
-      actor: "系統",
-      action: "送出簽核",
-      note: "文件已送往主管簽核。",
-    },
-    {
-      time: "2026-05-06 15:42",
-      actor: "文管中心",
-      action: "審核紀錄",
-      note: "已完成版本與欄位確認。",
-    },
-    {
-      time: "2026-05-07 10:10",
-      actor: "系統",
-      action: "狀態更新",
-      note: "文件狀態已更新。",
-    },
-  ];
+  const workflowDoc = doc as DocumentRecord & { history?: WorkflowAuditEntry[] };
+  const items =
+    workflowDoc.history && workflowDoc.history.length > 0
+      ? workflowDoc.history.map((entry) => ({
+          time: entry.timestamp.slice(0, 16).replace("T", " "),
+          actor: entry.actor,
+          action: entry.action,
+          note:
+            entry.comment ||
+            `${entry.statusFrom} → ${entry.statusTo}`,
+        }))
+      : [
+          { time: `${doc.uploadDate} 09:18`, actor: doc.uploaderName, action: "建立草稿", note: "文件建立並開始編修" },
+          { time: `${doc.uploadDate} 11:05`, actor: "系統", action: "送出簽核", note: "文件送往主管審核" },
+        ];
 
   return (
     <div className="space-y-3">
@@ -477,7 +443,7 @@ function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
               <p className="text-sm font-semibold text-slate-900">{item.action}</p>
               <p className="mt-1 text-sm text-slate-500">{item.note}</p>
               <p className="mt-3 text-xs text-slate-400">
-                {item.actor} ・ {item.time}
+                {item.actor} · {item.time}
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">

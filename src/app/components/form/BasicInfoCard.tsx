@@ -1,97 +1,158 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { User, CalendarDays, Tag, AlignLeft } from "lucide-react";
 
-export function BasicInfoCard() {
-  const [name, setName] = useState("");
-  const MAX = 30;
+export interface BasicInfoValue {
+  title: string;
+  ownerName: string;
+  validFrom: string;
+  validTo: string;
+  summary: string;
+  tags: string[];
+}
+
+interface BasicInfoCardProps {
+  initialValue?: BasicInfoValue;
+}
+
+export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
+  const [title, setTitle] = useState(initialValue?.title ?? "");
+  const [ownerName, setOwnerName] = useState(initialValue?.ownerName ?? "");
+  const [validFrom, setValidFrom] = useState(initialValue?.validFrom ?? "");
+  const [validTo, setValidTo] = useState(initialValue?.validTo ?? "");
+  const [summary, setSummary] = useState(initialValue?.summary ?? "");
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState(initialValue?.tags?.length ? initialValue.tags : ["制度", "流程", "2024"]);
+  const maxLength = 30;
+
+  function addTag(raw: string) {
+    const next = raw.trim();
+    if (!next) return;
+    setTags((current) => (current.includes(next) ? current : [...current, next]));
+  }
 
   return (
     <Card title="文件基本資料" icon="📄">
       <div className="space-y-5">
-        {/* 文件名稱 */}
         <Field label="文件名稱" required>
           <div className="relative">
             <input
               type="text"
-              maxLength={MAX}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              name="title"
+              maxLength={maxLength}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="請輸入文件名稱"
-              className="w-full px-4 py-2.5 pr-16 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all"
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 pr-16 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-              {name.length}/{MAX}
+            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+              {title.length}/{maxLength}
             </span>
           </div>
         </Field>
 
-        {/* 文件擁有者 */}
-        <Field label="文件擁有者" required>
+        <Field label="文件負責人" required>
           <div className="relative">
-            <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <User size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="請輸入姓名或員工編號搜尋"
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all"
+              name="ownerName"
+              value={ownerName}
+              onChange={(e) => setOwnerName(e.target.value)}
+              placeholder="請輸入負責人姓名或代碼"
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none"
             />
           </div>
         </Field>
 
-        {/* 有效區間 */}
-        <Field label="有效區間" required>
+        <Field label="生效日期" required>
           <div className="grid grid-cols-2 gap-3">
             <div className="relative">
-              <CalendarDays size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <CalendarDays
+                size={15}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="date"
-                className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all"
+                name="validFrom"
+                value={validFrom}
+                onChange={(e) => setValidFrom(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-700 transition-all focus:border-teal-500 focus:bg-white focus:outline-none"
               />
             </div>
             <div className="relative">
-              <CalendarDays size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <CalendarDays
+                size={15}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="date"
-                className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-700 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all"
+                name="validTo"
+                value={validTo}
+                onChange={(e) => setValidTo(e.target.value)}
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-3 text-sm text-gray-700 transition-all focus:border-teal-500 focus:bg-white focus:outline-none"
               />
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+          <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-400">
             <CalendarDays size={11} />
-            請選擇文件生效的起始與截止日期
+            可輸入文件的起訖生效期間
           </p>
         </Field>
 
-        {/* 摘要 */}
-        <Field label="摘要">
+        <Field label="摘要說明">
           <div className="relative">
-            <AlignLeft size={14} className="absolute left-3.5 top-3 text-gray-400 pointer-events-none" />
+            <AlignLeft
+              size={14}
+              className="pointer-events-none absolute left-3.5 top-3 text-gray-400"
+            />
             <textarea
               rows={3}
-              placeholder="請輸入文件摘要說明（選填）"
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all resize-none"
+              name="summary"
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              placeholder="請輸入文件用途、適用範圍或補充說明"
+              className="w-full resize-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 pl-9 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none"
             />
           </div>
         </Field>
 
-        {/* 標籤 */}
-        <Field label="標籤">
+        <Field label="關鍵字">
           <div className="relative">
-            <Tag size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Tag
+              size={14}
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+            />
             <input
               type="text"
-              placeholder="輸入標籤後按 Enter 新增，例如：財務、年度報告"
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-800 placeholder:text-gray-400 text-sm focus:outline-none focus:border-teal-500 focus:bg-white transition-all"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addTag(tagInput);
+                  setTagInput("");
+                }
+              }}
+              placeholder="輸入關鍵字後可按 Enter 新增"
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none"
             />
           </div>
-          <div className="flex flex-wrap gap-1.5 mt-2">
-            {["財務", "年度報告", "2024"].map((tag) => (
+          <input type="hidden" name="tags" value={tags.join(",")} />
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium"
+                className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
                 style={{ backgroundColor: "#0D948818", color: "#0D9488" }}
               >
                 {tag}
-                <button className="hover:text-red-400 transition-colors leading-none">×</button>
+                <button
+                  type="button"
+                  className="leading-none hover:text-red-400"
+                  onClick={() => setTags((current) => current.filter((item) => item !== tag))}
+                >
+                  ×
+                </button>
               </span>
             ))}
           </div>
@@ -108,16 +169,16 @@ export function Card({
 }: {
   title: string;
   icon?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100">
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
         {icon && <span className="text-lg leading-none">{icon}</span>}
         <h2 className="text-gray-800" style={{ fontSize: "15px", fontWeight: 700 }}>
           {title}
         </h2>
-        <div className="flex-1 h-px bg-gray-100 ml-2" />
+        <div className="ml-2 h-px flex-1 bg-gray-100" />
       </div>
       <div className="px-6 py-5">{children}</div>
     </div>
@@ -131,13 +192,13 @@ export function Field({
 }: {
   label: string;
   required?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div>
-      <label className="flex items-center gap-0.5 text-sm text-gray-600 mb-1.5" style={{ fontWeight: 600 }}>
+      <label className="mb-1.5 flex items-center gap-0.5 text-sm text-gray-600" style={{ fontWeight: 600 }}>
         {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
       </label>
       {children}
     </div>

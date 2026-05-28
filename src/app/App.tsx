@@ -1,33 +1,49 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Toaster, toast } from "sonner";
 import { Header } from "./components/Header";
 import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
-import { SAMPLE_DOCS, type DocRecord } from "./components/DocumentTable";
-import { Toaster, toast } from "sonner";
+import { SAMPLE_DOCS } from "./components/document-management/mockData";
+import {
+  applyWorkflowDecision,
+  buildInitialNotifications,
+  buildInitialWorkflowDocuments,
+  createDemoUser,
+  markNotificationRead,
+  submitDocument,
+  type ApprovalStage,
+  type WorkflowDocument,
+  type WorkflowNotification,
+  type WorkflowUser,
+} from "./workflow/workflowState";
+import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
+
+const INITIAL_DOCUMENTS = buildInitialWorkflowDocuments(SAMPLE_DOCS);
 
 interface ApprovalTarget {
-  doc: DocRecord;
-  role: "manager" | "docadmin";
+  docId: number;
+  stage: ApprovalStage;
 }
 
 export default function App() {
+  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(), []);
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
+  const [documents, setDocuments] = useState<WorkflowDocument[]>(() => INITIAL_DOCUMENTS);
+  const [notifications, setNotifications] = useState<WorkflowNotification[]>(() =>
+    buildInitialNotifications(INITIAL_DOCUMENTS),
+  );
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
-  const [formDoc, setFormDoc] = useState<DocRecord | null>(null);
+  const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
 
-  function openApproval(docId: number, role: "manager" | "docadmin") {
-    const doc = SAMPLE_DOCS.find((item) => item.id === docId);
-    if (doc) setApproval({ doc, role });
+  const approvalDoc = approval ? documents.find((item) => item.id === approval.docId) ?? null : null;
+
+  function openApproval(docId: number, stage: ApprovalStage) {
+    setApproval({ docId, stage });
   }
 
-  function openReEdit(doc: DocRecord) {
-    const draftDoc = SAMPLE_DOCS.find((item) => item.id === doc.id);
-    if (draftDoc) {
-      draftDoc.status = "退回";
-    }
-    setFormDoc({ ...doc, status: "退回" });
+  function openReEdit(doc: WorkflowDocument) {
+    setFormDoc(doc);
     setView({ kind: "documentUpload" });
-    toast.success(`已將「${doc.name}」切換為退回狀態，開始重新編輯。`);
   }
 
   function navigateTo(nextScreen: string) {
@@ -44,6 +60,68 @@ export default function App() {
     setFormDoc(null);
   }
 
+  function handleNotificationClick(notification: WorkflowNotification) {
+    setNotifications((current) => markNotificationRead(current, notification.id));
+
+    if (notification.type === "manager_approval_pending" || notification.type === "docadmin_approval_pending") {
+      openApproval(notification.docId, notification.targetStage);
+      return;
+    }
+
+    if (notification.type === "rejected") {
+      const doc = documents.find((item) => item.id === notification.docId);
+      if (doc) openReEdit(doc);
+      return;
+    }
+
+    if (notification.type === "published" || notification.type === "voided") {
+      setView(OVERVIEW_VIEW);
+    }
+  }
+
+  function handleFormSubmit(payload: DocumentFormSubmitPayload) {
+    const result = submitDocument(documents, notifications, currentUser, {
+      ...payload,
+      uploaderName: currentUser.name,
+      uploaderCode: currentUser.code,
+      editingDocId: formDoc?.id ?? null,
+      existingDoc: formDoc,
+    });
+
+    setDocuments((current) => {
+      const nextDocs = current.some((item) => item.id === result.document.id)
+        ? current.map((item) => (item.id === result.document.id ? result.document : item))
+        : [...current, result.document];
+      return nextDocs;
+    });
+    setNotifications((current) => [...current, result.notification]);
+    setFormDoc(null);
+    setView(OVERVIEW_VIEW);
+    toast.success(formDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
+  }
+
+  function handleApproveDecision(action: "approve" | "reject", comment?: string) {
+    if (!approvalDoc || !approval) return;
+
+    const result = applyWorkflowDecision(documents, notifications, {
+      doc: approvalDoc,
+      stage: approval.stage,
+      action,
+      actor: currentUser,
+      ...(comment ? { comment } : {}),
+    });
+
+    setDocuments(result.documents);
+    setNotifications(result.notifications);
+    if (result.document.status === "退回") {
+      toast.success("文件已退回，請重新編輯");
+    } else if (result.document.status === "上架") {
+      toast.success("文件已審核通過並上架");
+    } else {
+      toast.success("簽核狀態已更新");
+    }
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
       <Toaster position="top-right" richColors closeButton />
@@ -51,39 +129,36 @@ export default function App() {
         activeScreen={view.kind === "systemAdmin" ? "permissions" : "list"}
         onNavigate={navigateTo}
         onLogoClick={goHome}
-        onOpenApproval={openApproval}
-        onReEdit={(docId) => {
-          const doc = SAMPLE_DOCS.find((item) => item.id === docId);
-          if (doc) openReEdit(doc);
-        }}
+        notifications={notifications}
+        onNotificationClick={handleNotificationClick}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DocumentListPage
+          documents={documents}
           view={view}
           formDoc={formDoc}
           onViewChange={setView}
+          onSubmitDocument={handleFormSubmit}
           onAdd={() => {
             setFormDoc(null);
             setView({ kind: "documentUpload" });
           }}
-          onApprove={(doc) =>
-            setApproval({
-              doc,
-              role: doc.status === "待主管簽核" ? "manager" : "docadmin",
-            })
-          }
+          onApprove={(doc) => {
+            const stage: ApprovalStage = doc.status === "待文管審核" ? "docadmin" : "manager";
+            openApproval(doc.id, stage);
+          }}
           onReEdit={openReEdit}
         />
       </div>
 
-      {approval && (
+      {approval && approvalDoc && (
         <ApprovalDrawer
-          doc={approval.doc}
-          role={approval.role}
+          doc={approvalDoc}
+          role={approval.stage}
           onClose={() => setApproval(null)}
-          onApprove={() => setApproval(null)}
-          onReject={() => setApproval(null)}
+          onApprove={() => handleApproveDecision("approve")}
+          onReject={(reason) => handleApproveDecision("reject", reason)}
         />
       )}
     </div>
