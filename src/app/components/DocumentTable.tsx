@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CheckCircle2,
   Clock3,
@@ -36,48 +36,23 @@ const STATUS_STYLES: Record<
   DocumentStatus,
   { bg: string; text: string; dot: string; label: string }
 > = {
-  上架: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    dot: "bg-emerald-500",
-    label: "上架",
+  草稿: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
+  "待主管簽核": {
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    dot: "bg-amber-500",
+    label: "待主管簽核",
   },
-  待主管審核: {
-    bg: "bg-orange-50",
-    text: "text-orange-700",
-    dot: "bg-orange-500",
-    label: "待主管審核",
-  },
-  待文管審核: {
+  "待文管審核": {
     bg: "bg-blue-50",
     text: "text-blue-700",
     dot: "bg-blue-500",
     label: "待文管審核",
   },
-  草稿: {
-    bg: "bg-gray-100",
-    text: "text-gray-600",
-    dot: "bg-gray-400",
-    label: "草稿",
-  },
-  退回: {
-    bg: "bg-red-50",
-    text: "text-red-700",
-    dot: "bg-red-500",
-    label: "退回",
-  },
-  下架: {
-    bg: "bg-orange-100",
-    text: "text-orange-800",
-    dot: "bg-orange-600",
-    label: "下架",
-  },
-  作廢: {
-    bg: "bg-slate-100",
-    text: "text-slate-600",
-    dot: "bg-slate-500",
-    label: "作廢",
-  },
+  上架: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
+  退回: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
+  作廢: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
+  下架: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: "下架" },
 };
 
 export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
@@ -120,34 +95,14 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
     setPageSizeInput(String(Math.min(100, Math.floor(parsed))));
   }
 
-  function handleTableClickCapture(event: MouseEvent<HTMLTableElement>) {
-    const target = event.target as HTMLElement | null;
-    const button = target?.closest("button");
-    const actionLabel = button?.textContent?.trim() ?? "";
-    if (actionLabel !== "版本歷程" && actionLabel !== "審核紀錄") return;
-
-    const row = button?.closest("tr");
-    if (!row) return;
-
-    const docNo = row.querySelector("td span")?.textContent?.trim() ?? "";
-    const name = row.querySelector("td:nth-child(2) button")?.textContent?.trim() ?? "";
-    const doc = docs.find((item) => item.docNo === docNo || item.name === name);
-    if (!doc) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-    setNotice(null);
-    setPanel({ kind: actionLabel === "版本歷程" ? "version" : "audit", doc });
-  }
-
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-3">
         <div className="flex items-center gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-700">文件表格</p>
+            <p className="text-sm font-semibold text-slate-700">文件清單</p>
             <p className="text-xs text-slate-400">
-              目前顯示 {docs.length} 筆，分頁每頁 {pageSize} 筆
+              目前共 {docs.length} 筆，頁面顯示 {pageSize} 筆
             </p>
           </div>
           <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
@@ -201,53 +156,30 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             </div>
 
             <div className="flex-1 overflow-y-auto bg-slate-50 px-6 py-5">
-              {panel.kind === "version" ? (
-                <VersionHistoryPanel doc={panel.doc} />
-              ) : (
-                <AuditHistoryPanel doc={panel.doc} />
-              )}
+              {panel.kind === "version" ? <VersionHistoryPanel doc={panel.doc} /> : <AuditHistoryPanel doc={panel.doc} />}
             </div>
           </div>
         </div>
       )}
 
       <div className="overflow-x-auto">
-        <table className="min-w-full text-left" onClickCapture={handleTableClickCapture}>
+        <table className="min-w-full text-left">
           <thead className="bg-teal-600">
             <tr>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                文件編號
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                文件名稱
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                文件階級
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                版本
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                狀態
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                上傳者
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                上傳日期
-              </th>
-              <th className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
-                操作
-              </th>
+              {["文件編號", "文件名稱", "文件階級", "版本", "狀態", "上傳者", "上傳日期", "操作"].map((header) => (
+                <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
+                  {header}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {pagedDocs.map((doc, index) => {
               const level = LEVEL_META[doc.level];
               const status = STATUS_STYLES[doc.status];
-              const needsApproval =
-                doc.status === "待主管審核" || doc.status === "待文管審核";
+              const needsApproval = doc.status === "待主管簽核" || doc.status === "待文管審核";
               const canReEdit = doc.status === "退回";
+
               return (
                 <tr
                   key={doc.id}
@@ -262,6 +194,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <button
                         type="button"
                         className="w-fit text-left text-sm font-semibold text-slate-800 transition hover:text-teal-700"
+                        onClick={() => setNotice(`已開啟「${doc.name}」的文件預覽（mock）。`)}
                       >
                         {doc.name}
                       </button>
@@ -277,7 +210,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-1">
                       <span className="inline-flex w-fit items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
-                        {level.short}
+                        {level.label}
                       </span>
                       <span className="text-xs text-slate-400">{level.description}</span>
                     </div>
@@ -301,16 +234,12 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                         {doc.uploaderName.slice(0, 1)}
                       </div>
                       <div className="leading-tight">
-                        <div className="text-sm font-medium text-slate-700">
-                          {doc.uploaderName}
-                        </div>
+                        <div className="text-sm font-medium text-slate-700">{doc.uploaderName}</div>
                         <div className="text-xs text-slate-400">{doc.uploaderCode}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">
-                    {doc.uploadDate}
-                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{doc.uploadDate}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <ActionButton
@@ -321,17 +250,17 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <ActionButton
                         icon={<History size={13} />}
                         label="版本歷程"
-                        onClick={() => setNotice(`已開啟「${doc.name}」的版本歷程（mock）。`)}
+                        onClick={() => setPanel({ kind: "version", doc })}
                       />
                       <ActionButton
                         icon={<Clock3 size={13} />}
                         label="審核紀錄"
-                        onClick={() => setNotice(`已開啟「${doc.name}」的審核紀錄（mock）。`)}
+                        onClick={() => setPanel({ kind: "audit", doc })}
                       />
                       {needsApproval && (
                         <ActionButton
                           icon={<CheckCircle2 size={13} />}
-                          label="審核"
+                          label="簽核"
                           primary
                           onClick={() => onApprove(doc)}
                         />
@@ -353,7 +282,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             {pagedDocs.length === 0 && (
               <tr>
                 <td colSpan={8} className="px-4 py-16 text-center text-sm text-slate-400">
-                  目前沒有符合條件的文件
+                  找不到符合條件的文件
                 </td>
               </tr>
             )}
@@ -363,36 +292,26 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
 
       <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2 text-sm text-slate-500">
-          <span>每頁顯示</span>
+          <span>每頁筆數</span>
           <input
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            aria-label="每頁顯示筆數"
+            aria-label="每頁筆數"
             value={pageSizeInput}
             onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => setPageSizeInput(e.target.value.replace(/\D/g, ""))}
             onBlur={handlePageSizeBlur}
             className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
           />
-          <select
-            value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-            className="hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
-          >
-            {[10].map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
           <span>筆</span>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
           <div className="text-sm text-slate-500">
-            目前第 <span className="font-semibold text-slate-700">{safePage}</span> 頁 / 共{" "}
-            <span className="font-semibold text-slate-700">{totalPages}</span> 頁
+            顯示 <span className="font-semibold text-slate-700">{start}</span> -{" "}
+            <span className="font-semibold text-slate-700">{end}</span> / 共{" "}
+            <span className="font-semibold text-slate-700">{docs.length}</span> 筆
           </div>
           <div className="flex items-center gap-1">
             <PagerButton
@@ -406,7 +325,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
               onClick={() => gotoPage(safePage - 1)}
             />
             <div className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
-              第 {safePage} 頁
+              第 {safePage} / {totalPages} 頁
             </div>
             <PagerButton
               icon={<ChevronRight size={14} />}
@@ -423,7 +342,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
       </div>
 
       <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
-        顯示範圍 {start} - {end}，共 {docs.length} 筆資料
+        顯示 {start} - {end}，共 {docs.length} 筆
       </div>
     </div>
   );
@@ -483,31 +402,10 @@ function PagerButton({
 
 function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
   const items = [
-    {
-      version: doc.version,
-      date: doc.uploadDate,
-      title: "目前版本",
-      note: "當前顯示於文件表格的版本。",
-      active: true,
-    },
-    {
-      version: "v1.2",
-      date: "2026-04-18",
-      title: "流程修訂",
-      note: "補充簽核條件與附件說明。",
-    },
-    {
-      version: "v1.1",
-      date: "2026-03-09",
-      title: "格式調整",
-      note: "調整章節順序與標題格式。",
-    },
-    {
-      version: "v1.0",
-      date: "2026-02-12",
-      title: "初版建立",
-      note: "建立文件初稿並送審。",
-    },
+    { version: doc.version, date: doc.uploadDate, title: "目前版本", note: "最新上傳文件版本。", active: true },
+    { version: "v1.2", date: "2026-04-18", title: "歷史版本", note: "前一版內容與調整紀錄。" },
+    { version: "v1.1", date: "2026-03-09", title: "歷史版本", note: "過往修訂內容。" },
+    { version: "v1.0", date: "2026-02-12", title: "初始版本", note: "文件初版。" },
   ];
 
   return (
@@ -548,25 +446,25 @@ function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
       time: `${doc.uploadDate} 09:18`,
       actor: doc.uploaderName,
       action: "建立草稿",
-      note: "文件完成上傳並進入編輯流程。",
+      note: "文件已建立並進入文件管理流程。",
     },
     {
       time: `${doc.uploadDate} 11:05`,
       actor: "系統",
-      action: "送出審核",
-      note: "文件已送出至主管審核。",
+      action: "送出簽核",
+      note: "文件已送往主管簽核。",
     },
     {
       time: "2026-05-06 15:42",
-      actor: "主管",
-      action: "審核中",
-      note: "已完成初步確認，等待下一步簽核。",
+      actor: "文管中心",
+      action: "審核紀錄",
+      note: "已完成版本與欄位確認。",
     },
     {
       time: "2026-05-07 10:10",
-      actor: "文管",
-      action: "紀錄更新",
-      note: "補充審核意見與版本備註。",
+      actor: "系統",
+      action: "狀態更新",
+      note: "文件狀態已更新。",
     },
   ];
 

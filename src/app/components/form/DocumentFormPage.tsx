@@ -31,9 +31,8 @@ export function DocumentFormPage({
     l4: "",
   });
   const [department, setDepartment] = useState<DepartmentSelection>({
-    regionName: "",
     companyName: "",
-    businessGroupName: "",
+    groupName: "",
     divisionName: "",
     departmentName: "",
     teamName: "",
@@ -46,21 +45,21 @@ export function DocumentFormPage({
   function handleSaveDraft() {
     toast.success(
       categoryPayload.categoryId
-        ? `Saved draft for ${categoryPayload.categoryId}`
-        : "Saved draft without category",
+        ? `已儲存草稿：${categoryPayload.categoryId}`
+        : "已儲存草稿",
     );
   }
 
   function handleSubmit() {
     toast.success(
       categoryPayload.categoryId
-        ? `Submitted document for ${categoryPayload.categoryId}`
-        : "Submitted document without category",
+        ? `已送出簽核：${categoryPayload.categoryId}`
+        : "已送出簽核",
     );
   }
 
   return (
-    <div className={`${embedded ? "pb-24" : "min-h-screen pb-24"}`} style={{ backgroundColor: "#F3F4F6" }}>
+    <div className={`${embedded ? "pb-8" : "min-h-screen pb-8"}`} style={{ backgroundColor: "#F3F4F6" }}>
       {showStandaloneHeader && (
         <header className="sticky top-0 z-20 border-b border-gray-100 bg-white shadow-sm">
           <div className="mx-auto flex h-16 max-w-screen-xl items-center justify-between px-6">
@@ -71,7 +70,7 @@ export function DocumentFormPage({
                   className="group flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-800"
                 >
                   <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
-                  返回上一頁
+                  返回
                 </button>
               ) : null}
               <div className="h-5 w-px bg-gray-200" />
@@ -107,8 +106,8 @@ export function DocumentFormPage({
           <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm font-semibold text-amber-700">編輯中</span>
-              <span className="text-sm text-amber-600">目前編輯文件：{editingDoc.name}</span>
-              <span className="ml-auto text-xs text-amber-500">此內容尚未送出，仍可調整後再提交</span>
+              <span className="text-sm text-amber-600">目前正在編輯文件：{editingDoc.name}</span>
+              <span className="ml-auto text-xs text-amber-500">未完成前請先儲存草稿再離開</span>
             </div>
           </div>
         )}
@@ -119,13 +118,13 @@ export function DocumentFormPage({
             <span>/</span>
             {canShowBackButton ? (
               <button onClick={onBack} className="hover:underline" style={{ color: "#0D9488" }}>
-                返回上一頁
+                文件管理
               </button>
             ) : (
-              <span className="text-gray-600">文件上傳專區</span>
+              <span className="text-gray-600">文件管理</span>
             )}
             <span>/</span>
-            <span className="text-gray-600">新增文件</span>
+            <span className="text-gray-600">文件上傳專區</span>
           </div>
 
           <div className="flex items-start justify-between gap-4">
@@ -136,11 +135,11 @@ export function DocumentFormPage({
               <p className="mt-0.5 text-sm text-gray-500">新增文件、選擇分類與送出簽核</p>
             </div>
 
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               {[
-                { n: 1, label: "填寫基本資料" },
-                { n: 2, label: "選擇分類" },
-                { n: 3, label: "上傳附件" },
+                { n: 1, label: "基本資料" },
+                { n: 2, label: "文件分類" },
+                { n: 3, label: "所屬部門" },
                 { n: 4, label: "送出簽核" },
               ].map(({ n, label }, i, arr) => (
                 <div key={n} className="flex items-center gap-2">
@@ -173,8 +172,8 @@ export function DocumentFormPage({
           <div className="rounded-2xl border border-teal-100 bg-teal-50/80 px-5 py-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">分類預覽</p>
-                <h3 className="mt-1 text-sm font-semibold text-slate-800">目前選擇的分類與 payload</h3>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">分類結果</p>
+                <h3 className="mt-1 text-sm font-semibold text-slate-800">目前選擇的 category payload</h3>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm">
                 categoryId {categoryPayload.categoryId || "尚未選擇"}
@@ -183,21 +182,17 @@ export function DocumentFormPage({
             <p className="mt-2 text-sm text-slate-600">
               {categoryPayload.categoryPath.length > 0
                 ? categoryPayload.categoryPath.join(" / ")
-                : "尚未選擇分類路徑"}
+                : "尚未選擇任何分類"}
             </p>
           </div>
         </div>
       </div>
 
-      <div
-        className={`border-t border-gray-200 bg-white shadow-lg ${
-          embedded ? "sticky bottom-0 z-20" : "fixed bottom-0 left-0 right-0 z-30"
-        }`}
-      >
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white shadow-sm">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-6 py-4">
           <div className="hidden items-center gap-2 text-xs text-gray-400 sm:flex">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400" />
-            送出前請再次確認必填欄位
+            底部操作列會跟著頁面內容捲動，請往下滑到底部使用。
           </div>
 
           <div className="ml-auto flex items-center gap-3">

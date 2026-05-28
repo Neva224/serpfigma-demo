@@ -1,16 +1,13 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { buildCategoryPayload as resolveCategoryPayload, CATEGORY_NODES, getCategoryLevelOptions, type CategorySelectionPath } from "../../data/catalogModels";
+import {
+  buildCategoryPayload as resolveCategoryPayload,
+  CATEGORY_NODES,
+  getCategoryLevelOptions,
+  type CategorySelectionPath,
+} from "../../data/catalogModels";
+import { LEVEL_OPTIONS } from "../document-management/mockData";
 import { Card, Field } from "./BasicInfoCard";
-
-const DOCUMENT_LEVEL_OPTIONS = [
-  { value: "level1", label: "第一層文件", short: "一層", description: "第一層文件" },
-  { value: "level2", label: "第二層文件", short: "二層", description: "第二層文件" },
-  { value: "level3", label: "第三層文件", short: "三層", description: "第三層文件" },
-  { value: "level4", label: "第四層文件", short: "四層", description: "第四層文件" },
-  { value: "level5", label: "第五層文件", short: "五層", description: "第五層文件" },
-  { value: "level6", label: "第六層文件", short: "六層", description: "第六層文件" },
-] as const;
 
 export interface ClassificationSelection extends CategorySelectionPath {
   l1: string;
@@ -29,7 +26,7 @@ interface Props {
 }
 
 export function ClassificationCard({ value, onChange }: Props) {
-  const [hierarchy, setHierarchy] = useState<string>("");
+  const [selectedLevel, setSelectedLevel] = useState("");
 
   const l1Options = getCategoryLevelOptions(CATEGORY_NODES, []);
   const l2Options = value.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1]) : [];
@@ -38,17 +35,18 @@ export function ClassificationCard({ value, onChange }: Props) {
   const payload = buildCategoryPayload(value);
 
   return (
-    <Card title="知識樹分類" icon="🗂️">
+    <Card title="文件分類與階級" icon="🗂">
       <div className="space-y-5">
         <div>
           <p className="mb-3 flex items-center gap-1 text-xs text-gray-400">
-            <span>選擇對應的知識樹路徑，系統會自動產生 categoryId / categoryPath。</span>
+            <span>知識樹分類使用 categoryId / categoryPath 對應，階級則使用下方統一 label。</span>
           </p>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="第一層分類" required>
               <Select
                 options={l1Options}
-                placeholder="請先選擇第一層分類"
+                placeholder="請選擇第一層分類"
                 value={value.l1}
                 onChange={(l1) => onChange({ l1, l2: "", l3: "", l4: "" })}
               />
@@ -85,7 +83,7 @@ export function ClassificationCard({ value, onChange }: Props) {
 
         {payload.categoryPath.length > 0 && (
           <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2">
-            <p className="mb-1 text-xs font-medium text-teal-600">已選分類路徑</p>
+            <p className="mb-1 text-xs font-medium text-teal-600">目前分類路徑</p>
             <div className="flex flex-wrap items-center gap-1.5">
               {payload.categoryPath.map((segment, index) => (
                 <span key={`${segment}-${index}`} className="flex items-center gap-1.5">
@@ -103,10 +101,10 @@ export function ClassificationCard({ value, onChange }: Props) {
         <div className="border-t border-gray-100 pt-5">
           <Field label="文件階級" required>
             <Select
-              options={DOCUMENT_LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+              options={LEVEL_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
               placeholder="請選擇文件階級"
-              value={hierarchy}
-              onChange={setHierarchy}
+              value={selectedLevel}
+              onChange={setSelectedLevel}
             />
           </Field>
           <p className="mt-1.5 text-xs text-gray-400">
@@ -139,7 +137,7 @@ function Select({
         disabled={disabled}
         className="w-full appearance-none rounded-lg border border-gray-200 px-4 py-2.5 pr-9 text-sm transition-all focus:border-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         style={{
-          backgroundColor: disabled ? "#F9FAFB" : "#F9FAFB",
+          backgroundColor: "#F9FAFB",
           color: value ? "#1F2937" : "#9CA3AF",
         }}
       >

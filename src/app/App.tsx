@@ -23,11 +23,11 @@ export default function App() {
   function openReEdit(doc: DocRecord) {
     const draftDoc = SAMPLE_DOCS.find((item) => item.id === doc.id);
     if (draftDoc) {
-      draftDoc.status = "草稿";
+      draftDoc.status = "退回";
     }
-    setFormDoc({ ...doc, status: "草稿" });
+    setFormDoc({ ...doc, status: "退回" });
     setView({ kind: "documentUpload" });
-    toast.success(`已將「${doc.name}」切換為草稿，開始重新編輯。`);
+    toast.success(`已將「${doc.name}」切換為退回狀態，開始重新編輯。`);
   }
 
   function navigateTo(nextScreen: string) {
@@ -70,7 +70,7 @@ export default function App() {
           onApprove={(doc) =>
             setApproval({
               doc,
-              role: doc.status === "待主管審核" ? "manager" : "docadmin",
+              role: doc.status === "待主管簽核" ? "manager" : "docadmin",
             })
           }
           onReEdit={openReEdit}

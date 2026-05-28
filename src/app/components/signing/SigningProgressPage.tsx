@@ -14,52 +14,56 @@ interface RecordItem {
   processUnitCode: string;
   company: string;
   status: SigningStatus;
-  cooperation: boolean;
-  returnable: boolean;
+  includeVoided: boolean;
+  includeReturned: boolean;
+  currentHandler: string;
 }
 
 const RECORDS: RecordItem[] = [
   {
-    signingNo: "SGN-2024-0094",
-    docName: "內部公版契約管理辦法",
-    requestor: "月靈",
+    signingNo: "SGN-2026-001",
+    docName: "文件管理程序書",
+    requestor: "王小明",
     requestorCode: "250341",
-    submitDate: "2024-04-05",
-    subject: "契約簽核申請",
+    submitDate: "2026-05-08",
+    subject: "文件管理",
     requestUnitCode: "1001",
     processUnitCode: "2001",
-    company: "雄獅旅遊",
+    company: "總管理處",
     status: "申請",
-    cooperation: true,
-    returnable: false,
+    includeVoided: true,
+    includeReturned: false,
+    currentHandler: "李文管",
   },
   {
-    signingNo: "SGN-2024-0093",
-    docName: "雄獅旅行社獎金辦法",
-    requestor: "Nancy",
+    signingNo: "SGN-2026-002",
+    docName: "請假申請單",
+    requestor: "陳怡君",
     requestorCode: "250343",
-    submitDate: "2024-03-28",
-    subject: "獎金制度調整",
+    submitDate: "2026-05-04",
+    subject: "請假申請",
     requestUnitCode: "1002",
     processUnitCode: "2001",
-    company: "雄獅旅遊",
+    company: "人資部",
     status: "會簽",
-    cooperation: true,
-    returnable: true,
+    includeVoided: true,
+    includeReturned: true,
+    currentHandler: "林主管",
   },
   {
-    signingNo: "SGN-2024-0092",
-    docName: "作業流程修訂版",
-    requestor: "Linda",
-    requestorCode: "250346",
-    submitDate: "2024-03-28",
-    subject: "流程修訂",
+    signingNo: "SGN-2026-003",
+    docName: "品質管理手冊",
+    requestor: "林建宏",
+    requestorCode: "250345",
+    submitDate: "2026-04-28",
+    subject: "品質管理",
     requestUnitCode: "1003",
     processUnitCode: "3001",
-    company: "雄獅旅遊",
+    company: "品保處",
     status: "結案",
-    cooperation: false,
-    returnable: true,
+    includeVoided: false,
+    includeReturned: true,
+    currentHandler: "系統",
   },
 ];
 
@@ -78,8 +82,8 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [statuses, setStatuses] = useState<SigningStatus[]>([]);
-  const [cooperationOnly, setCooperationOnly] = useState(false);
-  const [returnableOnly, setReturnableOnly] = useState(false);
+  const [includeVoidedOnly, setIncludeVoidedOnly] = useState(false);
+  const [includeReturnedOnly, setIncludeReturnedOnly] = useState(false);
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<RecordItem[]>([]);
 
@@ -94,8 +98,8 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
     if (processUnitCode) list = list.filter((item) => item.processUnitCode.includes(processUnitCode));
     if (company) list = list.filter((item) => item.company.includes(company));
     if (statuses.length > 0) list = list.filter((item) => statuses.includes(item.status));
-    if (cooperationOnly) list = list.filter((item) => item.cooperation);
-    if (returnableOnly) list = list.filter((item) => item.returnable);
+    if (includeVoidedOnly) list = list.filter((item) => item.includeVoided);
+    if (includeReturnedOnly) list = list.filter((item) => item.includeReturned);
     if (startDate) list = list.filter((item) => item.submitDate >= startDate);
     if (endDate) list = list.filter((item) => item.submitDate <= endDate);
     return list;
@@ -107,8 +111,8 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
     processUnitCode,
     company,
     statuses,
-    cooperationOnly,
-    returnableOnly,
+    includeVoidedOnly,
+    includeReturnedOnly,
     startDate,
     endDate,
   ]);
@@ -128,8 +132,8 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
     setStartDate("");
     setEndDate("");
     setStatuses([]);
-    setCooperationOnly(false);
-    setReturnableOnly(false);
+    setIncludeVoidedOnly(false);
+    setIncludeReturnedOnly(false);
     setResults([]);
     setSearched(false);
   }
@@ -146,18 +150,18 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
             <button type="button" onClick={onBack} className="hover:text-slate-600">
-              首頁
+              返回
             </button>
             <span>/</span>
             <button type="button" onClick={onBack} className="hover:text-slate-600">
-              文件管理
+              文件簽核
             </button>
             <span>/</span>
-            <span>文件簽核單進度查詢</span>
+            <span>文件簽核進度查詢</span>
           </div>
-          <h2 className="text-lg font-bold text-slate-800">文件簽核單進度查詢</h2>
-          <p className="mt-1 text-sm text-slate-500">查詢各類文件的簽核流程進度、狀態及處理人員</p>
-        </div>
+          <h2 className="text-lg font-bold text-slate-800">文件簽核進度查詢</h2>
+          <p className="mt-1 text-sm text-slate-500">查詢簽核單進度、目前處理人與文件處理狀態</p>
+        </div>
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -178,7 +182,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
               className={inputClass}
             />
           </Field>
-          <Field label="主旨">
+          <Field label="申請主旨">
             <input
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
@@ -206,7 +210,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
             <input
               value={company}
               onChange={(e) => setCompany(e.target.value)}
-              placeholder="請輸入公司名稱"
+              placeholder="請輸入公司"
               className={inputClass}
             />
           </Field>
@@ -216,7 +220,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
           <Field label="申請日期迄">
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputClass} />
           </Field>
-          <Field label="狀態">
+          <Field label="簽核狀態">
             <div className="flex flex-wrap gap-2">
               {statusOptions.map((status) => (
                 <button
@@ -237,8 +241,8 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-4">
-          <Toggle label="合作度" checked={cooperationOnly} onChange={setCooperationOnly} />
-          <Toggle label="合退件" checked={returnableOnly} onChange={setReturnableOnly} />
+          <Toggle label="含作廢" checked={includeVoidedOnly} onChange={setIncludeVoidedOnly} />
+          <Toggle label="含退件" checked={includeReturnedOnly} onChange={setIncludeReturnedOnly} />
 
           <div className="ml-auto flex gap-2">
             <button
@@ -247,7 +251,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
               className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               <RotateCcw size={14} />
-              清除
+              重設
             </button>
             <button
               type="button"
@@ -255,7 +259,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
               className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-teal-500"
             >
               <Search size={14} />
-              搜尋
+              查詢
             </button>
           </div>
         </div>
@@ -263,11 +267,11 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
 
       {!searched ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">
-          請先設定條件並按搜尋
+          請先設定條件後查詢
         </div>
       ) : results.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center text-sm text-slate-400">
-          查無符合條件的簽核資料
+          找不到符合條件的簽核資料
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -305,7 +309,7 @@ export function SigningProgressPage({ onBack, embedded = false }: Props) {
                       {item.status}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">待處理</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.currentHandler}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <button className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
                       <FileText size={12} />
@@ -350,11 +354,7 @@ function Toggle({
           : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
       }`}
     >
-      <span
-        className={`relative h-4 w-8 rounded-full transition ${
-          checked ? "bg-teal-600" : "bg-slate-300"
-        }`}
-      >
+      <span className={`relative h-4 w-8 rounded-full transition ${checked ? "bg-teal-600" : "bg-slate-300"}`}>
         <span
           className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition ${
             checked ? "left-4" : "left-0.5"
