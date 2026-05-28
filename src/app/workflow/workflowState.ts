@@ -18,6 +18,14 @@ export interface WorkflowHistoryEntry {
   comment?: string;
 }
 
+export interface WorkflowAttachment {
+  id: string;
+  name: string;
+  size: string;
+  type: string;
+  uploadedAt: string;
+}
+
 export interface WorkflowDocument extends DocumentRecord {
   ownerName?: string;
   summary?: string;
@@ -28,6 +36,7 @@ export interface WorkflowDocument extends DocumentRecord {
   approvalNo?: string;
   categoryId?: string;
   ownershipDepartmentPath?: string[];
+  attachments?: WorkflowAttachment[];
   isPublished?: boolean;
   history: WorkflowHistoryEntry[];
 }
@@ -61,6 +70,7 @@ export interface DocumentSubmissionInput {
   categoryId: string;
   categoryPath: string[];
   ownershipDepartmentPath: string[];
+  attachments: WorkflowAttachment[];
   level: DocumentLevel;
   uploaderName: string;
   uploaderCode: string;
@@ -125,6 +135,7 @@ export function buildInitialWorkflowDocuments(docs: DocumentRecord[]): WorkflowD
       createdAt: doc.uploadDate,
       updatedAt: doc.uploadDate,
       approvalNo: doc.signingNo,
+      attachments: [],
       isPublished: doc.status === "上架",
       ownershipDepartmentPath: normalizePath(doc.department.split(" / ")),
       history,
@@ -181,12 +192,12 @@ export function buildInitialNotifications(docs: WorkflowDocument[]): WorkflowNot
   return notifications;
 }
 
-export function createDemoUser(): WorkflowUser {
+export function createDemoUser(demoMode = true): WorkflowUser {
   return {
     id: "demo-user",
     name: "SERP Demo",
     code: "SERP-001",
-    roles: ["uploader", "system_admin", "signing_manager", "doc_admin"],
+    roles: demoMode ? ["uploader", "system_admin", "signing_manager", "doc_admin"] : ["uploader"],
   };
 }
 
@@ -258,6 +269,7 @@ function cloneDoc(doc: WorkflowDocument): WorkflowDocument {
     knowledgePath: doc.knowledgePath ? [...doc.knowledgePath] : undefined,
     history: [...doc.history],
     ownershipDepartmentPath: doc.ownershipDepartmentPath ? [...doc.ownershipDepartmentPath] : undefined,
+    attachments: doc.attachments ? [...doc.attachments] : undefined,
   };
 }
 
@@ -320,6 +332,7 @@ export function submitDocument(
         approvalNo: signingNo,
         categoryId: input.categoryId,
         ownershipDepartmentPath: [...input.ownershipDepartmentPath],
+        attachments: [...input.attachments],
         isPublished: false,
         history: [],
       };
@@ -343,6 +356,7 @@ export function submitDocument(
     approvalNo: signingNo,
     categoryId: input.categoryId,
     ownershipDepartmentPath: [...input.ownershipDepartmentPath],
+    attachments: [...input.attachments],
     isPublished: false,
     history: nextHistory,
     currentHandler: "待主管簽核",

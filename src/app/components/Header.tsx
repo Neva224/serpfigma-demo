@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, ChevronRight, FileText, Settings, X } from "lucide-react";
 import { type WorkflowNotification } from "../workflow/workflowState";
 
@@ -18,14 +18,21 @@ interface Props {
   onLogoClick: () => void;
   notifications: WorkflowNotification[];
   onNotificationClick: (notification: WorkflowNotification) => void;
+  notificationPulse: number;
 }
 
-export function Header({ onNavigate, onLogoClick, notifications, onNotificationClick }: Props) {
+export function Header({ onNavigate, onLogoClick, notifications, onNotificationClick, notificationPulse }: Props) {
   const [panelOpen, setPanelOpen] = useState(false);
   const unreadCount = useMemo(
     () => notifications.filter((notification) => notification.unread).length,
     [notifications],
   );
+
+  useEffect(() => {
+    if (notificationPulse > 0) {
+      setPanelOpen(true);
+    }
+  }, [notificationPulse]);
 
   function handleNotificationClick(item: WorkflowNotification) {
     setPanelOpen(false);

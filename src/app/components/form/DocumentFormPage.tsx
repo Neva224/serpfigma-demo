@@ -10,7 +10,7 @@ import {
 import { DepartmentCard, type DepartmentSelection } from "./DepartmentCard";
 import { FileUploadCard } from "./FileUploadCard";
 import type { DocumentLevel } from "../document-management/mockData";
-import type { WorkflowDocument } from "../../workflow/workflowState";
+import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
 
 export interface DocumentFormSubmitPayload {
   title: string;
@@ -22,6 +22,7 @@ export interface DocumentFormSubmitPayload {
   categoryId: string;
   categoryPath: string[];
   ownershipDepartmentPath: string[];
+  attachments: WorkflowAttachment[];
   level: DocumentLevel;
 }
 
@@ -57,11 +58,13 @@ export function DocumentFormPage({
     divisionName: "",
     departmentName: "",
   });
+  const [attachments, setAttachments] = useState<WorkflowAttachment[]>([]);
 
   useEffect(() => {
     if (!editingDoc) {
       setClassification({ l1: "", l2: "", l3: "", l4: "" });
       setDepartment({ companyName: "", groupName: "", divisionName: "", departmentName: "" });
+      setAttachments([]);
       return;
     }
 
@@ -80,6 +83,7 @@ export function DocumentFormPage({
       divisionName: path[2] ?? "",
       departmentName: path[3] ?? "",
     });
+    setAttachments(editingDoc.attachments ? [...editingDoc.attachments] : []);
   }, [editingDoc]);
 
   const categoryPayload = buildCategoryPayload(classification);
@@ -144,6 +148,7 @@ export function DocumentFormPage({
       categoryId,
       categoryPath,
       ownershipDepartmentPath,
+      attachments,
       level,
     });
 
@@ -267,7 +272,7 @@ export function DocumentFormPage({
           <BasicInfoCard key={editingDoc?.id ?? "new"} initialValue={initialBasicInfo} />
           <ClassificationCard key={`classification-${editingDoc?.id ?? "new"}`} value={classification} onChange={setClassification} initialLevel={editingDoc?.level} />
           <DepartmentCard value={department} onChange={setDepartment} />
-          <FileUploadCard />
+          <FileUploadCard files={attachments} onFilesChange={setAttachments} />
         </div>
 
         <div className="mx-auto max-w-screen-xl px-0 pt-5">

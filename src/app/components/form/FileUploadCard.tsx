@@ -1,21 +1,14 @@
 import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { CloudUpload, File, FileSpreadsheet, FileText, Trash2, CheckCircle2 } from "lucide-react";
 import { Card } from "./BasicInfoCard";
+import type { WorkflowAttachment } from "../../workflow/workflowState";
 
-interface UploadedFile {
-  id: number;
-  name: string;
-  size: string;
-  type: string;
-  progress: number;
+interface Props {
+  files: WorkflowAttachment[];
+  onFilesChange: (files: WorkflowAttachment[]) => void;
 }
 
-const SAMPLE_FILES: UploadedFile[] = [
-  { id: 1, name: "2024年度制度文件清單.pdf", size: "3.2 MB", type: "pdf", progress: 100 },
-];
-
-export function FileUploadCard() {
-  const [files, setFiles] = useState<UploadedFile[]>(SAMPLE_FILES);
+export function FileUploadCard({ files, onFilesChange }: Props) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const maxFiles = 10;
@@ -39,18 +32,20 @@ export function FileUploadCard() {
 
   function addFiles(raw: File[]) {
     if (files.length >= maxFiles) return;
-    const newEntries: UploadedFile[] = raw.slice(0, maxFiles - files.length).map((file, index) => ({
-      id: Date.now() + index,
+
+    const newEntries: WorkflowAttachment[] = raw.slice(0, maxFiles - files.length).map((file, index) => ({
+      id: `${Date.now()}-${index}`,
       name: file.name,
       size: formatSize(file.size),
       type: extension(file.name),
-      progress: 100,
+      uploadedAt: new Date().toISOString(),
     }));
-    setFiles((current) => [...current, ...newEntries]);
+
+    onFilesChange([...files, ...newEntries]);
   }
 
-  function removeFile(id: number) {
-    setFiles((current) => current.filter((file) => file.id !== id));
+  function removeFile(id: string) {
+    onFilesChange(files.filter((file) => file.id !== id));
   }
 
   return (
@@ -82,11 +77,11 @@ export function FileUploadCard() {
               />
             </div>
             <p className="mb-1 text-sm font-semibold text-gray-700">
-              點擊或拖曳檔案到這裡
-              <span className="text-teal-600"> 進行上傳</span>
+              拖曳檔案到這裡，或
+              <span className="text-teal-600"> 點擊上傳</span>
             </p>
             <p className="text-xs text-gray-400">
-              每個檔案上限 200MB，最多 {maxFiles} 個，支援 PDF、Word、Excel、PPT 與 ZIP
+              支援單檔 200MB，最多 {maxFiles} 個檔案，格式可為 PDF、Word、Excel、PPT 或 ZIP
             </p>
           </div>
 
@@ -95,7 +90,7 @@ export function FileUploadCard() {
               className="absolute inset-0 flex items-center justify-center rounded-xl"
               style={{ backgroundColor: "#0D948810", borderColor: "#0D9488" }}
             >
-              <p className="font-semibold text-teal-700">放開即可開始上傳</p>
+              <p className="font-semibold text-teal-700">放開即可上傳</p>
             </div>
           )}
         </div>
@@ -107,7 +102,7 @@ export function FileUploadCard() {
           {files.length > 0 && (
             <button
               type="button"
-              onClick={() => setFiles([])}
+              onClick={() => onFilesChange([])}
               className="text-red-400 transition-colors hover:text-red-600"
             >
               清除全部
@@ -124,14 +119,14 @@ export function FileUploadCard() {
         )}
 
         {files.length === 0 && (
-          <div className="py-4 text-center text-xs text-gray-400">目前尚未加入任何附件</div>
+          <div className="py-4 text-center text-xs text-gray-400">尚未上傳附件</div>
         )}
       </div>
     </Card>
   );
 }
 
-function FileRow({ file, onRemove }: { file: UploadedFile; onRemove: () => void }) {
+function FileRow({ file, onRemove }: { file: WorkflowAttachment; onRemove: () => void }) {
   const Icon = fileIcon(file.type);
   const color = fileColor(file.type);
 
@@ -145,12 +140,10 @@ function FileRow({ file, onRemove }: { file: UploadedFile; onRemove: () => void 
         <p className="truncate text-sm font-medium text-gray-800">{file.name}</p>
         <div className="mt-0.5 flex items-center gap-2">
           <span className="text-xs text-gray-400">{file.size}</span>
-          {file.progress === 100 && (
-            <span className="flex items-center gap-0.5 text-xs" style={{ color: "#10B981" }}>
-              <CheckCircle2 size={11} />
-              已完成
-            </span>
-          )}
+          <span className="flex items-center gap-0.5 text-xs" style={{ color: "#10B981" }}>
+            <CheckCircle2 size={11} />
+            已上傳
+          </span>
         </div>
       </div>
 

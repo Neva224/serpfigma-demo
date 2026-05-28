@@ -3,11 +3,8 @@ import { Toaster, toast } from "sonner";
 import { Header } from "./components/Header";
 import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
-import { SAMPLE_DOCS } from "./components/document-management/mockData";
 import {
   applyWorkflowDecision,
-  buildInitialNotifications,
-  buildInitialWorkflowDocuments,
   createDemoUser,
   markNotificationRead,
   submitDocument,
@@ -18,7 +15,8 @@ import {
 } from "./workflow/workflowState";
 import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
 
-const INITIAL_DOCUMENTS = buildInitialWorkflowDocuments(SAMPLE_DOCS);
+const INITIAL_DOCUMENTS: WorkflowDocument[] = [];
+const INITIAL_NOTIFICATIONS: WorkflowNotification[] = [];
 
 interface ApprovalTarget {
   docId: number;
@@ -26,12 +24,12 @@ interface ApprovalTarget {
 }
 
 export default function App() {
-  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(), []);
+  const demoMode = true;
+  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(demoMode), [demoMode]);
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
   const [documents, setDocuments] = useState<WorkflowDocument[]>(() => INITIAL_DOCUMENTS);
-  const [notifications, setNotifications] = useState<WorkflowNotification[]>(() =>
-    buildInitialNotifications(INITIAL_DOCUMENTS),
-  );
+  const [notifications, setNotifications] = useState<WorkflowNotification[]>(() => INITIAL_NOTIFICATIONS);
+  const [notificationPulse, setNotificationPulse] = useState(0);
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
 
@@ -95,6 +93,7 @@ export default function App() {
       return nextDocs;
     });
     setNotifications((current) => [...current, result.notification]);
+    setNotificationPulse((current) => current + 1);
     setFormDoc(null);
     setView(OVERVIEW_VIEW);
     toast.success(formDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
@@ -113,6 +112,10 @@ export default function App() {
 
     setDocuments(result.documents);
     setNotifications(result.notifications);
+    if (result.notification) {
+      setNotificationPulse((current) => current + 1);
+    }
+    setApproval(null);
     if (result.document.status === "退回") {
       toast.success("文件已退回，請重新編輯");
     } else if (result.document.status === "上架") {
@@ -131,6 +134,7 @@ export default function App() {
         onLogoClick={goHome}
         notifications={notifications}
         onNotificationClick={handleNotificationClick}
+        notificationPulse={notificationPulse}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">

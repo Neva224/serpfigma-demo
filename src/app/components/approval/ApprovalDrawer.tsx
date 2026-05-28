@@ -1,19 +1,28 @@
 import { useState, type ReactNode } from "react";
-import { CheckCircle2, ChevronDown, ChevronRight, MoveRight, RotateCcw, X, ZoomIn, ZoomOut } from "lucide-react";
-import { type DocRecord } from "../DocumentTable";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  MoveRight,
+  RotateCcw,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react";
 import { LEVEL_META } from "../document-management/mockData";
+import type { WorkflowDocument } from "../../workflow/workflowState";
 
 type RejectMode = "none" | "return" | "transfer";
 
 interface Props {
-  doc: DocRecord;
+  doc: WorkflowDocument;
   role: "manager" | "docadmin";
   onClose: () => void;
   onApprove: () => void;
   onReject: (reason: string) => void;
 }
 
-const REJECT_TYPES = ["格式不符", "內容需修正", "簽核流程不完整", "附件不足", "分類錯誤", "其他原因"];
+const REJECT_TYPES = ["內容不符", "格式不正確", "資料缺漏", "權責不明", "附件不足", "其他"];
 
 export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["basic"]));
@@ -34,6 +43,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
   const canReject = rejectType.length > 0 && rejectReason.trim().length >= 10;
   const canTransfer = rejectReason.trim().length >= 10;
+  const attachments = doc.attachments ?? [];
 
   if (confirmed) {
     return (
@@ -49,14 +59,14 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             <h3 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>
               {completedAction === "reject"
                 ? role === "manager"
-                  ? "主管退回已完成"
-                  : "文管退回已完成"
+                  ? "文件已退回主管"
+                  : "文件已退回文管"
                 : role === "manager"
-                  ? "主管簽核已完成"
-                  : "文管審核已完成"}
+                  ? "主管簽核完成"
+                  : "文管審核完成"}
             </h3>
             <p className="text-sm text-gray-500">
-              此文件的簽核狀態已更新，關閉後可繼續下一步處理。
+              已完成本次處理，文件狀態與通知已同步更新，可直接返回查看下一步流程。
             </p>
             <button
               type="button"
@@ -80,7 +90,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
       >
         <div>
           <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>
-            {role === "manager" ? "主管簽核畫面" : "文管審核畫面"}
+            {role === "manager" ? "主管簽核" : "文管審核"}
           </h2>
           <p className="text-teal-100" style={{ fontSize: "11px" }}>
             {doc.signingNo || "SGN-XXXX"} / {doc.name}
@@ -93,13 +103,13 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
       <div className="flex flex-1 overflow-hidden">
         <div className="w-[340px] shrink-0 overflow-y-auto border-r border-gray-200 bg-white">
-          <AccordionSection id="basic" label="文件基本資料" expanded={expanded} onToggle={toggle}>
+          <AccordionSection id="basic" label="基本資料" expanded={expanded} onToggle={toggle}>
             <InfoRow label="文件名稱" value={doc.name} />
             <InfoRow label="文件編號" value={doc.docNo} />
             <InfoRow label="版本" value={doc.version} />
             <InfoRow label="上傳者" value={`${doc.uploaderName} (${doc.uploaderCode})`} />
             <InfoRow label="上傳日期" value={doc.uploadDate} />
-            <InfoRow label="部門" value={doc.department} />
+            <InfoRow label="所屬部門" value={doc.department} />
           </AccordionSection>
 
           <AccordionSection id="level" label="文件階級" expanded={expanded} onToggle={toggle}>
@@ -107,7 +117,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             <InfoRow label="說明" value={LEVEL_META[doc.level].description} />
           </AccordionSection>
 
-          <AccordionSection id="reject" label="退回設定" expanded={expanded} onToggle={toggle}>
+          <AccordionSection id="reject" label="退回處理" expanded={expanded} onToggle={toggle}>
             <div className="space-y-3 p-1">
               <div className="flex gap-1">
                 <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label="退回" />
@@ -118,7 +128,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                 <>
                   <div>
                     <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      退回類別 <span className="text-red-500">*</span>
+                      退回原因類型<span className="text-red-500">*</span>
                     </label>
                     <select
                       value={rejectType}
@@ -126,7 +136,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                       className="w-full rounded-lg border border-amber-200 bg-white px-3 py-2 text-gray-700 focus:border-amber-400 focus:outline-none"
                       style={{ fontSize: "12px" }}
                     >
-                      <option value="">請選擇退回類別</option>
+                      <option value="">請選擇退回原因</option>
                       {REJECT_TYPES.map((item) => (
                         <option key={item} value={item}>
                           {item}
@@ -137,13 +147,13 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
                   <div>
                     <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      退回原因 <span className="text-red-500">*</span>
+                      退回說明<span className="text-red-500">*</span>
                     </label>
                     <textarea
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       rows={3}
-                      placeholder="請詳細說明退回原因"
+                      placeholder="請輸入退回原因與修改建議"
                       className="w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"
                       style={{ fontSize: "12px" }}
                     />
@@ -159,11 +169,19 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
           <div className="flex items-center justify-between border-b border-slate-600 bg-slate-900 px-4 py-2">
             <p className="truncate text-xs text-slate-300">{doc.name} 預覽</p>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setZoom((value) => Math.max(60, value - 10))} className="text-slate-400 transition hover:text-white">
+              <button
+                type="button"
+                onClick={() => setZoom((value) => Math.max(60, value - 10))}
+                className="text-slate-400 transition hover:text-white"
+              >
                 <ZoomOut size={14} />
               </button>
               <span className="w-10 text-center text-[11px] text-slate-400">{zoom}%</span>
-              <button type="button" onClick={() => setZoom((value) => Math.min(140, value + 10))} className="text-slate-400 transition hover:text-white">
+              <button
+                type="button"
+                onClick={() => setZoom((value) => Math.min(140, value + 10))}
+                className="text-slate-400 transition hover:text-white"
+              >
                 <ZoomIn size={14} />
               </button>
             </div>
@@ -171,25 +189,74 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
           <div className="flex flex-1 items-start justify-center overflow-auto px-4 py-6">
             <div
-              className="space-y-4 rounded bg-white p-8 shadow-2xl"
-              style={{ width: `${zoom * 4}px`, minWidth: "320px", maxWidth: "560px" }}
+              className="space-y-4 rounded bg-white p-6 shadow-2xl"
+              style={{ width: `${zoom * 4}px`, minWidth: "360px", maxWidth: "720px" }}
             >
-              <div className="h-4 w-48 rounded bg-slate-800" />
-              <div className="h-1 w-full rounded" style={{ backgroundColor: "#0D9488" }} />
-              {[100, 100, 80, 100, 75, 100, 85].map((w, index) => (
-                <div key={index} className="h-2 rounded bg-slate-200" style={{ width: `${w}%` }} />
-              ))}
-              <div className="grid grid-cols-3 gap-2 overflow-hidden rounded border border-slate-200">
-                {["欄位", "內容", "備註"].map((label) => (
-                  <div key={label} className="bg-teal-600 px-2 py-1.5 text-xs font-semibold text-white">
-                    {label}
+              <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">實際文件內容</p>
+                  <h3 className="mt-1 truncate text-lg font-semibold text-slate-900">{doc.name}</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {doc.signingNo || "SGN-XXXX"} / {doc.docNo}
+                  </p>
+                </div>
+                <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
+                  {doc.status}
+                </span>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-2">
+                <PreviewField label="文件階級" value={LEVEL_META[doc.level].label} />
+                <PreviewField label="文件版本" value={doc.version} />
+                <PreviewField label="上傳者" value={`${doc.uploaderName} (${doc.uploaderCode})`} />
+                <PreviewField label="上傳日期" value={doc.uploadDate} />
+                <PreviewField
+                  label="分類路徑"
+                  value={(doc.categoryPath ?? doc.knowledgePath ?? []).join(" / ") || "未指定"}
+                />
+                <PreviewField label="所屬部門" value={doc.department || "未指定"} />
+                <PreviewField label="有效起日" value={doc.validFrom || "未填寫"} />
+                <PreviewField label="有效迄日" value={doc.validTo || "未填寫"} />
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-800">摘要</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{doc.summary ?? doc.subject ?? "尚無摘要"}</p>
+              </div>
+
+              <div className="rounded-xl border border-slate-200 bg-white p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-800">附件資訊</p>
+                  <span className="text-xs text-slate-400">{attachments.length} 個附件</span>
+                </div>
+
+                {attachments.length > 0 ? (
+                  <div className="space-y-2">
+                    {attachments.map((attachment) => (
+                      <div
+                        key={attachment.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-slate-800">{attachment.name}</p>
+                          <p className="text-xs text-slate-400">
+                            {attachment.size} · {attachment.type.toUpperCase()}
+                          </p>
+                        </div>
+                        <p className="flex-shrink-0 text-xs text-slate-400">{attachment.uploadedAt.slice(0, 10)}</p>
+                      </div>
+                    ))}
                   </div>
-                ))}
-                {[...Array(9)].map((_, index) => (
-                  <div key={index} className={`px-2 py-2 ${Math.floor(index / 3) % 2 ? "bg-slate-50" : "bg-white"}`}>
-                    <div className="h-1.5 rounded bg-slate-200" style={{ width: `${40 + (index % 3) * 20}%` }} />
-                  </div>
-                ))}
+                ) : (
+                  <p className="text-sm text-slate-500">目前沒有附件，僅顯示文件基本資訊。</p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-dashed border-teal-200 bg-teal-50/60 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700">預覽說明</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  這裡顯示的是實際提交後的文件資料與附件引用，不再使用假內容。如果未來提供真正的二進位預覽，可直接替換這一區塊。
+                </p>
               </div>
             </div>
           </div>
@@ -227,7 +294,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
               style={{ fontSize: "13px" }}
             >
               {rejectMode === "transfer" ? <MoveRight size={15} /> : <RotateCcw size={15} />}
-              {rejectMode === "transfer" ? "送交文管審" : "確認退回"}
+              {rejectMode === "transfer" ? "移轉" : "送出退回"}
             </button>
           )}
 
@@ -242,7 +309,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             style={{ backgroundColor: "#0D9488", fontSize: "13px" }}
           >
             <CheckCircle2 size={15} />
-            {role === "manager" ? "同意 - 送往文管" : "核准上架"}
+            {role === "manager" ? "主管核准" : "文管核准"}
           </button>
         </div>
       </div>
@@ -304,6 +371,15 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <span className="text-right text-gray-700" style={{ fontSize: "11px", fontWeight: 500 }}>
         {value}
       </span>
+    </div>
+  );
+}
+
+function PreviewField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+      <p className="mt-1 break-words text-sm text-slate-700">{value}</p>
     </div>
   );
 }
