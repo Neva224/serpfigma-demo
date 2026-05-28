@@ -24,6 +24,7 @@ export interface WorkflowAttachment {
   size: string;
   type: string;
   uploadedAt: string;
+  downloadUrl?: string;
 }
 
 export interface WorkflowDocument extends DocumentRecord {

@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type DragEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { CloudUpload, File, FileSpreadsheet, FileText, Trash2, CheckCircle2 } from "lucide-react";
 import { Card } from "./BasicInfoCard";
 import type { WorkflowAttachment } from "../../workflow/workflowState";
@@ -11,7 +11,21 @@ interface Props {
 export function FileUploadCard({ files, onFilesChange }: Props) {
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const currentFilesRef = useRef<WorkflowAttachment[]>([]);
   const maxFiles = 10;
+
+  useEffect(() => {
+    currentFilesRef.current = files;
+  }, [files]);
+
+  useEffect(
+    () => () => {
+      currentFilesRef.current.forEach((file) => {
+        if (file.downloadUrl) URL.revokeObjectURL(file.downloadUrl);
+      });
+    },
+    [],
+  );
 
   function handleDrag(event: DragEvent<HTMLDivElement>, active: boolean) {
     event.preventDefault();
@@ -39,13 +53,25 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
       size: formatSize(file.size),
       type: extension(file.name),
       uploadedAt: new Date().toISOString(),
+      downloadUrl: URL.createObjectURL(file),
     }));
 
     onFilesChange([...files, ...newEntries]);
   }
 
   function removeFile(id: string) {
+    const removed = files.find((file) => file.id === id);
+    if (removed?.downloadUrl) {
+      URL.revokeObjectURL(removed.downloadUrl);
+    }
     onFilesChange(files.filter((file) => file.id !== id));
+  }
+
+  function clearFiles() {
+    currentFilesRef.current.forEach((file) => {
+      if (file.downloadUrl) URL.revokeObjectURL(file.downloadUrl);
+    });
+    onFilesChange([]);
   }
 
   return (
@@ -102,7 +128,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
           {files.length > 0 && (
             <button
               type="button"
-              onClick={() => onFilesChange([])}
+              onClick={clearFiles}
               className="text-red-400 transition-colors hover:text-red-600"
             >
               清除全部

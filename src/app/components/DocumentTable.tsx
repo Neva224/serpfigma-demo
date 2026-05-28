@@ -12,11 +12,12 @@ import {
   ChevronsRight,
 } from "lucide-react";
 import {
-  SAMPLE_DOCS,
   LEVEL_META,
+  STATUS_OPTIONS,
   type DocumentRecord,
   type DocumentStatus,
 } from "./document-management/mockData";
+import type { WorkflowAttachment } from "../workflow/workflowState";
 
 export type DocRecord = DocumentRecord;
 
@@ -41,14 +42,32 @@ type WorkflowAuditEntry = {
   comment?: string;
 };
 
+type WorkflowDocLike = DocumentRecord & {
+  updatedAt?: string;
+  summary?: string;
+  subject?: string;
+  attachments?: WorkflowAttachment[];
+  history?: WorkflowAuditEntry[];
+};
+
+const [
+  STATUS_DRAFT,
+  STATUS_MANAGER_PENDING,
+  STATUS_DOCADMIN_PENDING,
+  STATUS_PUBLISHED,
+  STATUS_RETURNED,
+  STATUS_VOIDED,
+  STATUS_ARCHIVED,
+] = STATUS_OPTIONS;
+
 const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: string; label: string }> = {
-  草稿: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
-  "待主管簽核": { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: "待主管簽核" },
-  "待文管審核": { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: "待文管審核" },
-  上架: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
-  退回: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
-  作廢: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
-  下架: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: "下架" },
+  [STATUS_DRAFT]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
+  [STATUS_MANAGER_PENDING]: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: "待主管簽核" },
+  [STATUS_DOCADMIN_PENDING]: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: "待文管審核" },
+  [STATUS_PUBLISHED]: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
+  [STATUS_RETURNED]: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
+  [STATUS_VOIDED]: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
+  [STATUS_ARCHIVED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: "下架" },
 };
 
 export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
@@ -91,13 +110,33 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
     setPageSizeInput(String(Math.min(100, Math.floor(parsed))));
   }
 
+  function handleDownload(doc: DocumentRecord) {
+    const workflowDoc = doc as WorkflowDocLike;
+    const attachment = workflowDoc.attachments?.[0];
+    if (!attachment?.downloadUrl) {
+      setNotice(`目前沒有可下載的實際附件：${doc.name}`);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = attachment.downloadUrl;
+    link.download = attachment.name || doc.name;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setNotice(`已開始下載：${attachment.name || doc.name}`);
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-3">
         <div className="flex items-center gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-700">文件清單</p>
-            <p className="text-xs text-slate-400">共 {docs.length} 筆，分頁顯示每頁 {pageSize} 筆</p>
+            <p className="text-sm font-semibold text-slate-700">文件列表</p>
+            <p className="text-xs text-slate-400">
+              共 {docs.length} 筆文件，頁面大小 {pageSize} 筆
+            </p>
           </div>
           <span className="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
             共 {docs.length} 筆
@@ -133,11 +172,11 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">
-                  {panel.kind === "version" ? "版本歷程" : "稽核歷程"}
+                  {panel.kind === "version" ? "版本歷程" : "審核歷程"}
                 </p>
                 <h3 className="mt-1 text-lg font-semibold text-slate-900">{panel.doc.name}</h3>
                 <p className="mt-1 text-sm text-slate-500">
-                  {panel.doc.docNo} / {panel.doc.version} / {panel.doc.status}
+                  {panel.doc.docNo} / {panel.doc.version} / {STATUS_STYLES[panel.doc.status]?.label ?? panel.doc.status}
                 </p>
               </div>
               <button
@@ -172,8 +211,8 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
             {pagedDocs.map((doc, index) => {
               const level = LEVEL_META[doc.level];
               const status = STATUS_STYLES[doc.status];
-              const needsApproval = doc.status === "待主管簽核" || doc.status === "待文管審核";
-              const canReEdit = doc.status === "退回";
+              const needsApproval = doc.status === STATUS_MANAGER_PENDING || doc.status === STATUS_DOCADMIN_PENDING;
+              const canReEdit = doc.status === STATUS_RETURNED;
 
               return (
                 <tr
@@ -189,7 +228,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                       <button
                         type="button"
                         className="w-fit text-left text-sm font-semibold text-slate-800 transition hover:text-teal-700"
-                        onClick={() => setNotice(`已點選文件：${doc.name}`)}
+                        onClick={() => setNotice(`已選取文件：${doc.name}`)}
                       >
                         {doc.name}
                       </button>
@@ -235,36 +274,14 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-500">{doc.uploadDate}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <ActionButton
-                        icon={<Download size={13} />}
-                        label="下載"
-                        onClick={() => setNotice(`已準備下載：${doc.name}`)}
-                      />
-                      <ActionButton
-                        icon={<History size={13} />}
-                        label="版本歷程"
-                        onClick={() => setPanel({ kind: "version", doc })}
-                      />
-                      <ActionButton
-                        icon={<Clock3 size={13} />}
-                        label="稽核歷程"
-                        onClick={() => setPanel({ kind: "audit", doc })}
-                      />
+                      <ActionButton icon={<Download size={13} />} label="下載" onClick={() => handleDownload(doc)} />
+                      <ActionButton icon={<History size={13} />} label="版本歷程" onClick={() => setPanel({ kind: "version", doc })} />
+                      <ActionButton icon={<Clock3 size={13} />} label="審核歷程" onClick={() => setPanel({ kind: "audit", doc })} />
                       {needsApproval && (
-                        <ActionButton
-                          icon={<CheckCircle2 size={13} />}
-                          label="簽核"
-                          primary
-                          onClick={() => onApprove(doc)}
-                        />
+                        <ActionButton icon={<CheckCircle2 size={13} />} label="審核" primary onClick={() => onApprove(doc)} />
                       )}
                       {canReEdit && (
-                        <ActionButton
-                          icon={<FileText size={13} />}
-                          label="重新編修"
-                          warn
-                          onClick={() => onReEdit(doc)}
-                        />
+                        <ActionButton icon={<FileText size={13} />} label="重新編輯" warn onClick={() => onReEdit(doc)} />
                       )}
                     </div>
                   </td>
@@ -303,7 +320,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
           <div className="text-sm text-slate-500">
             顯示 <span className="font-semibold text-slate-700">{start}</span> -{" "}
-            <span className="font-semibold text-slate-700">{end}</span> / 共{" "}
+            <span className="font-semibold text-slate-700">{end}</span> /{" "}
             <span className="font-semibold text-slate-700">{docs.length}</span> 筆
           </div>
           <div className="flex items-center gap-1">
@@ -319,7 +336,7 @@ export function DocumentTable({ docs, onAdd, onApprove, onReEdit }: Props) {
       </div>
 
       <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
-        顯示 {start} - {end}，共 {docs.length} 筆
+        顯示 {start} - {end} 筆，共 {docs.length} 筆
       </div>
     </div>
   );
@@ -378,11 +395,15 @@ function PagerButton({
 }
 
 function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
+  const workflowDoc = doc as WorkflowDocLike;
   const items = [
-    { version: doc.version, date: doc.uploadDate, title: "目前版本", note: "最新版本，已在清單中顯示", active: true },
-    { version: "v1.2", date: "2026-04-18", title: "前一版本", note: "內容調整與文字修正" },
-    { version: "v1.1", date: "2026-03-09", title: "前一版本", note: "補充細節與格式更新" },
-    { version: "v1.0", date: "2026-02-12", title: "初版", note: "文件首次建立" },
+    {
+      version: doc.version,
+      date: workflowDoc.updatedAt ?? doc.uploadDate,
+      title: doc.name,
+      note: workflowDoc.summary ?? workflowDoc.subject ?? "目前版本",
+      active: true,
+    },
   ];
 
   return (
@@ -418,42 +439,41 @@ function VersionHistoryPanel({ doc }: { doc: DocumentRecord }) {
 }
 
 function AuditHistoryPanel({ doc }: { doc: DocumentRecord }) {
-  const workflowDoc = doc as DocumentRecord & { history?: WorkflowAuditEntry[] };
+  const workflowDoc = doc as WorkflowDocLike;
   const items =
     workflowDoc.history && workflowDoc.history.length > 0
       ? workflowDoc.history.map((entry) => ({
           time: entry.timestamp.slice(0, 16).replace("T", " "),
           actor: entry.actor,
           action: entry.action,
-          note:
-            entry.comment ||
-            `${entry.statusFrom} → ${entry.statusTo}`,
+          note: entry.comment || `${entry.statusFrom} → ${entry.statusTo}`,
         }))
-      : [
-          { time: `${doc.uploadDate} 09:18`, actor: doc.uploaderName, action: "建立草稿", note: "文件建立並開始編修" },
-          { time: `${doc.uploadDate} 11:05`, actor: "系統", action: "送出簽核", note: "文件送往主管審核" },
-        ];
+      : [];
 
   return (
     <div className="space-y-3">
-      {items.map((item, index) => (
-        <div key={`${item.time}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-slate-900">{item.action}</p>
-              <p className="mt-1 text-sm text-slate-500">{item.note}</p>
-              <p className="mt-3 text-xs text-slate-400">
-                {item.actor} · {item.time}
-              </p>
+      {items.length > 0 ? (
+        items.map((item, index) => (
+          <div key={`${item.time}-${index}`} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-900">{item.action}</p>
+                <p className="mt-1 text-sm text-slate-500">{item.note}</p>
+                <p className="mt-3 text-xs text-slate-400">
+                  {item.actor} · {item.time}
+                </p>
+              </div>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                {index + 1}
+              </span>
             </div>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-              {index + 1}
-            </span>
           </div>
+        ))
+      ) : (
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center text-sm text-slate-400">
+          尚無真實審核歷程
         </div>
-      ))}
+      )}
     </div>
   );
 }
-
-export { SAMPLE_DOCS };
