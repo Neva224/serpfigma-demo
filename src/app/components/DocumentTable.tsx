@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { LEVEL_META, STATUS_OPTIONS, type DocumentRecord, type DocumentStatus } from "./document-management/mockData";
 import type { WorkflowAttachment } from "../workflow/workflowState";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
+import { StatusRail } from "./ui/StatusRail";
+import { getDocumentStatusLabel } from "../workflow/statusCatalog";
 
 export type DocRecord = DocumentRecord;
 
@@ -68,14 +71,14 @@ const [
 ] = STATUS_OPTIONS;
 
 const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: string; label: string }> = {
-  [STATUS_DRAFT]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: "草稿" },
-  [STATUS_MANAGER_PENDING]: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: "待主管簽核" },
-  [STATUS_DOCADMIN_PENDING]: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: "待文管審核" },
-  [STATUS_TRANSFER_PENDING]: { bg: "bg-cyan-50", text: "text-cyan-700", dot: "bg-cyan-500", label: "待新主管簽核" },
-  [STATUS_PUBLISHED]: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: "上架" },
-  [STATUS_RETURNED]: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: "退回" },
-  [STATUS_VOIDED]: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: "作廢" },
-  [STATUS_ARCHIVED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: "下架" },
+  [STATUS_DRAFT]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-400", label: getDocumentStatusLabel(STATUS_DRAFT) },
+  [STATUS_MANAGER_PENDING]: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-500", label: getDocumentStatusLabel(STATUS_MANAGER_PENDING) },
+  [STATUS_DOCADMIN_PENDING]: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-500", label: getDocumentStatusLabel(STATUS_DOCADMIN_PENDING) },
+  [STATUS_TRANSFER_PENDING]: { bg: "bg-cyan-50", text: "text-cyan-700", dot: "bg-cyan-500", label: getDocumentStatusLabel(STATUS_TRANSFER_PENDING) },
+  [STATUS_PUBLISHED]: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: getDocumentStatusLabel(STATUS_PUBLISHED) },
+  [STATUS_RETURNED]: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: getDocumentStatusLabel(STATUS_RETURNED) },
+  [STATUS_VOIDED]: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: getDocumentStatusLabel(STATUS_VOIDED) },
+  [STATUS_ARCHIVED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: getDocumentStatusLabel(STATUS_ARCHIVED) },
 };
 
 export function DocumentTable({
@@ -94,6 +97,11 @@ export function DocumentTable({
   const [pageSizeInput, setPageSizeInput] = useState(String(DEFAULT_PAGE_SIZE));
   const [notice, setNotice] = useState<string | null>(null);
   const [panel, setPanel] = useState<TablePanel>(null);
+  const [confirmState, setConfirmState] = useState<{
+    kind: "void" | "delete";
+    doc: DocumentRecord;
+  } | null>(null);
+  const [confirmBusy, setConfirmBusy] = useState(false);
 
   const pageSize = useMemo(() => {
     const parsed = Number(pageSizeInput);
@@ -144,6 +152,21 @@ export function DocumentTable({
     link.click();
     link.remove();
     setNotice(`已開始下載：${attachment.name || doc.name}`);
+  }
+
+  async function confirmDestructiveAction() {
+    if (!confirmState || confirmBusy) return;
+    setConfirmBusy(true);
+    try {
+      if (confirmState.kind === "void") {
+        await Promise.resolve(onVoidPublished(confirmState.doc));
+      } else {
+        await Promise.resolve(onDeletePublished(confirmState.doc));
+      }
+      setConfirmState(null);
+    } finally {
+      setConfirmBusy(false);
+    }
   }
 
   return (
@@ -208,11 +231,39 @@ export function DocumentTable({
             </div>
 
             <div className="flex-1 overflow-y-auto bg-slate-50 px-6 py-5">
-              {panel.kind === "version" ? <VersionHistoryPanel doc={panel.doc} /> : <AuditHistoryPanel doc={panel.doc} />}
+                  <StatusRail status={panel.doc.status} compact className="mb-4" />
+                  {panel.kind === "version" ? <VersionHistoryPanel doc={panel.doc} /> : <AuditHistoryPanel doc={panel.doc} />}
             </div>
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmState?.kind === "void"}
+        title="作廢確認"
+        description={confirmState?.doc ? `請確認是否要將「${confirmState.doc.name}」作廢？作廢後將影響文件使用狀態。` : "請確認是否要將此文件作廢？作廢後將影響文件使用狀態。"}
+        confirmLabel="確認作廢"
+        destructive
+        loading={confirmBusy}
+        onConfirm={confirmDestructiveAction}
+        onCancel={() => {
+          if (confirmBusy) return;
+          setConfirmState(null);
+        }}
+      />
+      <ConfirmDialog
+        open={confirmState?.kind === "delete"}
+        title="刪除確認"
+        description={confirmState?.doc ? `請確認是否要刪除「${confirmState.doc.name}」？刪除後可能無法恢復。` : "請確認是否要刪除此文件？刪除後可能無法恢復。"}
+        confirmLabel="確認刪除"
+        destructive
+        loading={confirmBusy}
+        onConfirm={confirmDestructiveAction}
+        onCancel={() => {
+          if (confirmBusy) return;
+          setConfirmState(null);
+        }}
+      />
 
       <div className="overflow-x-auto">
         <table className="min-w-full text-left">
@@ -303,7 +354,7 @@ export function DocumentTable({
                           icon={<X size={13} />}
                           label="作廢"
                           warn
-                          onClick={() => onVoidPublished(doc)}
+                          onClick={() => setConfirmState({ kind: "void", doc })}
                         />
                       )}
                       {canRestore && (
@@ -319,7 +370,7 @@ export function DocumentTable({
                           icon={<X size={13} />}
                           label="刪除"
                           warn
-                          onClick={() => onDeletePublished(doc)}
+                          onClick={() => setConfirmState({ kind: "delete", doc })}
                         />
                       )}
                       {needsApproval && (

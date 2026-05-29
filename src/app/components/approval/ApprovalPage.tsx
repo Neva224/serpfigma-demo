@@ -24,7 +24,7 @@ const DOC_DATA: Record<number, {
     uploadDate: "2024-05-20",
     department: "財務法務處 › 財務會計部",
     version: "v3.2",
-    status: "待審核",
+    status: "待主管簽核",
   },
   2: {
     title: "產品開發規格書 Q2",
@@ -33,7 +33,7 @@ const DOC_DATA: Record<number, {
     uploadDate: "2024-05-19",
     department: "軟體開發處 › 後端開發部",
     version: "v1.0",
-    status: "待審核",
+    status: "待主管簽核",
   },
   3: {
     title: "人力資源管理辦法 v2.1",
@@ -42,7 +42,7 @@ const DOC_DATA: Record<number, {
     uploadDate: "2024-05-18",
     department: "人力資源處 › 教育訓練部",
     version: "v2.1",
-    status: "待審核",
+    status: "待主管簽核",
   },
   4: {
     title: "供應商合約範本 v4.0",
@@ -60,7 +60,7 @@ const DOC_DATA: Record<number, {
     uploadDate: "2024-05-16",
     department: "資訊安全處 › 安全架構部",
     version: "v5.0",
-    status: "待審核",
+    status: "待主管簽核",
   },
   6: {
     title: "系統架構設計文件",
@@ -107,7 +107,7 @@ export function ApprovalPage({ onBack }: Props) {
                   className="ml-2 px-2 py-0.5 rounded text-white"
                   style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#0D9488" }}
                 >
-                  MS / RV
+                  文件審核
                 </span>
               </div>
             </div>

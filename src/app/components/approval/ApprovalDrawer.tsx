@@ -15,6 +15,8 @@ import {
 } from "../../data/hrScopeModel";
 import { LEVEL_META } from "../document-management/mockData";
 import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
+import { StatusRail } from "../ui/StatusRail";
+import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 
 type RejectMode = "none" | "return" | "transfer";
 
@@ -32,7 +34,7 @@ interface Props {
   onReject: (reason: string, comment?: string, transfer?: ApprovalTransferTarget) => void;
 }
 
-const REJECT_REASONS = ["\u5167\u5bb9\u4e0d\u7b26", "\u683c\u5f0f\u4e0d\u6b63\u78ba", "\u8cc7\u6599\u7f3a\u6f0f", "\u6b0a\u8cac\u4e0d\u660e", "\u9644\u4ef6\u4e0d\u8db3", "\u5176\u4ed6"];
+const REJECT_REASONS = ["內容不符", "格式不正確", "資料缺漏", "權責不明", "附件不足", "其他原因"];
 
 export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Props) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set(["basic"]));
@@ -50,7 +52,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   const attachments = doc.attachments ?? [];
   const categoryPayload = useMemo(() => resolveCategoryPayload(CATEGORY_NODES, transferCategory), [transferCategory]);
   const departmentPayload = useMemo(() => buildHrScopePayload(HR_SCOPE_ROWS, transferDepartment), [transferDepartment]);
-  const isOtherReason = rejectType === "?嗡?";
+  const isOtherReason = rejectType === "其他原因";
   const canTransfer = role === "manager";
   const rejectReady = rejectType.length > 0 && (!isOtherReason || rejectReason.trim().length > 0);
   const transferReady =
@@ -78,13 +80,13 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   }
 
   function submitReject() {
-    const reason = rejectType || "?批捆銝泵";
+    const reason = rejectType || "請選擇退回原因";
     const comment = isOtherReason ? rejectReason.trim() : undefined;
     onReject(reason, comment);
   }
 
   function submitTransfer() {
-    const reason = rejectReason.trim() || "蝘餉??桐?";
+    const reason = rejectReason.trim() || "請輸入移轉原因";
     onReject(reason, undefined, {
       categoryId: categoryPayload.categoryId,
       categoryPath: categoryPayload.categoryPath,
@@ -92,18 +94,19 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
     });
   }
 
-  const previewSummary = doc.summary ?? doc.subject ?? "撠??";
-  const actionLabel = rejectMode === "transfer" ? "\u79fb\u8f49" : rejectMode === "return" ? "\u9000\u56de" : role === "manager" ? "\u4e3b\u7ba1\u7c3d\u6838\u901a\u904e" : "\u6587\u7ba1\u5be9\u6838\u901a\u904e";
+  const previewSummary = doc.summary ?? doc.subject ?? "尚未提供摘要";
+  const actionLabel = rejectMode === "transfer" ? "確認移轉" : rejectMode === "return" ? "確認退回" : role === "manager" ? "主管簽核通過" : "文管簽核通過";
+  const pageTitle = role === "manager" ? "主管簽核" : "文管簽核";
 
   return (
     <DrawerShell onClose={onClose}>
       <div className="flex items-center justify-between border-b border-gray-200 px-5 py-3" style={{ backgroundColor: "#0D9488" }}>
         <div>
           <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>
-            {role === "manager" ? "銝餌恣蝪賣" : "?恣撖拇"}
+            {pageTitle}
           </h2>
           <p className="text-teal-100" style={{ fontSize: "11px" }}>
-            {doc.signingNo || "SGN-XXXX"} / {doc.name}
+            {doc.signingNo || "尚無簽核號"} / {doc.name}
           </p>
         </div>
         <button type="button" onClick={onClose} className="text-white/75 transition hover:text-white">
@@ -113,32 +116,36 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
       <div className="flex flex-1 overflow-hidden">
         <div className="w-[340px] shrink-0 overflow-y-auto border-r border-gray-200 bg-white">
-          <AccordionSection id="basic" label="?箸鞈?" expanded={expanded} onToggle={toggle}>
-            <InfoRow label="?辣?迂" value={doc.name} />
-            <InfoRow label="?辣蝺刻?" value={doc.docNo} />
-            <InfoRow label="?" value={doc.version} />
-            <InfoRow label={"Uploaded by"} value={`${doc.uploaderName} (${doc.uploaderCode})`} />
-            <InfoRow label="銝?交?" value={doc.uploadDate} />
-            <InfoRow label={"Status"} value={doc.status} />
-            <InfoRow label="?撅祇?" value={doc.department} />
-            <InfoRow label="?辣??" value={LEVEL_META[doc.level].label} />
-            <InfoRow label="?? / 隤芣?" value={previewSummary} />
-            <InfoRow label={"Valid from"} value={doc.validFrom || "-"} />
-            <InfoRow label={"Valid to"} value={doc.validTo || "-"} />
+          <AccordionSection id="basic" label="基本資訊" expanded={expanded} onToggle={toggle}>
+            <InfoRow label="文件名稱" value={doc.name} />
+            <InfoRow label="文件編號" value={doc.docNo} />
+            <InfoRow label="版本" value={doc.version} />
+            <InfoRow label="上傳者" value={`${doc.uploaderName}（${doc.uploaderCode}）`} />
+            <InfoRow label="上傳日期" value={doc.uploadDate} />
+            <InfoRow label="狀態" value={getDocumentStatusLabel(doc.status)} />
+            <InfoRow label="所屬部門" value={doc.department} />
+            <InfoRow label="文件階級" value={LEVEL_META[doc.level].label} />
+            <InfoRow label="摘要 / 主旨" value={previewSummary} />
+            <InfoRow label="有效起日" value={doc.validFrom || "－"} />
+            <InfoRow label="有效迄日" value={doc.validTo || "－"} />
           </AccordionSection>
 
-          <AccordionSection id="decision" label="???/ 蝘餉?" expanded={expanded} onToggle={toggle}>
+          <div className="px-4 py-4">
+            <StatusRail status={doc.status} compact />
+          </div>
+
+          <AccordionSection id="decision" label="退回 / 移轉" expanded={expanded} onToggle={toggle}>
             <div className="space-y-3 p-1">
               <div className="flex gap-1">
-                <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label={"Reject"} />
-                {canTransfer && <ModeBtn active={rejectMode === "transfer"} onClick={() => setRejectMode("transfer")} label="蝘餉?" />}
+                <ModeBtn active={rejectMode === "return"} onClick={() => setRejectMode("return")} label="退回" />
+                {canTransfer && <ModeBtn active={rejectMode === "transfer"} onClick={() => setRejectMode("transfer")} label="移轉" />}
               </div>
 
               {rejectMode !== "none" && (
                 <>
                   <div>
                     <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                      {rejectMode === "transfer" ? "Transfer reason" : "Reject reason"}
+                      {rejectMode === "transfer" ? "移轉原因" : "退回原因"}
                       {rejectMode === "transfer" || rejectMode === "return" ? <span className="text-red-500"> *</span> : null}
                     </label>
                     {rejectMode === "return" ? (
@@ -149,7 +156,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                           className="w-full appearance-none rounded-lg border border-amber-200 bg-white px-3 py-2 pr-9 text-gray-700 focus:border-amber-400 focus:outline-none"
                           style={{ fontSize: "12px" }}
                         >
-                          <option value="">Please select</option>
+                          <option value="">請選擇</option>
                           {REJECT_REASONS.map((item) => (
                             <option key={item} value={item}>
                               {item}
@@ -167,14 +174,14 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                   {showReasonTextarea && rejectMode === "return" && (
                     <div>
                       <label className="mb-1 block text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                        {rejectMode === "return" ? "?嗡?隤芣?" : "蝘餉?隤芣?嚗憛恬?"}
+                        {rejectMode === "return" ? "退回說明" : "移轉說明"}
                         {rejectMode === "return" && isOtherReason && <span className="text-red-500"> *</span>}
                       </label>
                       <textarea
                         value={rejectReason}
                         onChange={(e) => setRejectReason(e.target.value)}
                         rows={3}
-                        placeholder={rejectMode === "return" ? "Enter reject reason" : "Enter transfer reason"}
+                        placeholder={rejectMode === "return" ? "請輸入退回原因" : "請輸入移轉原因"}
                         className="w-full resize-none rounded-lg border border-amber-200 px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-amber-400 focus:outline-none"
                         style={{ fontSize: "12px" }}
                       />
@@ -185,26 +192,26 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                     <div className="space-y-4 rounded-xl border border-teal-100 bg-teal-50/60 p-3">
                       <div>
                         <label className="mb-1 block text-teal-700" style={{ fontSize: "11px", fontWeight: 600 }}>
-                          蝘餉???隤芣? <span className="text-red-500">*</span>
+                          移轉說明 <span className="text-red-500">*</span>
                         </label>
                         <textarea
                           value={rejectReason}
                           onChange={(e) => setRejectReason(e.target.value)}
                           rows={3}
-                          placeholder="隢撓?亦宏頧???鋆?隤芣?"
+                          placeholder="請輸入移轉原因與說明"
                           className="w-full resize-none rounded-lg border border-teal-200 bg-white px-3 py-2 text-gray-700 placeholder:text-gray-400 focus:border-teal-400 focus:outline-none"
                           style={{ fontSize: "12px" }}
                         />
                       </div>
 
                       <SelectorGroup
-                        title="Category path"
+                        title="知識樹分層"
                         rows={[
                           {
-                            label: "Level 1",
+                            label: "第 1 層",
                             options: getCategoryLevelOptions(CATEGORY_NODES, []),
                             value: transferCategory.l1,
-                            placeholder: "Select level 1",
+                            placeholder: "請選擇第 1 層",
                             onChange: (l1) =>
                               setTransferCategory({
                                 l1,
@@ -214,10 +221,10 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Level 2",
+                            label: "第 2 層",
                             options: transferCategory.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1]) : [],
                             value: transferCategory.l2,
-                            placeholder: transferCategory.l1 ? "Select level 2" : "Select level 1 first",
+                            placeholder: transferCategory.l1 ? "請選擇第 2 層" : "請先選擇第 1 層",
                             onChange: (l2) =>
                               setTransferCategory({
                                 ...transferCategory,
@@ -227,12 +234,12 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Level 3",
+                            label: "第 3 層",
                             options: transferCategory.l2
                               ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1, transferCategory.l2])
                               : [],
                             value: transferCategory.l3,
-                            placeholder: transferCategory.l2 ? "Select level 3" : "Select level 2 first",
+                            placeholder: transferCategory.l2 ? "請選擇第 3 層" : "請先選擇第 2 層",
                             onChange: (l3) =>
                               setTransferCategory({
                                 ...transferCategory,
@@ -241,25 +248,25 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Level 4",
+                            label: "第 4 層",
                             options: transferCategory.l3
                               ? getCategoryLevelOptions(CATEGORY_NODES, [transferCategory.l1, transferCategory.l2, transferCategory.l3])
                               : [],
                             value: transferCategory.l4,
-                            placeholder: transferCategory.l3 ? "Select level 4" : "Select level 3 first",
+                            placeholder: transferCategory.l3 ? "請選擇第 4 層" : "請先選擇第 3 層",
                             onChange: (l4) => setTransferCategory({ ...transferCategory, l4 }),
                           },
                         ]}
                       />
 
                       <SelectorGroup
-                        title="?撅祇?"
+                        title="所屬部門"
                         rows={[
                           {
-                            label: "?砍",
+                            label: "公司",
                             options: getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 0),
                             value: transferDepartment.companyName,
-                            placeholder: "Select company",
+                            placeholder: "請選擇公司",
                             onChange: (companyName) =>
                               setTransferDepartment({
                                 ...createEmptyHrScopeSelection(),
@@ -267,10 +274,10 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Group",
+                            label: "群",
                             options: transferDepartment.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 1) : [],
                             value: transferDepartment.groupName,
-                            placeholder: transferDepartment.companyName ? "隢?黎" : "隢??豢??砍",
+                            placeholder: transferDepartment.companyName ? "請選擇群" : "請先選擇公司",
                             onChange: (groupName) =>
                               setTransferDepartment({
                                 ...transferDepartment,
@@ -280,10 +287,10 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Division",
+                            label: "處",
                             options: transferDepartment.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 2) : [],
                             value: transferDepartment.divisionName,
-                            placeholder: transferDepartment.groupName ? "Select division" : "Select group first",
+                            placeholder: transferDepartment.groupName ? "請選擇處" : "請先選擇群",
                             onChange: (divisionName) =>
                               setTransferDepartment({
                                 ...transferDepartment,
@@ -292,12 +299,12 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                               }),
                           },
                           {
-                            label: "Department",
+                            label: "部",
                             options: transferDepartment.divisionName
                               ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 3)
                               : [],
                             value: transferDepartment.departmentName,
-                            placeholder: transferDepartment.divisionName ? "Select department" : "Select division first",
+                            placeholder: transferDepartment.divisionName ? "請選擇部" : "請先選擇處",
                             onChange: (departmentName) =>
                               setTransferDepartment({
                                 ...transferDepartment,
@@ -308,9 +315,9 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                       />
 
                       <div className="rounded-lg border border-teal-100 bg-white p-3 text-xs text-teal-700">
-                        <div className="mb-1 font-semibold text-teal-700">Transfer targets</div>
-                        <p>{categoryPayload.categoryPath.length > 0 ? categoryPayload.categoryPath.join(" / ") : "No category selected"}</p>
-                        <p>{departmentPayload.scopePath.length > 0 ? departmentPayload.scopePath.join(" / ") : "撠?豢??撅祇?"}</p>
+                        <div className="mb-1 font-semibold text-teal-700">移轉目標</div>
+                        <p>{categoryPayload.categoryPath.length > 0 ? categoryPayload.categoryPath.join(" / ") : "尚未選擇知識樹"}</p>
+                        <p>{departmentPayload.scopePath.length > 0 ? departmentPayload.scopePath.join(" / ") : "尚未選擇所屬部門"}</p>
                       </div>
                     </div>
                   )}
@@ -322,9 +329,9 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
         <div className="flex flex-1 flex-col bg-slate-800">
           <div className="flex items-center justify-between border-b border-slate-600 bg-slate-900 px-4 py-2">
-            <p className="truncate text-xs text-slate-300">?辣?批捆?汗</p>
+            <p className="truncate text-xs text-slate-300">文件預覽</p>
             <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-400">{attachments.length} attachments</span>
+              <span className="text-[11px] text-slate-400">{attachments.length} 個附件</span>
             </div>
           </div>
 
@@ -358,7 +365,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
           }}
         >
           <RotateCcw size={15} />
-          {rejectMode === "return" ? "Cancel reject" : rejectMode === "transfer" ? "Cancel transfer" : "Reject"}
+          {rejectMode === "return" ? "取消退回" : rejectMode === "transfer" ? "取消移轉" : "退回"}
         </button>
 
         <div className="flex items-center gap-3">
@@ -372,7 +379,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
               }}
               className="rounded-lg px-4 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-50"
             >
-              餈?
+              返回
             </button>
           )}
 
@@ -402,7 +409,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             style={{ backgroundColor: "#0D9488", fontSize: "13px" }}
           >
             <CheckCircle2 size={15} />
-            {role === "manager" ? "銝餌恣蝪賣??" : "?恣撖拇??"}
+            {role === "manager" ? "主管簽核通過" : "文管簽核通過"}
           </button>
         </div>
       </div>
@@ -423,9 +430,9 @@ function DocumentPreviewPane({
   return (
     <article className="space-y-5">
       <header className="border-b border-slate-200 pb-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">?辣?批捆?汗</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-600">文件預覽</p>
         <h3 className="mt-2 text-2xl font-semibold text-slate-900">{doc.name}</h3>
-        <p className="mt-2 text-sm leading-7 text-slate-600">Real uploaded file preview based on the actual attachment source.</p>
+        <p className="mt-2 text-sm leading-7 text-slate-600">根據實際上傳的附件來源進行預覽。</p>
       </header>
 
       {primary ? (
@@ -445,7 +452,7 @@ function DocumentPreviewPane({
                   className="inline-flex items-center gap-1.5 rounded-lg border border-teal-200 bg-white px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-50"
                 >
                   <Download size={13} />
-                  銝?
+                  下載
                 </button>
               )}
               {primary.downloadUrl && (
@@ -456,7 +463,7 @@ function DocumentPreviewPane({
                   className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
                   <ExternalLink size={13} />
-                  ??
+                  開新視窗
                 </a>
               )}
             </div>
@@ -471,8 +478,8 @@ function DocumentPreviewPane({
               <div className="flex flex-col items-center justify-center gap-3 px-6 py-16 text-center text-slate-500">
                 {previewKind === "file" ? <FileText size={40} className="text-slate-400" /> : <FileImage size={40} className="text-slate-400" />}
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Attachment preview</p>
-                  <p className="mt-1 text-xs text-slate-400">Use the real uploaded file or attachment source for preview and download.</p>
+                  <p className="text-sm font-semibold text-slate-700">附件預覽</p>
+                  <p className="mt-1 text-xs text-slate-400">使用實際上傳檔案或附件來源進行預覽與下載。</p>
                 </div>
               </div>
             )}
@@ -480,7 +487,7 @@ function DocumentPreviewPane({
 
           {attachments.length > 1 && (
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Attached files</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">其他附件</p>
               <div className="space-y-2">
                 {attachments.slice(1).map((attachment) => (
                   <div key={attachment.id} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
@@ -494,7 +501,7 @@ function DocumentPreviewPane({
         </div>
       ) : (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
-          No preview available for this file.
+          此檔案沒有可用的預覽內容。
         </div>
       )}
     </article>

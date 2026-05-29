@@ -97,12 +97,12 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">
                 管
               </div>
-              <div className="hidden sm:block">
-                <div className="text-sm font-semibold text-slate-800">系統管理者</div>
-                <div className="text-[11px] text-slate-400">Admin</div>
+                <div className="hidden sm:block">
+                  <div className="text-sm font-semibold text-slate-800">系統管理者</div>
+                  <div className="text-[11px] text-slate-400">管理員</div>
+                </div>
               </div>
             </div>
-          </div>
         </div>
       </header>
 
@@ -151,7 +151,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
                         onClick={() => handleNotificationClick(item)}
                         className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-red-600 transition hover:text-red-500"
                       >
-                        Go
+                        前往
                         <ChevronRight size={14} />
                       </button>
                     )}

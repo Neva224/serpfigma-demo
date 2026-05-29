@@ -9,6 +9,7 @@ import {
 } from "./ClassificationCard";
 import { DepartmentCard, type DepartmentSelection } from "./DepartmentCard";
 import { FileUploadCard } from "./FileUploadCard";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 import type { DocumentLevel } from "../document-management/mockData";
 import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
 
@@ -59,12 +60,18 @@ export function DocumentFormPage({
     departmentName: "",
   });
   const [attachments, setAttachments] = useState<WorkflowAttachment[]>([]);
+  const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
+  const [submitBusy, setSubmitBusy] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState<DocumentFormSubmitPayload | null>(null);
 
   useEffect(() => {
     if (!editingDoc) {
       setClassification({ l1: "", l2: "", l3: "", l4: "" });
       setDepartment({ companyName: "", groupName: "", divisionName: "", departmentName: "" });
       setAttachments([]);
+      setPendingSubmit(null);
+      setSubmitConfirmOpen(false);
+      setSubmitBusy(false);
       return;
     }
 
@@ -84,6 +91,9 @@ export function DocumentFormPage({
       departmentName: path[3] ?? "",
     });
     setAttachments(editingDoc.attachments ? [...editingDoc.attachments] : []);
+    setPendingSubmit(null);
+    setSubmitConfirmOpen(false);
+    setSubmitBusy(false);
   }, [editingDoc]);
 
   const categoryPayload = buildCategoryPayload(classification);
@@ -135,8 +145,15 @@ export function DocumentFormPage({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const payload = buildSubmitPayload();
+    if (!payload) return;
+    setPendingSubmit(payload);
+    setSubmitConfirmOpen(true);
+  }
+
+  function buildSubmitPayload() {
     const form = formRef.current;
-    if (!form) return;
+    if (!form) return null;
 
     const formData = new FormData(form);
     const title = String(formData.get("title") ?? "").trim();
@@ -163,10 +180,10 @@ export function DocumentFormPage({
 
     if (!title || !ownerName || !categoryId || !level || ownershipDepartmentPath.length === 0) {
       toast.error("請先完成必填欄位再送出");
-      return;
+      return null;
     }
 
-    onSubmit?.({
+    return {
       title,
       ownerName,
       validFrom,
@@ -178,10 +195,21 @@ export function DocumentFormPage({
       ownershipDepartmentPath,
       attachments,
       level,
-    });
+    } satisfies DocumentFormSubmitPayload;
+  }
 
-    toast.success(editingDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
-    onBack();
+  async function confirmSubmit() {
+    if (!pendingSubmit || submitBusy) return;
+    setSubmitBusy(true);
+    try {
+      await Promise.resolve(onSubmit?.(pendingSubmit));
+      toast.success(editingDoc ? "文件已更新並送出審核" : "文件已送出審核");
+      setSubmitConfirmOpen(false);
+      setPendingSubmit(null);
+      onBack();
+    } finally {
+      setSubmitBusy(false);
+    }
   }
 
   return (
@@ -332,10 +360,10 @@ export function DocumentFormPage({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-teal-700">分類預覽</p>
-                <h3 className="mt-1 text-sm font-semibold text-slate-800">category payload</h3>
+                <h3 className="mt-1 text-sm font-semibold text-slate-800">分類結果</h3>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm">
-                categoryId {categoryPayload.categoryId || "尚未選擇"}
+                分類編號 {categoryPayload.categoryId || "尚未選擇"}
               </span>
             </div>
             <p className="mt-2 text-sm text-slate-600">
@@ -384,6 +412,20 @@ export function DocumentFormPage({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={submitConfirmOpen}
+        title="送出審核確認"
+        description="請確認是否送出審核？送出後將進入簽核流程。"
+        confirmLabel="確認送出"
+        onConfirm={confirmSubmit}
+        onCancel={() => {
+          if (submitBusy) return;
+          setSubmitConfirmOpen(false);
+          setPendingSubmit(null);
+        }}
+        loading={submitBusy}
+      />
     </form>
   );
 }

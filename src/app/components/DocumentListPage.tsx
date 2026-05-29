@@ -13,11 +13,14 @@ import {
 import { DocumentTable } from "./DocumentTable";
 import { DocumentFormPage, type DocumentFormSubmitPayload } from "./form/DocumentFormPage";
 import { SigningProgressPage } from "./signing/SigningProgressPage";
+import { FaqSearchPage } from "./query/FaqSearchPage";
+import { TransferUnitPage } from "./query/TransferUnitPage";
 import { DatabasePage } from "./database/DatabasePage";
 import { PermissionsPage } from "./settings/PermissionsPage";
 import { KnowledgeTree } from "./knowledge/KnowledgeTree";
 import { buildLegacyKnowledgeTreeFromGenerated, type LegacyKnowledgeTreeNode } from "../data/catalogModels";
 import type { WorkflowDocument } from "../workflow/workflowState";
+import { getDocumentStatusLabel } from "../workflow/statusCatalog";
 import {
   LEVEL_OPTIONS,
   STATUS_OPTIONS,
@@ -59,7 +62,7 @@ const KNOWLEDGE_TREE = buildLegacyKnowledgeTreeFromGenerated();
 
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
-  { label: "FAQ 查詢", variant: "faq" as const },
+  { label: "常見問題", variant: "faq" as const },
 ];
 
 export function DocumentListPage({
@@ -316,7 +319,7 @@ export function DocumentListPage({
           <SectionCard
             collapsed={sidebarCollapsed}
             title="一般文件查詢"
-            subtitle="一般文件與 FAQ 查詢"
+            subtitle="一般文件與常見問題查詢"
             icon={<Search size={16} />}
             badge={String(publishedDocs.length)}
             open={queryOpen}
@@ -445,15 +448,9 @@ export function DocumentListPage({
           ) : view.kind === "systemAdmin" ? (
             <PermissionsPage onBack={activateKnowledgeOverview} embedded />
           ) : view.kind === "query" && view.variant === "faq" ? (
-            <EmptyState
-              title="FAQ 查詢"
-              description="查看常見問題與說明內容"
-            />
+            <FaqSearchPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : view.kind === "signing" && view.variant === "transfer" ? (
-            <EmptyState
-              title="移轉單位"
-              description="目前僅提供簽核單查詢與移轉相關操作"
-            />
+            <TransferUnitPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : (
             <>
               {view.kind === "category" && categoryChildren.length > 0 && (
@@ -552,7 +549,7 @@ function getViewTitle(view: ViewMode) {
     case "category":
       return view.label;
     case "query":
-      return view.variant === "general" ? "一般文件查詢" : "FAQ 查詢";
+      return view.variant === "general" ? "一般文件查詢" : "常見問題查詢";
     case "documentUpload":
       return "文件上傳專區";
     case "signingProgress":
@@ -584,7 +581,7 @@ function getViewDescription(view: ViewMode) {
     case "category":
       return `分類路徑 > ${view.path.join(" > ")}`;
     case "query":
-      return view.variant === "general" ? "一般文件條件查詢" : "FAQ 查詢";
+      return view.variant === "general" ? "一般文件條件查詢" : "常見問題條件查詢";
     case "documentUpload":
       return "新增文件、選擇分類與送出簽核";
     case "signingProgress":
@@ -696,7 +693,7 @@ function FilterBar({
           onChange={(value) => setStatus(value as "all" | DocumentStatus)}
           options={[
             { value: "all", label: "全部狀態" },
-            ...STATUS_OPTIONS.map((option) => ({ value: option, label: option })),
+            ...STATUS_OPTIONS.map((option) => ({ value: option, label: getDocumentStatusLabel(option) })),
           ]}
         />
 

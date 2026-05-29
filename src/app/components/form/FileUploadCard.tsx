@@ -66,7 +66,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
   }
 
   return (
-    <Card title="?辣?辣銝" icon="??">
+    <Card title="文件上傳與附件" icon="上傳">
       <div className="space-y-4">
         <div
           onDragEnter={(event) => handleDrag(event, true)}
@@ -94,11 +94,11 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               />
             </div>
             <p className="mb-1 text-sm font-semibold text-gray-700">
-              ?瑼??圈ㄐ嚗?
-              <span className="text-teal-600"> 暺?銝</span>
+              拖曳檔案到這裡，或
+              <span className="text-teal-600"> 點擊選擇檔案</span>
             </p>
             <p className="text-xs text-gray-400">
-              ?舀?格? 200MB嚗?憭?{maxFiles} ??獢??澆??舐 PDF?ord?xcel?PT ??ZIP
+              單檔上限 200MB，最多可上傳 {maxFiles} 個附件。支援 PDF、Word、Excel、PPT、ZIP。
             </p>
           </div>
 
@@ -107,14 +107,14 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               className="absolute inset-0 flex items-center justify-center rounded-xl"
               style={{ backgroundColor: "#0D948810", borderColor: "#0D9488" }}
             >
-              <p className="font-semibold text-teal-700">?暸??喳銝</p>
+              <p className="font-semibold text-teal-700">可直接拖放檔案上傳</p>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between text-xs text-gray-400">
           <span>
-            撌脤瑼? {files.length} / {maxFiles}
+            已附加 {files.length} / {maxFiles}
           </span>
           {files.length > 0 && (
             <button
@@ -122,7 +122,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               onClick={clearFiles}
               className="text-red-400 transition-colors hover:text-red-600"
             >
-              皜?券
+              清除附件
             </button>
           )}
         </div>
@@ -136,7 +136,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
         )}
 
         {files.length === 0 && (
-          <div className="py-4 text-center text-xs text-gray-400">撠銝?辣</div>
+          <div className="py-4 text-center text-xs text-gray-400">尚未上傳任何附件</div>
         )}
       </div>
     </Card>
@@ -159,7 +159,8 @@ function FileRow({ file, onRemove }: { file: WorkflowAttachment; onRemove: () =>
           <span className="text-xs text-gray-400">{file.size}</span>
           <span className="flex items-center gap-0.5 text-xs" style={{ color: "#10B981" }}>
             <CheckCircle2 size={11} />
-            撌脖???          </span>
+            已上傳
+          </span>
         </div>
       </div>
 

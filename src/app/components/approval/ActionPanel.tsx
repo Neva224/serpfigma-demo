@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, CheckCircle2, XCircle, Archive, Info, AlertTriangle, Clock } from "lucide-react";
+import { StatusRail } from "../ui/StatusRail";
 
 interface DocMeta {
   category: string;
@@ -44,7 +45,7 @@ export function ActionPanel({ meta }: Props) {
       {/* Header */}
       <div className="px-5 py-4 border-b border-gray-100 flex-shrink-0">
         <h2 className="text-gray-800" style={{ fontSize: "14px", fontWeight: 700 }}>審核決策面板</h2>
-        <p className="text-gray-400 mt-0.5" style={{ fontSize: "11px" }}>MS / RV 模組</p>
+        <p className="text-gray-400 mt-0.5" style={{ fontSize: "11px" }}>文件簽核模組</p>
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -73,42 +74,8 @@ export function ActionPanel({ meta }: Props) {
           </div>
         </div>
 
-        {/* Approval history mini timeline */}
         <div className="px-5 py-4 border-b border-gray-100">
-          <SectionTitle icon={<Clock size={13} />} label="簽核歷程" />
-          <div className="mt-3 space-y-0">
-            {[
-              { label: "文件提交", user: "王大明", time: "05/20 07:45", done: true },
-              { label: "部門主管初審", user: "張副理", time: "05/20 09:30", done: true },
-              { label: "文管主管複審", user: "您", time: "進行中", done: false, active: true },
-              { label: "最終核准上架", user: "系統自動", time: "待執行", done: false },
-            ].map((step, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="flex flex-col items-center">
-                  <div
-                    className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                    style={{
-                      backgroundColor: step.done ? "#0D9488" : step.active ? "#F59E0B" : "#E5E7EB",
-                    }}
-                  >
-                    {step.done ? (
-                      <CheckCircle2 size={12} className="text-white" strokeWidth={2.5} />
-                    ) : (
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    )}
-                  </div>
-                  {i < 3 && <div className="w-px flex-1 mt-1 mb-1" style={{ backgroundColor: step.done ? "#0D9488" : "#E5E7EB", minHeight: "16px" }} />}
-                </div>
-                <div className="pb-3">
-                  <p className="text-gray-700" style={{ fontSize: "12px", fontWeight: step.active ? 700 : 500 }}>
-                    {step.label}
-                    {step.active && <span className="ml-1.5 text-amber-600" style={{ fontSize: "10px" }}>● 進行中</span>}
-                  </p>
-                  <p className="text-gray-400" style={{ fontSize: "10px" }}>{step.user} · {step.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <StatusRail status={meta.status} compact />
         </div>
 
         {/* Rejection form — conditionally shown */}

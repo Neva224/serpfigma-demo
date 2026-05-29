@@ -2,6 +2,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { FileText, RotateCcw, Search } from "lucide-react";
 import { type DocumentStatus } from "../document-management/mockData";
 import { toApprovalQueryRecord, type WorkflowDocument } from "../../workflow/workflowState";
+import { StatusRail } from "../ui/StatusRail";
+import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 
 type SigningStatus = DocumentStatus | "";
 
@@ -131,6 +133,10 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
         </div>
       </div>
 
+      <div className="mb-5">
+        <StatusRail status={results[0]?.status ?? "草稿"} />
+      </div>
+
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid gap-4 lg:grid-cols-3">
           <Field label="簽核號">
@@ -200,7 +206,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
                   }`}
                 >
-                  {status}
+                  {getDocumentStatusLabel(status)}
                 </button>
               ))}
             </div>
@@ -267,7 +273,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
                       {item.requestor} / {item.requestorCode}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.submitDate}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-teal-700">{item.status}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-teal-700">{getDocumentStatusLabel(item.status)}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.currentHandler}</td>
                   </tr>
                 ))}
