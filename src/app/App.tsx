@@ -9,7 +9,9 @@ import {
   createDemoUser,
   deleteWorkflowDocument,
   markNotificationRead,
+  normalizeWorkflowDocuments,
   restoreWorkflowDocument,
+  saveDraftDocument,
   submitDocument,
   type ApprovalStage,
   type WorkflowDocument,
@@ -35,8 +37,9 @@ export default function App() {
   const [notificationPulse, setNotificationPulse] = useState(0);
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
+  const visibleDocuments = useMemo(() => normalizeWorkflowDocuments(documents), [documents]);
 
-  const approvalDoc = approval ? documents.find((item) => item.id === approval.docId) ?? null : null;
+  const approvalDoc = approval ? visibleDocuments.find((item) => item.id === approval.docId) ?? null : null;
 
   function openApproval(docId: number, stage: ApprovalStage) {
     setApproval({ docId, stage });
@@ -70,7 +73,7 @@ export default function App() {
     }
 
     if (notification.type === "rejected") {
-      const doc = documents.find((item) => item.id === notification.docId);
+      const doc = visibleDocuments.find((item) => item.id === notification.docId);
       if (doc) openReEdit(doc);
       return;
     }
@@ -100,6 +103,26 @@ export default function App() {
     setFormDoc(null);
     setView(OVERVIEW_VIEW);
     toast.success(formDoc ? "文件已更新並送出簽核" : "文件已送出簽核");
+  }
+
+  function handleSaveDraft(payload: DocumentFormSubmitPayload) {
+    const result = saveDraftDocument(documents, {
+      ...payload,
+      uploaderName: currentUser.name,
+      uploaderCode: currentUser.code,
+      editingDocId: formDoc?.id ?? null,
+      existingDoc: formDoc,
+    });
+
+    setDocuments((current) => {
+      const nextDocs = current.some((item) => item.id === result.document.id)
+        ? current.map((item) => (item.id === result.document.id ? result.document : item))
+        : [...current, result.document];
+      return nextDocs;
+    });
+    setFormDoc(null);
+    setView({ kind: "drafts" });
+    toast.success("草稿已儲存並移至草稿專區");
   }
 
   function handleApproveDecision(
@@ -205,7 +228,7 @@ export default function App() {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <DocumentListPage
-          documents={documents}
+          documents={visibleDocuments}
           view={view}
           formDoc={formDoc}
           onViewChange={setView}
@@ -222,6 +245,7 @@ export default function App() {
           onVoidPublished={handleVoidPublished}
           onDeletePublished={handleDeletePublished}
           onRestoreVoided={handleRestoreVoided}
+          onSaveDraft={handleSaveDraft}
           canVoidPublishedDocs={canVoidPublishedDocs}
           canDeletePublishedDocs={canDeletePublishedDocs}
         />

@@ -42,6 +42,7 @@ export interface WorkflowDocument extends DocumentRecord {
   approvalNo?: string;
   categoryId?: string;
   ownershipDepartmentPath?: string[];
+  sourceDepartmentPath?: string[];
   attachments?: WorkflowAttachment[];
   isPublished?: boolean;
   voidedFromStatus?: DocumentStatus;
@@ -132,6 +133,29 @@ function normalizePath(values: string[]) {
   return values.map((value) => value.trim()).filter(Boolean);
 }
 
+function todayYmd() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isExpiredByValidTo(validTo?: string) {
+  if (!validTo) return false;
+  return todayYmd() > validTo;
+}
+
+export function normalizeWorkflowStatus(status: string, validTo?: string): DocumentStatus {
+  if (status === "刪除" || status === "已刪除") return "刪除";
+  if (status === "作廢" || status === "已作廢" || status === "下架" || status === "已下架") return "作廢";
+  if (isExpiredByValidTo(validTo)) return "作廢";
+  if (status === "已上架") return "上架";
+  if (status === "待文管審核" || status === "待文管簽核") return "待文管審核";
+  if (status === "退回" || status === "已退回") return "退回";
+  return status as DocumentStatus;
+}
+
 function toWorkflowHistory(action: string, actor: WorkflowUser | "系統", statusFrom: DocumentStatus, statusTo: DocumentStatus, comment?: string): WorkflowHistoryEntry {
   return {
     action,
@@ -146,6 +170,7 @@ function toWorkflowHistory(action: string, actor: WorkflowUser | "系統", statu
 export function buildInitialWorkflowDocuments(docs: DocumentRecord[]): WorkflowDocument[] {
   return docs.map((doc) => ({
     ...doc,
+    status: normalizeWorkflowStatus(doc.status, undefined),
     ownerName: doc.requestor ?? doc.uploaderName,
     summary: doc.subject ?? doc.name,
     createdAt: doc.uploadDate,
@@ -154,6 +179,7 @@ export function buildInitialWorkflowDocuments(docs: DocumentRecord[]): WorkflowD
     attachments: [],
     isPublished: doc.status === "上架",
     ownershipDepartmentPath: normalizePath(doc.department.split(" / ")),
+    sourceDepartmentPath: normalizePath(doc.department.split(" / ")),
     history: [],
   }));
 }
@@ -205,16 +231,56 @@ function cloneDoc(doc: WorkflowDocument): WorkflowDocument {
     knowledgePath: doc.knowledgePath ? [...doc.knowledgePath] : undefined,
     history: [...doc.history],
     ownershipDepartmentPath: doc.ownershipDepartmentPath ? [...doc.ownershipDepartmentPath] : undefined,
+    sourceDepartmentPath: doc.sourceDepartmentPath ? [...doc.sourceDepartmentPath] : undefined,
     attachments: doc.attachments ? [...doc.attachments] : undefined,
   };
+}
+
+export interface DraftDocumentInput {
+  title: string;
+  ownerName: string;
+  validFrom: string;
+  validTo: string;
+  summary: string;
+  tags: string[];
+  categoryId: string;
+  categoryPath: string[];
+  ownershipDepartmentPath: string[];
+  attachments: WorkflowAttachment[];
+  level: DocumentLevel;
+  uploaderName: string;
+  uploaderCode: string;
+  editingDocId?: number | null;
+  existingDoc?: WorkflowDocument | null;
 }
 
 function deriveCurrentHandlerForStatus(doc: WorkflowDocument, status: DocumentStatus) {
   if (status === "上架") return "上架";
   if (status === "待主管簽核") return "主管審核";
   if (status === "待文管審核") return "文管審核";
-  if (status === "退回" || status === "作廢") return doc.uploaderName || doc.requestor || "上傳者";
+  if (status === "退回") return doc.uploaderName || doc.requestor || "上傳者";
+  if (status === "作廢") return "文件作廢";
+  if (status === "刪除") return "文件刪除";
   return status;
+}
+
+export function normalizeWorkflowDocument(doc: WorkflowDocument): WorkflowDocument {
+  const effectiveStatus = normalizeWorkflowStatus(doc.status, doc.validTo);
+  if (effectiveStatus === doc.status && !isExpiredByValidTo(doc.validTo)) {
+    return doc;
+  }
+
+  return {
+    ...doc,
+    status: effectiveStatus,
+    currentHandler: deriveCurrentHandlerForStatus(doc, effectiveStatus),
+    isPublished: effectiveStatus === "上架",
+    voidedFromStatus: effectiveStatus === "作廢" ? doc.voidedFromStatus ?? doc.status : doc.voidedFromStatus,
+  };
+}
+
+export function normalizeWorkflowDocuments(docs: WorkflowDocument[]) {
+  return docs.map((doc) => normalizeWorkflowDocument(doc));
 }
 
 export function submitDocument(
@@ -330,6 +396,108 @@ export function submitDocument(
   return {
     document: updatedDoc,
     notification,
+  };
+}
+
+export function saveDraftDocument(docs: WorkflowDocument[], input: DraftDocumentInput) {
+  const existing = input.existingDoc ?? (input.editingDocId != null ? docs.find((doc) => doc.id === input.editingDocId) ?? null : null);
+  const sequence = nextSequenceFromDocs(docs);
+  const docNo = existing?.docNo ?? createDocumentNo(sequence);
+  const timestamp = nowIso();
+  const title = input.title.trim() || existing?.name || "未命名草稿";
+  const summary = input.summary.trim() || existing?.summary || existing?.subject || "";
+  const tags = input.tags.map((tag) => tag.trim()).filter(Boolean);
+  const sourcePath = [...input.ownershipDepartmentPath];
+  const departmentLabel = toOwnerDepartmentLabel(input.ownershipDepartmentPath) || existing?.department || "未選擇部門";
+  const currentStatus: DocumentStatus = "草稿";
+  const nextHistory: WorkflowHistoryEntry[] = [
+    ...(existing?.history ? existing.history : []),
+    {
+      action: existing ? "儲存草稿" : "建立草稿",
+      actor: input.uploaderName,
+      timestamp,
+      statusFrom: existing?.status ?? "草稿",
+      statusTo: currentStatus,
+      ...(summary ? { comment: summary } : {}),
+    },
+  ];
+
+  const baseDoc: WorkflowDocument = existing
+    ? cloneDoc(existing)
+    : {
+        id: Math.max(0, ...docs.map((doc) => doc.id)) + 1,
+        docNo,
+        name: title,
+        level: input.level,
+        version: "v1.0",
+        status: currentStatus,
+        uploaderName: input.uploaderName,
+        uploaderCode: input.uploaderCode,
+        uploadDate: timestamp.slice(0, 10),
+        department: departmentLabel,
+        tags,
+        categoryPath: [...input.categoryPath],
+        knowledgePath: [...input.categoryPath],
+        signingNo: "",
+        subject: summary || title,
+        requestor: input.ownerName || input.uploaderName,
+        requestorCode: input.uploaderCode,
+        currentHandler: "草稿編輯中",
+        ownerName: input.ownerName || input.uploaderName,
+        summary: summary || title,
+        validFrom: input.validFrom || undefined,
+        validTo: input.validTo || undefined,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        approvalNo: "",
+        categoryId: input.categoryId,
+        ownershipDepartmentPath: [...input.ownershipDepartmentPath],
+        sourceDepartmentPath: sourcePath,
+        attachments: [...input.attachments],
+        isPublished: false,
+        history: [],
+      };
+
+  const updatedDoc: WorkflowDocument = {
+    ...baseDoc,
+    docNo,
+    name: title,
+    level: input.level,
+    status: currentStatus,
+    version: baseDoc.version ?? "v1.0",
+    uploaderName: input.uploaderName,
+    uploaderCode: input.uploaderCode,
+    uploadDate: baseDoc.uploadDate || timestamp.slice(0, 10),
+    department: departmentLabel,
+    tags,
+    categoryPath: [...input.categoryPath],
+    knowledgePath: [...input.categoryPath],
+    signingNo: existing?.signingNo ?? "",
+    subject: summary || title,
+    requestor: input.ownerName || input.uploaderName,
+    requestorCode: input.uploaderCode,
+    currentHandler: "草稿編輯中",
+    ownerName: input.ownerName || input.uploaderName,
+    summary: summary || title,
+    validFrom: input.validFrom || undefined,
+    validTo: input.validTo || undefined,
+    updatedAt: timestamp,
+    approvalNo: existing?.approvalNo ?? "",
+    categoryId: input.categoryId,
+    ownershipDepartmentPath: [...input.ownershipDepartmentPath],
+    sourceDepartmentPath: sourcePath,
+    attachments: [...input.attachments],
+    isPublished: false,
+    history: nextHistory,
+  };
+
+  const nextDocuments = existing
+    ? docs.map((doc) => (doc.id === existing.id ? updatedDoc : doc))
+    : [...docs, updatedDoc];
+
+  return {
+    documents: nextDocuments,
+    document: updatedDoc,
   };
 }
 export function applyWorkflowDecision(

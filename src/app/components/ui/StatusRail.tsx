@@ -10,7 +10,7 @@ interface Props {
 export function StatusRail({ status, label, compact = false, className = "" }: Props) {
   const stages = getDocumentStatusProgress(status);
   const currentLabel = getDocumentStatusLabel(status);
-  const isExceptionStatus = !["待主管簽核", "待文管審核", "待文管簽核", "上架"].includes(currentLabel);
+  const isExceptionStatus = ["已退回", "草稿"].includes(currentLabel);
 
   return (
     <div className={`rounded-2xl border border-slate-200 bg-white ${className}`}>
@@ -26,7 +26,9 @@ export function StatusRail({ status, label, compact = false, className = "" }: P
 
       {isExceptionStatus && (
         <div className="border-b border-slate-100 bg-slate-50 px-4 py-2 text-xs text-slate-500">
-          目前狀態屬於例外狀態，未納入主流程步階。
+          {currentLabel === "已退回"
+            ? "文件已退回，將回到上傳者並從主管簽核重新開始。"
+            : "草稿尚未進入簽核流程。"}
         </div>
       )}
 

@@ -67,7 +67,7 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
             <span>移轉單位</span>
           </div>
           <h2 className="text-lg font-bold text-slate-800">移轉單位</h2>
-          <p className="mt-1 text-sm text-slate-500">查詢文件移轉紀錄與移轉摘要資訊</p>
+          <p className="mt-1 text-sm text-slate-500">查詢文件移轉紀錄與轉移資訊</p>
         </div>
       </div>
 
@@ -136,17 +136,6 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
                           </span>
                         </div>
                         <div className="text-sm font-semibold text-slate-800">{doc.name}</div>
-                        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                          <div className="font-semibold text-slate-500">移轉摘要</div>
-                          <div className="mt-1 leading-6">
-                            原單位：{(transfer.ownershipDepartmentPathBefore ?? []).join(" / ") || "無"}<br />
-                            新單位：{(transfer.ownershipDepartmentPathAfter ?? []).join(" / ") || "無"}
-                          </div>
-                          <div className="mt-1 leading-6">
-                            原知識樹分層：{(transfer.categoryPathBefore ?? []).join(" / ") || "無"}<br />
-                            新知識樹分層：{(transfer.categoryPathAfter ?? []).join(" / ") || "無"}
-                          </div>
-                        </div>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-slate-600">

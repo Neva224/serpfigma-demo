@@ -6,6 +6,7 @@ interface ConfirmDialogProps {
   description: string;
   confirmLabel: string;
   cancelLabel?: string;
+  warningText?: string;
   destructive?: boolean;
   loading?: boolean;
   onConfirm: () => void | Promise<void>;
@@ -18,6 +19,7 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   cancelLabel = "返回",
+  warningText = "這項操作會立即影響文件狀態，請再次確認。",
   destructive = false,
   loading = false,
   onConfirm,
@@ -40,7 +42,7 @@ export function ConfirmDialog({
         </div>
 
         <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          這項操作會立即影響文件狀態，請再次確認。
+          {warningText}
         </div>
 
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

@@ -52,10 +52,6 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   const attachments = doc.attachments ?? [];
   const categoryPayload = useMemo(() => resolveCategoryPayload(CATEGORY_NODES, transferCategory), [transferCategory]);
   const departmentPayload = useMemo(() => buildHrScopePayload(HR_SCOPE_ROWS, transferDepartment), [transferDepartment]);
-  const latestTransfer = useMemo(
-    () => [...(doc.history ?? [])].reverse().find((entry) => entry.action === "移轉單位"),
-    [doc.history],
-  );
   const isOtherReason = rejectType === "其他原因";
   const canTransfer = role === "manager";
   const rejectReady = rejectType.length > 0 && (!isOtherReason || rejectReason.trim().length > 0);
@@ -137,30 +133,6 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
           <div className="px-4 py-4">
             <StatusRail status={doc.status} compact />
           </div>
-
-          {latestTransfer && (
-            <div className="px-4 pb-4">
-              <div className="rounded-xl border border-cyan-100 bg-cyan-50/80 p-4">
-                <p className="text-xs font-semibold text-cyan-700">移轉摘要</p>
-                <div className="mt-3 space-y-2 text-sm text-slate-700">
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <span className="font-semibold text-slate-600">原單位 → 新單位：</span>
-                    {(latestTransfer.ownershipDepartmentPathBefore ?? []).join(" / ") || "無"} →
-                    {(latestTransfer.ownershipDepartmentPathAfter ?? []).join(" / ") || "無"}
-                  </div>
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <span className="font-semibold text-slate-600">原知識樹分層 → 新知識樹分層：</span>
-                    {(latestTransfer.categoryPathBefore ?? []).join(" / ") || "無"} →
-                    {(latestTransfer.categoryPathAfter ?? []).join(" / ") || "無"}
-                  </div>
-                  <div className="rounded-lg bg-white px-3 py-2">
-                    <span className="font-semibold text-slate-600">執行人：</span>
-                    {latestTransfer.actor}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           <AccordionSection id="decision" label="退回 / 移轉" expanded={expanded} onToggle={toggle}>
             <div className="space-y-3 p-1">

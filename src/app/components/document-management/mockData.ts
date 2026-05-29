@@ -7,7 +7,7 @@ export type DocumentStatus =
   | "上架"
   | "退回"
   | "作廢"
-  | "下架";
+  | "刪除";
 
 export interface DocumentRecord {
   id: number;
@@ -80,7 +80,7 @@ export const LEVEL_META: Record<DocumentLevel, LevelMeta> = Object.fromEntries(
   LEVEL_OPTIONS.map((option) => [option.value, option]),
 ) as Record<DocumentLevel, LevelMeta>;
 
-export const STATUS_OPTIONS: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "下架"];
+export const STATUS_OPTIONS: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "刪除"];
 
 export const LEFT_RAIL_PRESETS = [
   { label: "全部文件", path: [] as string[] },
@@ -228,7 +228,7 @@ export const SAMPLE_DOCS: DocumentRecord[] = [
     name: "品保說明書",
     level: "level3",
     version: "v1.2",
-    status: "下架",
+    status: "作廢",
     uploaderName: "林佳宏",
     uploaderCode: "250345",
     uploadDate: "2026-04-02",
@@ -239,7 +239,7 @@ export const SAMPLE_DOCS: DocumentRecord[] = [
     subject: "品保說明書修訂",
     requestor: "林佳宏",
     requestorCode: "250345",
-    currentHandler: "文件下架",
+    currentHandler: "文件作廢",
   },
 ];
 

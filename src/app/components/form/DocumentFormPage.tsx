@@ -33,6 +33,7 @@ interface DocumentFormPageProps {
   showBackButton?: boolean;
   editingDoc?: WorkflowDocument | null;
   onSubmit?: (payload: DocumentFormSubmitPayload) => void;
+  onSaveDraft?: (payload: DocumentFormSubmitPayload) => void | Promise<void>;
 }
 
 function splitPath(value?: string) {
@@ -45,6 +46,7 @@ export function DocumentFormPage({
   showBackButton,
   editingDoc = null,
   onSubmit,
+  onSaveDraft,
 }: DocumentFormPageProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const [classification, setClassification] = useState<ClassificationSelection>({
@@ -63,6 +65,8 @@ export function DocumentFormPage({
   const [submitConfirmOpen, setSubmitConfirmOpen] = useState(false);
   const [submitBusy, setSubmitBusy] = useState(false);
   const [pendingSubmit, setPendingSubmit] = useState<DocumentFormSubmitPayload | null>(null);
+  const [backConfirmOpen, setBackConfirmOpen] = useState(false);
+  const [draftBusy, setDraftBusy] = useState(false);
 
   useEffect(() => {
     if (!editingDoc) {
@@ -72,6 +76,8 @@ export function DocumentFormPage({
       setPendingSubmit(null);
       setSubmitConfirmOpen(false);
       setSubmitBusy(false);
+      setBackConfirmOpen(false);
+      setDraftBusy(false);
       return;
     }
 
@@ -94,6 +100,8 @@ export function DocumentFormPage({
     setPendingSubmit(null);
     setSubmitConfirmOpen(false);
     setSubmitBusy(false);
+    setBackConfirmOpen(false);
+    setDraftBusy(false);
   }, [editingDoc]);
 
   const categoryPayload = buildCategoryPayload(classification);
@@ -140,7 +148,19 @@ export function DocumentFormPage({
   );
 
   function handleSaveDraft() {
-    toast.success(editingDoc ? `已儲存草稿：${editingDoc.name}` : "已儲存草稿");
+    const payload = buildDraftPayload();
+    if (!payload || draftBusy) return;
+    setDraftBusy(true);
+    Promise.resolve()
+      .then(() => onSaveDraft?.(payload))
+      .then(() => {
+        if (!onSaveDraft) {
+          toast.success(editingDoc ? `已儲存草稿：${editingDoc.name}` : "已儲存草稿");
+        }
+      })
+      .finally(() => {
+        setDraftBusy(false);
+      });
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -198,6 +218,48 @@ export function DocumentFormPage({
     } satisfies DocumentFormSubmitPayload;
   }
 
+  function buildDraftPayload() {
+    const form = formRef.current;
+    if (!form) return null;
+
+    const formData = new FormData(form);
+    const title = String(formData.get("title") ?? "").trim();
+    const ownerName = String(formData.get("ownerName") ?? "").trim();
+    const validFrom = String(formData.get("validFrom") ?? "").trim();
+    const validTo = String(formData.get("validTo") ?? "").trim();
+    const summary = String(formData.get("summary") ?? "").trim();
+    const tags = String(formData.get("tags") ?? "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const categoryPath = String(formData.get("categoryPath") ?? "")
+      .split(" / ")
+      .map((segment) => segment.trim())
+      .filter(Boolean);
+    const level = (String(formData.get("documentLevel") ?? "") || editingDoc?.level || "level1") as DocumentLevel;
+    const ownershipDepartmentPath = [
+      department.companyName,
+      department.groupName,
+      department.divisionName,
+      department.departmentName,
+    ].filter(Boolean) as string[];
+
+    return {
+      title: title || editingDoc?.name || "未命名草稿",
+      ownerName: ownerName || editingDoc?.requestor || editingDoc?.uploaderName || "未填負責人",
+      validFrom,
+      validTo,
+      summary,
+      tags,
+      categoryId,
+      categoryPath,
+      ownershipDepartmentPath,
+      attachments,
+      level,
+    } satisfies DocumentFormSubmitPayload;
+  }
+
   async function confirmSubmit() {
     if (!pendingSubmit || submitBusy) return;
     setSubmitBusy(true);
@@ -226,7 +288,7 @@ export function DocumentFormPage({
               {canShowBackButton ? (
                 <button
                   type="button"
-                  onClick={onBack}
+                  onClick={() => setBackConfirmOpen(true)}
                   className="group flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-800"
                 >
                   <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" />
@@ -385,7 +447,7 @@ export function DocumentFormPage({
           <div className="ml-auto flex items-center gap-3">
             <button
               type="button"
-              onClick={onBack}
+              onClick={() => setBackConfirmOpen(true)}
               className="rounded-lg border border-gray-200 px-5 py-2 text-sm text-gray-600 transition-all hover:bg-gray-50"
               style={{ fontWeight: 500 }}
             >
@@ -397,6 +459,7 @@ export function DocumentFormPage({
               className="rounded-lg border px-5 py-2 text-sm transition-all hover:bg-teal-50"
               style={{ borderColor: "#0D9488", color: "#0D9488", fontWeight: 500 }}
               onClick={handleSaveDraft}
+              disabled={draftBusy}
             >
               儲存草稿
             </button>
@@ -425,6 +488,20 @@ export function DocumentFormPage({
           setPendingSubmit(null);
         }}
         loading={submitBusy}
+      />
+
+      <ConfirmDialog
+        open={backConfirmOpen}
+        title="返回確認"
+        description="請確認是否返回？若尚未儲存，離開後目前編輯內容可能不會保留。"
+        warningText="離開前請確認是否已完成儲存草稿或送出簽核。"
+        confirmLabel="確認返回"
+        cancelLabel="取消"
+        onConfirm={() => {
+          setBackConfirmOpen(false);
+          onBack();
+        }}
+        onCancel={() => setBackConfirmOpen(false)}
       />
     </form>
   );

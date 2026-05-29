@@ -66,7 +66,7 @@ const [
   STATUS_PUBLISHED,
   STATUS_RETURNED,
   STATUS_VOIDED,
-  STATUS_ARCHIVED,
+  STATUS_DELETED,
 ] = STATUS_OPTIONS;
 
 const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: string; label: string }> = {
@@ -76,7 +76,7 @@ const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: str
   [STATUS_PUBLISHED]: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500", label: getDocumentStatusLabel(STATUS_PUBLISHED) },
   [STATUS_RETURNED]: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500", label: getDocumentStatusLabel(STATUS_RETURNED) },
   [STATUS_VOIDED]: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-500", label: getDocumentStatusLabel(STATUS_VOIDED) },
-  [STATUS_ARCHIVED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: getDocumentStatusLabel(STATUS_ARCHIVED) },
+  [STATUS_DELETED]: { bg: "bg-slate-100", text: "text-slate-600", dot: "bg-slate-500", label: getDocumentStatusLabel(STATUS_DELETED) },
 };
 
 export function DocumentTable({

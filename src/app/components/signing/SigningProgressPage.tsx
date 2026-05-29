@@ -297,7 +297,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
   );
 }
 
-const STATUS_ORDER: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "下架"];
+const STATUS_ORDER: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "刪除"];
 
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white";

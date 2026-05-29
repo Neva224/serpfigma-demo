@@ -14,6 +14,7 @@ import { DocumentTable } from "./DocumentTable";
 import { DocumentFormPage, type DocumentFormSubmitPayload } from "./form/DocumentFormPage";
 import { SigningProgressPage } from "./signing/SigningProgressPage";
 import { FaqSearchPage } from "./query/FaqSearchPage";
+import { DraftSectionPage } from "./query/DraftSectionPage";
 import { TransferUnitPage } from "./query/TransferUnitPage";
 import { DatabasePage } from "./database/DatabasePage";
 import { PermissionsPage } from "./settings/PermissionsPage";
@@ -34,6 +35,7 @@ export type ViewMode =
   | { kind: "overview" }
   | { kind: "category"; path: string[]; label: string }
   | { kind: "query"; variant: "general" | "faq" }
+  | { kind: "drafts" }
   | { kind: "signing"; variant: "manager" | "docadmin" | "void" | "transfer" }
   | { kind: "documentUpload" }
   | { kind: "signingProgress" }
@@ -48,6 +50,7 @@ interface Props {
   onVoidPublished: (doc: DocumentRecord) => void;
   onDeletePublished: (doc: DocumentRecord) => void;
   onRestoreVoided: (doc: DocumentRecord) => void;
+  onSaveDraft: (payload: DocumentFormSubmitPayload) => void;
   canVoidPublishedDocs: boolean;
   canDeletePublishedDocs: boolean;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
@@ -73,6 +76,7 @@ export function DocumentListPage({
   onVoidPublished,
   onDeletePublished,
   onRestoreVoided,
+  onSaveDraft,
   canVoidPublishedDocs,
   canDeletePublishedDocs,
   onSubmitDocument,
@@ -84,6 +88,7 @@ export function DocumentListPage({
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
   const [queryOpen, setQueryOpen] = useState(true);
   const [uploadOpen, setUploadOpen] = useState(true);
+  const [draftOpen, setDraftOpen] = useState(true);
   const [signingOpen, setSigningOpen] = useState(true);
   const [databaseOpen, setDatabaseOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
@@ -111,6 +116,7 @@ export function DocumentListPage({
   const docsForView = useMemo(() => {
     if (view.kind === "overview") return [];
     if (view.kind === "query" && view.variant === "faq") return [];
+    if (view.kind === "drafts") return [];
     if (view.kind === "documentUpload") return [];
     if (view.kind === "signingProgress") return [];
     if (view.kind === "database") return [];
@@ -267,6 +273,10 @@ export function DocumentListPage({
     onAdd();
   }
 
+  function activateDrafts() {
+    onViewChange({ kind: "drafts" });
+  }
+
   function countForPath(path: string[]) {
     return publishedDocs.filter((doc) => includesPathPrefix(doc, path)).length;
   }
@@ -359,6 +369,21 @@ export function DocumentListPage({
 
           <SectionCard
             collapsed={sidebarCollapsed}
+            title="草稿專區"
+            subtitle="已儲存的草稿文件"
+            icon={<FileText size={16} />}
+            badge={String(countForDraftSection(documents))}
+            open={draftOpen}
+            onToggle={() => setDraftOpen((current) => !current)}
+            onHeaderClick={activateDrafts}
+          >
+            <div className="space-y-1.5">
+              <SelectionPill label="草稿專區" active={view.kind === "drafts"} onClick={activateDrafts} />
+            </div>
+          </SectionCard>
+
+          <SectionCard
+            collapsed={sidebarCollapsed}
             title="文件簽核專區"
             subtitle="查詢簽核進度、處理退件與移轉"
             icon={<Clock3 size={16} />}
@@ -440,7 +465,10 @@ export function DocumentListPage({
               embedded
               editingDoc={formDoc}
               onSubmit={onSubmitDocument}
+              onSaveDraft={onSaveDraft}
             />
+          ) : view.kind === "drafts" ? (
+            <DraftSectionPage onBack={activateKnowledgeOverview} embedded documents={documents} onEditDraft={onReEdit} />
           ) : view.kind === "signingProgress" ? (
             <SigningProgressPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : view.kind === "database" ? (
@@ -521,7 +549,7 @@ export function DocumentListPage({
   );
 }
 
-function countForSigningSection(docs: DocumentRecord[]) {
+  function countForSigningSection(docs: DocumentRecord[]) {
   return docs.filter(
     (doc) =>
       doc.status === "待主管簽核" ||
@@ -529,6 +557,10 @@ function countForSigningSection(docs: DocumentRecord[]) {
       doc.status === "上架" ||
       doc.status === "作廢",
   ).length;
+}
+
+function countForDraftSection(docs: DocumentRecord[]) {
+  return docs.filter((doc) => doc.status === "草稿").length;
 }
 
 function findNodeByPath(nodes: LegacyKnowledgeTreeNode[], path: string[]): LegacyKnowledgeTreeNode | null {
@@ -549,6 +581,8 @@ function getViewTitle(view: ViewMode) {
       return view.label;
     case "query":
       return view.variant === "general" ? "一般文件查詢" : "FAQ常見問題專區";
+    case "drafts":
+      return "草稿專區";
     case "documentUpload":
       return "文件上傳專區";
     case "signingProgress":
@@ -581,6 +615,8 @@ function getViewDescription(view: ViewMode) {
       return `分類路徑 > ${view.path.join(" > ")}`;
     case "query":
       return view.variant === "general" ? "一般文件條件查詢" : "FAQ常見問題條件查詢";
+    case "drafts":
+      return "查詢與管理已儲存的草稿文件";
     case "documentUpload":
       return "新增文件、選擇分類與送出簽核";
     case "signingProgress":

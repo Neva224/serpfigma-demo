@@ -27,7 +27,6 @@ const PERMISSIONS: Permission[] = [
   { action: "查看文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: true,  一般使用者: true,  唯讀使用者: true  } },
   { action: "文件移轉",    category: "流程操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
   { action: "文件上架",    category: "流程操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
-  { action: "文件下架",    category: "流程操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
   { action: "文件作廢",    category: "流程操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
   { action: "主管簽核",    category: "簽核操作", roles: { 系統管理員: true,  文管人員: false, 部門主管: true,  一般使用者: false, 唯讀使用者: false } },
   { action: "文管審核",    category: "簽核操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
