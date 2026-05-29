@@ -79,8 +79,8 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-4 lg:flex-row lg:items-center">
+      <section className="enterprise-panel overflow-hidden rounded-xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -90,14 +90,14 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
                 if (e.key === "Enter") setSubmittedKeyword(keyword);
               }}
               placeholder="請輸入文件關鍵字"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-700 focus:bg-white"
             />
           </div>
 
           <button
             type="button"
             onClick={() => setSubmittedKeyword(keyword)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
+            className="enterprise-query-button inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
           >
             <Search size={15} />
             查詢
@@ -110,10 +110,10 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
             <button
               type="button"
               onClick={() => setAdvancedOpen((current) => !current)}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${
                 advancedOpen
-                  ? "border-teal-300 bg-teal-50 text-teal-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  ? "border-teal-700 bg-teal-50 text-teal-800"
+                  : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
               }`}
             >
               <SlidersHorizontal size={14} />
@@ -123,7 +123,7 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
             <button
               type="button"
               onClick={reset}
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               重設條件
             </button>
@@ -131,7 +131,7 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         </div>
 
         {advancedOpen && (
-          <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
+          <div className="enterprise-section-header px-4 py-4">
             <CascadeSelectGroup
               title="組織篩選"
               description="以 HR 組織資料來源進行四層級選擇。"
@@ -192,18 +192,18 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         )}
       </section>
 
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="enterprise-panel mt-4 rounded-xl p-5">
         <div className="mb-3 flex items-center justify-between">
           <div className="text-sm font-semibold text-slate-800">查詢結果</div>
           <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{results.length} 筆</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left">
-            <thead className="bg-slate-50">
+            <table className="min-w-full text-left">
+            <thead className="enterprise-table-head">
               <tr>
                 {["文件編號", "文件名稱", "所屬部門", "狀態", "上傳者", "上傳日期"].map((header) => (
-                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
+                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
                     {header}
                   </th>
                 ))}
@@ -211,14 +211,14 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
             </thead>
             <tbody>
               {results.map((doc) => (
-                <tr key={doc.id} className="border-b border-slate-100">
+                <tr key={doc.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{doc.docNo}</td>
                   <td className="px-4 py-3">
                     <div className="text-sm font-semibold text-slate-800">{doc.name}</div>
                     <div className="text-xs text-slate-400">{doc.summary ?? doc.subject ?? "沒有摘要"}</div>
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-600">{doc.department}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-teal-700">{getDocumentStatusLabel(doc.status)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-700">{getDocumentStatusLabel(doc.status)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{doc.uploaderName}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{doc.uploadDate}</td>
                 </tr>

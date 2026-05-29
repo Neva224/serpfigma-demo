@@ -168,8 +168,8 @@ export function DocumentTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-5 py-3">
+    <div className="enterprise-panel overflow-hidden rounded-xl">
+      <div className="enterprise-section-header flex items-center justify-between px-5 py-3">
         <div className="flex items-center gap-3">
           <div>
             <p className="text-sm font-semibold text-slate-700">文件列表</p>
@@ -184,7 +184,7 @@ export function DocumentTable({
         <button
           type="button"
           onClick={onAdd}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-500 active:scale-[0.98]"
+          className="enterprise-query-button inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-semibold text-white transition active:scale-[0.98]"
         >
           <FileText size={15} />
           新增文件
@@ -197,7 +197,7 @@ export function DocumentTable({
           <button
             type="button"
             onClick={() => setNotice(null)}
-            className="rounded-lg px-2 py-1 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
+            className="rounded-md px-2 py-1 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
           >
             關閉
           </button>
@@ -207,8 +207,8 @@ export function DocumentTable({
       {panel && (
         <div className="fixed inset-0 z-50 flex">
           <div className="absolute inset-0 bg-slate-950/50" onClick={() => setPanel(null)} />
-          <div className="relative ml-auto flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl">
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-4">
+          <div className="relative ml-auto flex h-full w-full max-w-3xl flex-col enterprise-panel bg-white shadow-2xl">
+            <div className="enterprise-section-header flex items-start justify-between px-6 py-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-teal-600">
                   {panel.kind === "version" ? "版本歷程" : "審核歷程"}
@@ -265,7 +265,7 @@ export function DocumentTable({
 
       <div className="overflow-x-auto">
         <table className="min-w-full text-left">
-          <thead className="bg-teal-600">
+          <thead className="enterprise-table-head">
             <tr>
               {["文件編號", "文件名稱", "文件階級", "版本", "狀態", "上傳者", "上傳日期", "操作"].map((header) => (
                 <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
@@ -287,7 +287,7 @@ export function DocumentTable({
               return (
                 <tr
                   key={doc.id}
-                  className="border-b border-slate-100 transition hover:bg-teal-50/40"
+                  className="border-b border-slate-100 transition hover:bg-teal-50/30"
                   style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#fafafa" }}
                 >
                   <td className="whitespace-nowrap px-4 py-3">
@@ -394,7 +394,7 @@ export function DocumentTable({
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <span>每頁筆數</span>
           <input
@@ -406,7 +406,7 @@ export function DocumentTable({
             onFocus={(e) => e.currentTarget.select()}
             onChange={(e) => setPageSizeInput(e.target.value.replace(/\D/g, ""))}
             onBlur={handlePageSizeBlur}
-            className="w-20 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-500"
+            className="w-20 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-700 outline-none transition focus:border-teal-700"
           />
           <span>筆</span>
         </div>
@@ -420,7 +420,7 @@ export function DocumentTable({
           <div className="flex items-center gap-1">
             <PagerButton icon={<ChevronsLeft size={14} />} disabled={safePage === 1} onClick={() => gotoPage(1)} />
             <PagerButton icon={<ChevronLeft size={14} />} disabled={safePage === 1} onClick={() => gotoPage(safePage - 1)} />
-            <div className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-600">
+            <div className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-600">
               第 {safePage} / {totalPages} 頁
             </div>
             <PagerButton icon={<ChevronRight size={14} />} disabled={safePage === totalPages} onClick={() => gotoPage(safePage + 1)} />
@@ -429,7 +429,7 @@ export function DocumentTable({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 px-5 py-3 text-xs text-slate-400">
+      <div className="border-t border-slate-200 px-5 py-3 text-xs text-slate-500">
         顯示 {start} - {end} 筆，共 {docs.length} 筆
       </div>
     </div>

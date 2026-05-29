@@ -61,7 +61,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
 
   return (
     <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
-      <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm flex items-start justify-between gap-4">
+      <div className="enterprise-panel mb-5 flex items-start justify-between gap-4 overflow-hidden rounded-xl px-5 py-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
             <button type="button" onClick={onBack} className="hover:text-gray-600">
@@ -74,8 +74,8 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
             <span>/</span>
             <span>系統設定 — 人員權限管理</span>
           </div>
-          <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>系統設定 — 人員權限管理</h2>
-          <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的權限</p>
+          <h2 className="text-[17px] font-bold text-slate-800">系統設定 — 人員權限管理</h2>
+          <p className="mt-0.5 text-sm text-slate-500">設定各角色對文件相關操作的權限</p>
           <p className="mt-2 text-sm leading-6 text-gray-600">
             本頁顯示目前角色權限設定。打勾代表可使用該功能，打叉代表不可使用。
           </p>
@@ -88,7 +88,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
           const rc = ROLE_COLORS[role];
           const count = perms.filter((p) => p.roles[role]).length;
           return (
-            <div key={role} className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col items-center gap-2">
+            <div key={role} className="enterprise-panel flex flex-col items-center gap-2 rounded-xl p-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: rc.bg }}>
                 {role === "系統管理員" ? <Shield size={18} className="text-white" /> : <User size={18} style={{ color: rc.text }} />}
               </div>
@@ -105,8 +105,8 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
       </div>
 
       {/* Permission matrix */}
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/60">
+      <div className="enterprise-panel overflow-hidden rounded-xl">
+        <div className="enterprise-section-header flex items-center justify-between px-5 py-3">
           <div className="space-y-1.5">
             <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>權限設定矩陣</h3>
             <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
@@ -123,12 +123,12 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
           </div>
           <button
             onClick={() => setEditing((v) => !v)}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border transition-all"
+            className="flex items-center gap-1.5 rounded-lg border px-4 py-1.5 transition-all"
             style={{
               fontSize: "12px", fontWeight: 600,
-              borderColor: editing ? "#0D9488" : "#E5E7EB",
-              backgroundColor: editing ? "#F0FDFA" : "transparent",
-              color: editing ? "#0D9488" : "#6B7280",
+              borderColor: editing ? "#0F4F4A" : "#CBD5E1",
+              backgroundColor: editing ? "#E6FFFB" : "#FFFFFF",
+              color: editing ? "#0F4F4A" : "#64748B",
             }}
           >
             <Edit2 size={12} />
@@ -139,7 +139,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full" style={{ fontSize: "12px" }}>
             <thead>
-              <tr style={{ backgroundColor: "#0D9488" }}>
+              <tr style={{ backgroundColor: "#0F4F4A" }}>
                 <th className="text-left px-5 py-2.5 text-white font-semibold whitespace-nowrap" style={{ width: "100px" }}>分類</th>
                 <th className="text-left px-5 py-2.5 text-white font-semibold">操作項目</th>
                 {ROLES.map((role) => (
@@ -155,7 +155,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                   return (
                     <tr
                       key={perm.action}
-                      className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                       style={{ backgroundColor: globalIdx % 2 === 1 ? "#FAFAFA" : "#FFFFFF" }}
                     >
                       {ci === 0 && (
@@ -169,17 +169,17 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                           <button
                             onClick={() => toggle(globalIdx, role)}
                             disabled={!editing}
-                            className="mx-auto flex items-center justify-center w-6 h-6 rounded-full transition-all"
+                            className="mx-auto flex h-6 w-6 items-center justify-center rounded-full transition-all"
                             aria-label={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
                             title={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
                             style={{
-                              backgroundColor: perm.roles[role] ? "#0D9488" : "#F3F4F6",
+                              backgroundColor: perm.roles[role] ? "#0F4F4A" : "#E2E8F0",
                               cursor: editing ? "pointer" : "default",
                             }}
                           >
                             {perm.roles[role]
                               ? <Check size={13} className="text-white" strokeWidth={2.5} />
-                              : <X size={13} className="text-gray-300" strokeWidth={2} />
+                              : <X size={13} className="text-slate-400" strokeWidth={2} />
                             }
                           </button>
                         </td>
@@ -191,7 +191,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
             </tbody>
           </table>
         </div>
-        <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 text-gray-400" style={{ fontSize: "11px" }}>
+        <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-slate-500" style={{ fontSize: "11px" }}>
           共 {PERMISSIONS.length} 項功能權限 · {editing ? "編輯模式：點擊方格可切換可使用 / 不可使用" : "點擊「編輯權限」以修改設定"}
         </div>
       </div>

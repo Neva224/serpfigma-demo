@@ -133,7 +133,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
         <StatusRail status={results[0]?.status ?? "待主管簽核"} />
       </div>
 
-      <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="enterprise-panel mb-5 rounded-xl p-5">
         <div className="grid gap-4 lg:grid-cols-3">
           <Field label="簽核號">
             <input
@@ -191,7 +191,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
           </Field>
           <Field label="狀態">
             <Select value={status} onValueChange={(value) => setStatus(value as SigningStatus)}>
-              <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700">
+                <SelectTrigger className="h-11 rounded-lg border-slate-300 bg-slate-50 text-sm text-slate-700">
                 <SelectValue placeholder="全部狀態" />
               </SelectTrigger>
               <SelectContent>
@@ -210,7 +210,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
             <button
               type="button"
               onClick={doReset}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
             >
               <RotateCcw size={14} />
               重設
@@ -218,7 +218,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
             <button
               type="button"
               onClick={doSearch}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-teal-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-teal-500"
+              className="enterprise-query-button inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-sm font-semibold text-white transition"
             >
               <Search size={14} />
               查詢
@@ -227,10 +227,10 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="enterprise-panel rounded-xl p-5">
         <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText size={16} className="text-teal-600" />
+            <FileText size={16} className="text-teal-700" />
             <h3 className="text-sm font-semibold text-slate-800">查詢結果</h3>
           </div>
           <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">
@@ -241,10 +241,10 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
         {searched ? (
           <div className="overflow-x-auto">
             <table className="min-w-full text-left">
-              <thead className="bg-slate-50">
+              <thead className="enterprise-table-head">
                 <tr>
                   {["簽核號", "文件名稱", "申請人", "申請日期", "狀態", "當前處理者"].map((header) => (
-                    <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
+                    <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
                       {header}
                     </th>
                   ))}
@@ -252,7 +252,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
               </thead>
               <tbody>
                 {results.map((item) => (
-                  <tr key={item.signingNo} className="border-b border-slate-100">
+                  <tr key={item.signingNo} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{item.signingNo}</td>
                     <td className="px-4 py-3">
                       <div className="text-sm font-semibold text-slate-800">{item.docName}</div>
@@ -262,7 +262,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
                       {item.requestor} / {item.requestorCode}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.submitDate}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-teal-700">{getDocumentStatusLabel(item.status)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-700">{getDocumentStatusLabel(item.status)}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{item.currentHandler}</td>
                   </tr>
                 ))}
@@ -277,7 +277,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
             </table>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-5 py-12 text-center text-sm text-slate-400">
+          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-12 text-center text-sm text-slate-400">
             請先設定查詢條件後按下查詢
           </div>
         )}
@@ -287,7 +287,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
 }
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white";
+  "w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-700 focus:bg-white";
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (

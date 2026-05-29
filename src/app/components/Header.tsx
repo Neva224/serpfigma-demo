@@ -50,7 +50,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
 
   return (
     <>
-      <header className="brand-teal-bar z-20 flex h-[80px] flex-shrink-0 border-b brand-teal-border">
+      <header className="brand-teal-bar z-20 flex h-[72px] flex-shrink-0 border-b brand-teal-border shadow-[0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex h-full flex-1 items-center px-6">
           <button
             type="button"
@@ -58,14 +58,14 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
             aria-label="返回首頁"
             className="flex cursor-pointer items-center gap-4 text-left"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 shadow-sm ring-1 ring-white/15">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/12 shadow-sm ring-1 ring-white/10">
               <FileText size={22} className="text-white" />
             </div>
             <div className="leading-tight">
-              <div className="text-[28px] font-extrabold tracking-[0.06em] text-white">
+              <div className="text-[24px] font-extrabold tracking-[0.04em] text-white">
                 SERP 文件管理系統
               </div>
-              <div className="mt-1 text-[15px] font-bold leading-6 tracking-[0.02em] text-white/90">
+              <div className="mt-0.5 text-[13px] font-bold leading-5 tracking-[0.03em] text-white/88">
                 文件管理系統
               </div>
             </div>
@@ -75,7 +75,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
             <button
               type="button"
               onClick={() => setPanelOpen((current) => !current)}
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-white transition hover:bg-white/10"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-md text-white transition hover:bg-white/10"
               aria-label="通知"
             >
               <Bell size={20} />
@@ -89,14 +89,14 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
             <button
               type="button"
               onClick={() => onNavigate("permissions")}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-white transition hover:bg-white/10"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-md text-white transition hover:bg-white/10"
               aria-label="系統管理"
             >
               <Settings size={20} />
             </button>
 
-            <div className="ml-1 flex items-center gap-2 border-l border-white/20 pl-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/15 text-xs font-bold text-white ring-1 ring-white/15">
+            <div className="ml-1 flex items-center gap-2 border-l border-white/18 pl-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/12 text-xs font-bold text-white ring-1 ring-white/10">
                 系
               </div>
                 <div className="hidden sm:block">
@@ -111,7 +111,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
       {panelOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setPanelOpen(false)} />
-          <div className="fixed right-4 top-14 z-50 w-[360px] overflow-hidden rounded-2xl border brand-teal-border bg-white shadow-2xl">
+          <div className="fixed right-4 top-14 z-50 w-[360px] overflow-hidden rounded-xl enterprise-panel-strong bg-white shadow-2xl">
             <div className="brand-teal-bar flex items-center justify-between border-b brand-teal-border px-4 py-3">
               <div className="flex items-center gap-2">
                 <Bell size={16} className="text-white" />
@@ -131,7 +131,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
               {orderedNotifications.map((item) => (
                 <div
                   key={item.id}
-                  className="border-b border-emerald-50 px-4 py-3"
+                  className="border-b border-slate-100 px-4 py-3"
                   style={{ backgroundColor: item.unread ? "#F0FDFA" : "#FFFFFF" }}
                 >
                   <div className="mb-1 flex items-center justify-between">
@@ -162,7 +162,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
               ))}
             </div>
 
-            <div className="border-t border-emerald-50 bg-emerald-50 px-4 py-2.5 text-center text-xs text-emerald-700">
+            <div className="border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-xs text-slate-600">
               共 {notifications.length} 筆通知
             </div>
           </div>

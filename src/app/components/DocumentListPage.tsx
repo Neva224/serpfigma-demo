@@ -295,7 +295,7 @@ export function DocumentListPage({
           sidebarCollapsed ? "w-[72px]" : "w-[320px]"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-white/15 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
           <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
             <button
               type="button"
@@ -313,7 +313,7 @@ export function DocumentListPage({
           </div>
         </div>
 
-        <div className="scrollbar-brand min-h-0 flex-1 overflow-y-auto px-3 py-3">
+        <div className="scrollbar-brand min-h-0 flex-1 overflow-y-auto px-3 py-2.5">
           <SectionCard
             collapsed={sidebarCollapsed}
             title="知識樹分類"
@@ -431,7 +431,7 @@ export function DocumentListPage({
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="knowledge-card mb-5 overflow-hidden rounded-3xl px-5 py-5">
+        <div className="enterprise-panel-strong mb-5 overflow-hidden rounded-xl px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -443,7 +443,7 @@ export function DocumentListPage({
                   主功能
                 </button>
               </div>
-              <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
+              <div className="mt-1.5 text-[17px] font-bold text-slate-800">{getViewTitle(view)}</div>
               <div className="mt-1 text-sm font-semibold text-slate-500">
                 {view.kind === "overview" ? "請選擇第一層分類查看下層資料夾與文件" : getViewDescription(view)}
               </div>
@@ -693,8 +693,8 @@ function FilterBar({
   searchPlaceholder: string;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-4 lg:flex-row lg:items-center">
+    <section className="enterprise-panel overflow-hidden rounded-xl">
+      <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center">
         <div className="relative flex-1">
           <Search
             size={15}
@@ -707,14 +707,14 @@ function FilterBar({
               if (e.key === "Enter") onSearch();
             }}
             placeholder={searchPlaceholder}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-700 focus:bg-white"
           />
         </div>
 
         <button
           type="button"
           onClick={onSearch}
-          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
+          className="enterprise-query-button inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
         >
           <Search size={15} />
           搜尋
@@ -738,7 +738,7 @@ function FilterBar({
           options={statusOptions}
         />
 
-        <div className="flex min-w-[240px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+        <div className="flex min-w-[240px] items-center rounded-lg border border-slate-300 bg-slate-50 px-3 py-2">
           <span className="mr-2 text-xs font-semibold text-slate-500">上傳者</span>
           <input
             value={uploader}
@@ -748,7 +748,7 @@ function FilterBar({
           />
         </div>
 
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2">
           <span className="text-xs font-semibold text-slate-500">日期區間</span>
           <input
             type="date"
@@ -769,10 +769,10 @@ function FilterBar({
           <button
             type="button"
             onClick={() => setAdvancedOpen((current) => !current)}
-            className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${
               advancedOpen
-                ? "border-teal-300 bg-teal-50 text-teal-700"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                ? "border-teal-700 bg-teal-50 text-teal-800"
+                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             進階搜尋
@@ -784,14 +784,14 @@ function FilterBar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
             重設條件
           </button>
           <button
             type="button"
             onClick={onAdd}
-            className="inline-flex items-center rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
+            className="enterprise-query-button inline-flex items-center rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
           >
             新增文件
           </button>
@@ -799,7 +799,7 @@ function FilterBar({
       </div>
 
       {advancedOpen && (
-        <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
+        <div className="enterprise-section-header px-4 py-4">
           <div className="grid gap-3 lg:grid-cols-3">
             <TextField
               label="文件編號"
@@ -839,7 +839,7 @@ function TextField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500"
+        className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-700"
       />
     </label>
   );
@@ -857,7 +857,7 @@ function FilterSelect({
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+        <label className="flex items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2">
       <span className="text-xs font-semibold text-slate-500">{label}</span>
       <select
         value={value}
@@ -899,45 +899,45 @@ function SectionCard({
 }) {
   return (
     <section
-      className={`mb-3 overflow-hidden rounded-2xl border transition ${
-        active ? "border-white/30 shadow-sm" : "border-white/15"
+      className={`mb-2.5 overflow-hidden rounded-xl border transition ${
+        active ? "border-white/18" : "border-white/10"
       }`}
     >
       <div
-        className={`flex w-full items-start justify-between gap-3 px-3 py-3 text-left transition ${
-          active ? "bg-white/10" : "bg-transparent hover:bg-white/10"
+        className={`flex w-full items-start justify-between gap-3 px-3 py-2.5 text-left transition ${
+          active ? "bg-white/8" : "bg-transparent hover:bg-white/8"
         } ${collapsed ? "px-2 py-2" : ""}`}
       >
         <button type="button" onClick={onHeaderClick} className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15 text-white ring-1 ring-white/15">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-white/10 text-white ring-1 ring-white/10">
               {icon}
             </span>
             {!collapsed && (
               <>
                 <span className="text-sm font-bold text-white">{title}</span>
                 {badge && (
-                  <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold text-white">
                     {badge}
                   </span>
                 )}
               </>
             )}
           </div>
-          {!collapsed && subtitle.trim() && <div className="mt-1.5 text-xs leading-5 text-white/75">{subtitle}</div>}
+          {!collapsed && subtitle.trim() && <div className="mt-1 text-xs leading-5 text-white/72">{subtitle}</div>}
         </button>
         {!collapsed && (
           <button
             type="button"
             onClick={onToggle}
-            className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white/80 transition hover:bg-white/10 hover:text-white"
+            className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-sm text-white/80 transition hover:bg-white/10 hover:text-white"
             aria-label={open ? "收合區塊" : "展開區塊"}
           >
             <ChevronRight size={16} className={`transition-transform ${open ? "rotate-90" : ""}`} />
           </button>
         )}
       </div>
-      {open && !collapsed && <div className="brand-teal-bar border-t border-white/10 px-3 py-3">{children}</div>}
+      {open && !collapsed && <div className="border-t border-white/8 px-3 py-2.5">{children}</div>}
     </section>
   );
 }
@@ -977,9 +977,9 @@ function FolderCard({
     <button
       type="button"
       onClick={onClick}
-      className="knowledge-card flex items-start gap-3 rounded-2xl px-4 py-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+      className="knowledge-card flex items-start gap-3 rounded-xl px-4 py-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
     >
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-slate-200">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700 ring-1 ring-slate-200">
         <FolderOpen size={18} />
       </div>
       <div className="min-w-0 flex-1">
@@ -1023,12 +1023,12 @@ function KnowledgeOverview({
           key={`${node.id}-${getNodePath(node).join("|")}`}
           type="button"
           onClick={() => onOpenCategory(getNodePath(node), node.label)}
-          className="knowledge-card rounded-2xl p-4 text-left text-slate-800 transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
+          className="knowledge-card rounded-xl p-4 text-left text-slate-800 transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <FolderOpen size={18} className="text-teal-700" />
+                <FolderOpen size={18} className="text-slate-700" />
                 <h4 className="truncate text-base font-bold text-slate-800">{node.label}</h4>
               </div>
             </div>

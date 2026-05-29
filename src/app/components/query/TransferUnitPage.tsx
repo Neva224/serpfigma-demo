@@ -134,8 +134,8 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-100 px-4 py-4 lg:flex-row lg:items-center">
+      <section className="enterprise-panel overflow-hidden rounded-xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 lg:flex-row lg:items-center">
           <div className="relative flex-1">
             <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -145,14 +145,14 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
                 if (e.key === "Enter") setSubmittedKeyword(keyword);
               }}
               placeholder="請輸入文件名稱、文件編號或移轉人"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+              className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-9 pr-4 text-sm text-slate-700 outline-none transition focus:border-teal-700 focus:bg-white"
             />
           </div>
 
           <button
             type="button"
             onClick={() => setSubmittedKeyword(keyword)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-500"
+            className="enterprise-query-button inline-flex items-center justify-center gap-1.5 rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition"
           >
             <Search size={15} />
             查詢
@@ -161,17 +161,17 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
           >
             重設條件
           </button>
           <button
             type="button"
             onClick={() => setAdvancedOpen((current) => !current)}
-            className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-4 py-2.5 text-sm font-semibold transition ${
               advancedOpen
-                ? "border-teal-300 bg-teal-50 text-teal-700"
-                : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                ? "border-teal-700 bg-teal-50 text-teal-800"
+                : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
             }`}
           >
             <SlidersHorizontal size={14} />
@@ -181,7 +181,7 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
         </div>
 
         {advancedOpen && (
-          <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4 space-y-4">
+          <div className="enterprise-section-header px-4 py-4 space-y-4">
             <CascadeSelectGroup
               title="知識樹分層"
               description="以文件移轉後的知識樹目標進行四層級篩選。"
@@ -297,7 +297,7 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
         )}
       </section>
 
-      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="enterprise-panel mt-4 rounded-xl p-5">
         <div className="mb-3 flex items-center justify-between">
           <div className="text-sm font-semibold text-slate-800">查詢結果</div>
           <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{results.length} 筆</span>
@@ -305,10 +305,10 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
-            <thead className="bg-slate-50">
+            <thead className="enterprise-table-head">
               <tr>
                 {["文件資訊", "原單位 → 新單位", "原知識樹 → 新知識樹", "操作人", "移轉時間"].map((header) => (
-                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
+                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-white">
                     {header}
                   </th>
                 ))}
@@ -318,7 +318,7 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
               {results.map(({ doc, transfer }) => {
                 const performerLabel = transfer.actor === doc.uploaderName || transfer.actor === doc.requestor ? "上傳者" : "簽核主管";
                 return (
-                  <tr key={`${doc.id}-${transfer.timestamp}`} className="border-b border-slate-100 align-top">
+                  <tr key={`${doc.id}-${transfer.timestamp}`} className="border-b border-slate-100 align-top hover:bg-slate-50">
                     <td className="px-4 py-4">
                       <div className="space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
