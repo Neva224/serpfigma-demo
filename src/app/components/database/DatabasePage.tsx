@@ -173,7 +173,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
             onClick={() => setTab(key)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg transition-all"
             style={{
-              backgroundColor: tab === key ? "#0D9488" : "transparent",
+              backgroundColor: tab === key ? "#3A867B" : "transparent",
               color: tab === key ? "#ffffff" : "#6B7280",
               fontWeight: tab === key ? 700 : 400,
               fontSize: "13px",
@@ -192,7 +192,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
           </div>
           <table className="w-full" style={{ fontSize: "13px" }}>
             <thead>
-              <tr style={{ backgroundColor: "#0D9488" }}>
+              <tr style={{ backgroundColor: "#3A867B" }}>
                 {["文件階級", "文件類型說明", "文件數", "負責窗口", "所屬部門", "員工編號", "聯繫"].map((h) => (
                   <th key={h} className="text-left px-5 py-2.5 text-white font-semibold whitespace-nowrap" style={{ fontSize: "12px" }}>{h}</th>
                 ))}
@@ -210,7 +210,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                   <td className="px-5 py-3 font-semibold text-gray-800">{row.count}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-white" style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#0D9488" }}>{row.contact[0]}</div>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center text-white" style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#3A867B" }}>{row.contact[0]}</div>
                       <span className="text-gray-800 font-medium">{row.contact}</span>
                     </div>
                   </td>
@@ -233,7 +233,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
           </div>
           <table className="w-full" style={{ fontSize: "13px" }}>
             <thead>
-              <tr style={{ backgroundColor: "#0D9488" }}>
+              <tr style={{ backgroundColor: "#3A867B" }}>
                 {["排名", "文件名稱", "文件階級", "點擊次數", "趨勢", "熱度"].map((h) => (
                   <th key={h} className="text-left px-5 py-2.5 text-white font-semibold whitespace-nowrap" style={{ fontSize: "12px" }}>{h}</th>
                 ))}
@@ -266,7 +266,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 bg-gray-100 rounded-full h-2" style={{ maxWidth: "100px" }}>
-                          <div className="h-2 rounded-full" style={{ width: `${pct}%`, backgroundColor: "#0D9488" }} />
+                          <div className="h-2 rounded-full" style={{ width: `${pct}%`, backgroundColor: "#3A867B" }} />
                         </div>
                         <span className="text-gray-400" style={{ fontSize: "10px" }}>{pct}%</span>
                       </div>
@@ -291,7 +291,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
               onClick={openAddTag}
               disabled={!canAddTag}
               className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
-              style={{ backgroundColor: canAddTag ? "#0D9488" : "#E5E7EB", color: canAddTag ? "#ffffff" : "#6B7280" }}
+              style={{ backgroundColor: canAddTag ? "#3A867B" : "#E5E7EB", color: canAddTag ? "#ffffff" : "#6B7280" }}
               title={canAddTag ? "新增標籤" : "僅文管人員、部門主管或文件窗口負責人員可新增標籤"}
             >
               <Plus size={14} />
@@ -317,13 +317,13 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                     style={{
                       fontSize: `${size}px`,
                       fontWeight: expandedTag === t.tag ? 700 : 500,
-                      borderColor: expandedTag === t.tag ? "#0D9488" : "#E5E7EB",
+                      borderColor: expandedTag === t.tag ? "#3A867B" : "#E5E7EB",
                       backgroundColor: expandedTag === t.tag ? "#F0FDFA" : `${LEVEL_COLORS[i % 6]}0A`,
                       color: expandedTag === t.tag ? "#0F766E" : "#374151",
                     }}
                   >
                     {t.tag}
-                    <span className="px-1.5 py-0.5 rounded-full text-white" style={{ fontSize: "10px", fontWeight: 700, backgroundColor: expandedTag === t.tag ? "#0D9488" : "#9CA3AF" }}>{t.count}</span>
+                    <span className="px-1.5 py-0.5 rounded-full text-white" style={{ fontSize: "10px", fontWeight: 700, backgroundColor: expandedTag === t.tag ? "#3A867B" : "#9CA3AF" }}>{t.count}</span>
                   </button>
                 );
               })}
@@ -435,7 +435,7 @@ function TagModal({
                     onClick={() => onToggleLevel(option.short)}
                     className="rounded-full border px-3 py-1.5 text-sm font-semibold transition"
                     style={{
-                      borderColor: active ? "#0D9488" : "#E5E7EB",
+                      borderColor: active ? "#3A867B" : "#E5E7EB",
                       backgroundColor: active ? "#F0FDFA" : "#FFFFFF",
                       color: active ? "#0F766E" : "#475569",
                     }}

@@ -299,7 +299,7 @@ export function DocumentFormPage({
               <div className="flex items-center gap-2">
                 <div
                   className="flex h-7 w-7 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: "#0D9488" }}
+                  style={{ backgroundColor: "#3A867B" }}
                 >
                   <FileText size={14} className="text-white" />
                 </div>
@@ -317,7 +317,7 @@ export function DocumentFormPage({
               </button>
               <div
                 className="ml-1 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
-                style={{ backgroundColor: "#0D9488" }}
+                style={{ backgroundColor: "#3A867B" }}
               >
                 系統
               </div>
@@ -366,7 +366,7 @@ export function DocumentFormPage({
             <span>首頁</span>
             <span>/</span>
             {canShowBackButton ? (
-              <button type="button" onClick={onBack} className="hover:underline" style={{ color: "#0D9488" }}>
+              <button type="button" onClick={onBack} className="hover:underline" style={{ color: "#3A867B" }}>
                 文件上傳專區
               </button>
             ) : (
@@ -395,7 +395,7 @@ export function DocumentFormPage({
                   <div className="flex items-center gap-1.5">
                     <div
                       className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-white"
-                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#0D9488" }}
+                      style={{ fontSize: "11px", fontWeight: 700, backgroundColor: "#3A867B" }}
                     >
                       {n}
                     </div>
@@ -457,7 +457,7 @@ export function DocumentFormPage({
             <button
               type="button"
               className="rounded-lg border px-5 py-2 text-sm transition-all hover:bg-teal-50"
-              style={{ borderColor: "#0D9488", color: "#0D9488", fontWeight: 500 }}
+              style={{ borderColor: "#3A867B", color: "#3A867B", fontWeight: 500 }}
               onClick={handleSaveDraft}
               disabled={draftBusy}
             >
@@ -467,7 +467,7 @@ export function DocumentFormPage({
             <button
               type="submit"
               className="flex items-center gap-2 rounded-lg px-6 py-2 text-sm text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
-              style={{ backgroundColor: "#0D9488", fontWeight: 600 }}
+              style={{ backgroundColor: "#3A867B", fontWeight: 600 }}
             >
               <FileText size={14} />
               送出簽核

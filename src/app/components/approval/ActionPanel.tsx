@@ -57,7 +57,7 @@ export function ActionPanel({ meta }: Props) {
             <MetaRow label="版本" value={<span className="font-mono text-xs bg-gray-100 px-1.5 py-0.5 rounded">{meta.version}</span>} />
             <MetaRow label="上傳者" value={
               <div className="flex items-center gap-1.5">
-                <div className="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ fontSize: "9px", fontWeight: 700, backgroundColor: "#0D9488" }}>
+                <div className="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0" style={{ fontSize: "9px", fontWeight: 700, backgroundColor: "#3A867B" }}>
                   {meta.uploader[0]}
                 </div>
                 <span>{meta.uploader}</span>
@@ -145,7 +145,7 @@ export function ActionPanel({ meta }: Props) {
         <button
           onClick={() => setDecision("approved")}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white transition-all hover:opacity-90 active:scale-95"
-          style={{ backgroundColor: "#0D9488", fontWeight: 600, fontSize: "13px" }}
+          style={{ backgroundColor: "#3A867B", fontWeight: 600, fontSize: "13px" }}
         >
           <CheckCircle2 size={16} strokeWidth={2.5} />
           核准 / 上架
@@ -239,7 +239,7 @@ function DecisionResult({ type, onReset }: { type: "approved" | "rejected"; onRe
         style={{ backgroundColor: isApproved ? "#F0FDFA" : "#FEF2F2" }}
       >
         {isApproved ? (
-          <CheckCircle2 size={32} style={{ color: "#0D9488" }} strokeWidth={1.5} />
+          <CheckCircle2 size={32} style={{ color: "#3A867B" }} strokeWidth={1.5} />
         ) : (
           <XCircle size={32} style={{ color: "#EF4444" }} strokeWidth={1.5} />
         )}
@@ -255,7 +255,7 @@ function DecisionResult({ type, onReset }: { type: "approved" | "rejected"; onRe
       <button
         onClick={onReset}
         className="px-5 py-2 rounded-lg text-white text-sm transition-all hover:opacity-90"
-        style={{ backgroundColor: "#0D9488", fontWeight: 600 }}
+        style={{ backgroundColor: "#3A867B", fontWeight: 600 }}
       >
         返回審核列表
       </button>

@@ -46,7 +46,7 @@ export function DocumentViewer({ title, uploader }: Props) {
           {/* Page content wireframe */}
           <div className="p-8 space-y-5">
             {/* Document header block */}
-            <div className="flex items-start justify-between pb-5 border-b-2" style={{ borderColor: "#0D9488" }}>
+            <div className="flex items-start justify-between pb-5 border-b-2" style={{ borderColor: "#3A867B" }}>
               <div>
                 <div className="h-4 w-48 rounded mb-2" style={{ backgroundColor: "#1A202C" }} />
                 <div className="h-2.5 w-32 rounded" style={{ backgroundColor: "#A0AEC0" }} />
@@ -68,7 +68,7 @@ export function DocumentViewer({ title, uploader }: Props) {
             <div className="border border-gray-200 rounded overflow-hidden">
               <div className="grid grid-cols-4 gap-px" style={{ backgroundColor: "#E2E8F0" }}>
                 {["項目", "說明", "金額", "備註"].map((h) => (
-                  <div key={h} className="px-3 py-2 text-xs font-semibold text-white" style={{ backgroundColor: "#0D9488" }}>
+                  <div key={h} className="px-3 py-2 text-xs font-semibold text-white" style={{ backgroundColor: "#3A867B" }}>
                     {h}
                   </div>
                 ))}
@@ -107,7 +107,7 @@ export function DocumentViewer({ title, uploader }: Props) {
                   className="flex-1 rounded-t"
                   style={{
                     height: `${h}%`,
-                    backgroundColor: i === 4 ? "#0D9488" : "#CBD5E0",
+                    backgroundColor: i === 4 ? "#3A867B" : "#CBD5E0",
                     opacity: 0.7,
                   }}
                 />

@@ -95,7 +95,7 @@ export function ApprovalPage({ onBack }: Props) {
             <div className="flex items-center gap-2">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: "#0D9488" }}
+                style={{ backgroundColor: "#3A867B" }}
               >
                 <FileText size={14} className="text-white" />
               </div>
@@ -105,7 +105,7 @@ export function ApprovalPage({ onBack }: Props) {
                 </span>
                 <span
                   className="ml-2 px-2 py-0.5 rounded text-white"
-                  style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#0D9488" }}
+                  style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#3A867B" }}
                 >
                   文件審核
                 </span>
@@ -117,7 +117,7 @@ export function ApprovalPage({ onBack }: Props) {
           <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-400">
             <span>首頁</span>
             <span>/</span>
-            <button onClick={onBack} className="hover:underline" style={{ color: "#0D9488" }}>文件管理</button>
+            <button onClick={onBack} className="hover:underline" style={{ color: "#3A867B" }}>文件管理</button>
             <span>/</span>
             <span className="text-gray-600">審核決策</span>
           </div>
@@ -130,7 +130,7 @@ export function ApprovalPage({ onBack }: Props) {
             </button>
             <div
               className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold"
-              style={{ backgroundColor: "#0D9488" }}
+              style={{ backgroundColor: "#3A867B" }}
             >
               管
             </div>

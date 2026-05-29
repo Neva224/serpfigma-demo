@@ -76,7 +76,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
           onClick={() => inputRef.current?.click()}
           className="relative cursor-pointer select-none rounded-3xl border-2 border-dashed transition-all"
           style={{
-            borderColor: dragging ? "#0D9488" : "#D1D5DB",
+            borderColor: dragging ? "#3A867B" : "#D1D5DB",
             backgroundColor: dragging ? "#F0FDFA" : "#FAFAFA",
           }}
         >
@@ -90,7 +90,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               <CloudUpload
                 size={32}
                 strokeWidth={1.5}
-                style={{ color: dragging ? "#0D9488" : "#5EEAD4" }}
+                style={{ color: dragging ? "#3A867B" : "#D8EFEB" }}
               />
             </div>
             <p className="mb-1 text-sm font-semibold text-gray-700">
@@ -105,7 +105,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
           {dragging && (
             <div
               className="absolute inset-0 flex items-center justify-center rounded-xl"
-              style={{ backgroundColor: "#0D948810", borderColor: "#0D9488" }}
+              style={{ backgroundColor: "#3A867B10", borderColor: "#3A867B" }}
             >
               <p className="font-semibold text-teal-700">可直接拖放檔案上傳</p>
             </div>
