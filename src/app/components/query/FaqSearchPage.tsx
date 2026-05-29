@@ -60,7 +60,7 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
   }
 
   return (
-    <div className={embedded ? "h-full overflow-y-auto bg-slate-100 px-6 py-5" : "flex-1 overflow-y-auto bg-slate-100 px-6 py-5"}>
+    <div className={embedded ? "h-full overflow-y-auto bg-transparent px-6 py-5" : "flex-1 overflow-y-auto bg-transparent px-6 py-5"}>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">

@@ -215,7 +215,7 @@ export default function App() {
   const canDeletePublishedDocs = currentUser.roles.includes("system_admin");
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-slate-100">
+    <div className="flex h-screen flex-col overflow-hidden bg-transparent">
       <Toaster position="top-right" richColors closeButton />
       <Header
         activeScreen={view.kind === "systemAdmin" ? "permissions" : "list"}
@@ -226,7 +226,7 @@ export default function App() {
         notificationPulse={notificationPulse}
       />
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
         <DocumentListPage
           documents={visibleDocuments}
           view={view}

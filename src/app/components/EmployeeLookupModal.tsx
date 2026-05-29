@@ -32,9 +32,9 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden">
+      <div className="enterprise-panel relative w-full max-w-2xl overflow-hidden rounded-xl bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100" style={{ backgroundColor: "#0D9488" }}>
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3" style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}>
           <h3 className="text-white font-semibold" style={{ fontSize: "14px" }}>查詢員工代號</h3>
           <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
             <X size={18} />
@@ -42,23 +42,23 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
         </div>
 
         {/* Search form */}
-        <div className="flex items-end gap-3 px-5 py-4 border-b border-gray-100 bg-gray-50">
+        <div className="flex items-end gap-3 border-b border-slate-200 px-5 py-4 bg-[rgba(248,250,252,0.88)]">
           <div>
-            <label className="block text-gray-600 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>員工編號</label>
+            <label className="mb-1 block text-slate-600" style={{ fontSize: "11px", fontWeight: 600 }}>員工編號</label>
             <input value={codeQ} onChange={(e) => setCodeQ(e.target.value)} placeholder="輸入員編" className={iCls} />
           </div>
           <div>
-            <label className="block text-gray-600 mb-1" style={{ fontSize: "11px", fontWeight: 600 }}>姓名 %</label>
+            <label className="mb-1 block text-slate-600" style={{ fontSize: "11px", fontWeight: 600 }}>姓名 %</label>
             <input value={nameQ} onChange={(e) => setNameQ(e.target.value)} placeholder="輸入姓名" className={iCls} onKeyDown={(e) => e.key === "Enter" && doSearch()} />
           </div>
           <button
             onClick={doSearch}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-white font-medium transition-all hover:opacity-90"
-            style={{ backgroundColor: "#0D9488", fontSize: "12px" }}
+            className="enterprise-query-button flex items-center gap-1.5 rounded-lg px-4 py-1.5 text-white font-medium transition-all"
+            style={{ fontSize: "12px" }}
           >
             <Search size={13} />查詢
           </button>
-          <button onClick={onClose} className="px-4 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-100 transition-all" style={{ fontSize: "12px" }}>
+          <button onClick={onClose} className="rounded-lg border border-slate-300 px-4 py-1.5 text-slate-500 hover:bg-slate-100 transition-all" style={{ fontSize: "12px" }}>
             關閉
           </button>
         </div>
@@ -67,7 +67,7 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
         <div className="overflow-auto" style={{ maxHeight: "320px" }}>
           <table className="w-full" style={{ fontSize: "12px" }}>
             <thead className="sticky top-0">
-              <tr style={{ backgroundColor: "#0D9488" }}>
+              <tr style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}>
                 {["編號", "姓名", "英文名", "公司", "單位", ""].map((h) => (
                   <th key={h} className="text-left px-4 py-2 text-white font-semibold whitespace-nowrap">{h}</th>
                 ))}
@@ -75,17 +75,16 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
             </thead>
             <tbody>
               {results.map((e, i) => (
-                <tr key={e.code} className={`border-b border-gray-50 ${i % 2 === 1 ? "bg-gray-50" : "bg-white"} hover:bg-teal-50 transition-colors`}>
-                  <td className="px-4 py-2 font-mono text-gray-600">{e.code}</td>
-                  <td className="px-4 py-2 font-medium text-gray-800">{e.name}</td>
-                  <td className="px-4 py-2 text-gray-500">{e.nameEn}</td>
-                  <td className="px-4 py-2 text-gray-500">{e.company}</td>
-                  <td className="px-4 py-2 text-gray-500">{e.dept}</td>
+                <tr key={e.code} className={`border-b border-slate-100 ${i % 2 === 1 ? "bg-white" : "bg-[rgba(248,250,252,0.72)]"} hover:bg-teal-50/40 transition-colors`}>
+                  <td className="px-4 py-2 font-mono text-slate-600">{e.code}</td>
+                  <td className="px-4 py-2 font-medium text-slate-800">{e.name}</td>
+                  <td className="px-4 py-2 text-slate-500">{e.nameEn}</td>
+                  <td className="px-4 py-2 text-slate-500">{e.company}</td>
+                  <td className="px-4 py-2 text-slate-500">{e.dept}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => { onSelect(e.code, e.name); onClose(); }}
-                      className="px-3 py-1 rounded text-white text-xs font-medium hover:opacity-90 transition-all"
-                      style={{ backgroundColor: "#0D9488" }}
+                      className="enterprise-query-button rounded px-3 py-1 text-xs font-medium text-white transition-all"
                     >
                       選取
                     </button>
@@ -93,12 +92,12 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
                 </tr>
               ))}
               {results.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-400 text-sm">查無符合資料，請至少輸入員工姓名或編號</td></tr>
+                <tr><td colSpan={6} className="py-8 text-center text-sm text-slate-400">查無符合資料，請至少輸入員工姓名或編號</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <div className="px-5 py-2.5 bg-gray-50 border-t border-gray-100 text-gray-400" style={{ fontSize: "11px" }}>
+        <div className="border-t border-slate-200 bg-[rgba(248,250,252,0.88)] px-5 py-2.5 text-slate-400" style={{ fontSize: "11px" }}>
           共 {results.length} 筆員工資料
         </div>
       </div>
@@ -106,4 +105,4 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
   );
 }
 
-const iCls = "px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-teal-500 transition-all" as const;
+const iCls = "enterprise-focus-ring rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-slate-700 placeholder:text-slate-400 transition-all focus:outline-none" as const;

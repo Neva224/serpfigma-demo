@@ -110,7 +110,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
   }
 
   return (
-    <div className={embedded ? "h-full overflow-y-auto bg-slate-100 px-6 py-5" : "flex-1 overflow-y-auto bg-slate-100 px-6 py-5"}>
+    <div className={embedded ? "h-full overflow-y-auto bg-transparent px-6 py-5" : "flex-1 overflow-y-auto bg-transparent px-6 py-5"}>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
@@ -140,7 +140,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
               value={signingNo}
               onChange={(e) => setSigningNo(e.target.value)}
               placeholder="請輸入簽核號"
-              className={inputClass}
+            className={inputClass}
             />
           </Field>
           <Field label="文件名稱">

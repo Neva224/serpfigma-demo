@@ -13,7 +13,7 @@ const ROLES: Role[] = ["系統管理員", "文管人員", "部門主管", "一�
 
 const ROLE_COLORS: Record<Role, { bg: string; text: string }> = {
   系統管理員: { bg: "#7C3AED", text: "#ffffff" },
-  文管人員:   { bg: "#0D9488", text: "#ffffff" },
+  文管人員:   { bg: "#3A867B", text: "#ffffff" },
   部門主管:   { bg: "#1D4ED8", text: "#ffffff" },
   一般使用者: { bg: "#6B7280", text: "#ffffff" },
   唯讀使用者: { bg: "#D1D5DB", text: "#374151" },
@@ -60,7 +60,10 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
   const filteredPerms = activeRole === "all" ? perms : perms;
 
   return (
-    <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
+    <div
+      className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"}
+      style={{ background: "linear-gradient(180deg, #F4F8F7 0%, #EEF5F3 100%)" }}
+    >
       <div className="enterprise-panel mb-5 flex items-start justify-between gap-4 overflow-hidden rounded-xl px-5 py-4">
         <div>
           <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
@@ -96,7 +99,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
               <p className="text-gray-400 text-center" style={{ fontSize: "11px" }}>
                 {count} / {perms.length} 項權限
               </p>
-              <div className="w-full bg-gray-100 rounded-full h-1.5">
+              <div className="w-full rounded-full bg-slate-100 h-1.5">
                 <div className="h-1.5 rounded-full" style={{ width: `${(count / perms.length) * 100}%`, backgroundColor: rc.bg }} />
               </div>
             </div>
@@ -108,9 +111,9 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
       <div className="enterprise-panel overflow-hidden rounded-xl">
         <div className="enterprise-section-header flex items-center justify-between px-5 py-3">
           <div className="space-y-1.5">
-            <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>權限設定矩陣</h3>
+            <h3 className="font-semibold text-slate-700" style={{ fontSize: "13px" }}>權限設定矩陣</h3>
             <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-2.5 py-1 font-semibold text-teal-700">
                 <Check size={12} aria-hidden="true" />
                 可使用
               </span>
@@ -118,7 +121,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                 <X size={12} aria-hidden="true" />
                 不可使用
               </span>
-              <span className="text-gray-400">打勾代表可使用該功能；打叉代表不可使用。</span>
+              <span className="text-slate-400">打勾代表可使用該功能；打叉代表不可使用。</span>
             </div>
           </div>
           <button
@@ -140,10 +143,10 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
           <table className="w-full" style={{ fontSize: "12px" }}>
             <thead>
               <tr style={{ backgroundColor: "#0F4F4A" }}>
-                <th className="text-left px-5 py-2.5 text-white font-semibold whitespace-nowrap" style={{ width: "100px" }}>分類</th>
-                <th className="text-left px-5 py-2.5 text-white font-semibold">操作項目</th>
+                <th className="whitespace-nowrap px-5 py-2.5 text-left font-semibold text-white" style={{ width: "100px" }}>分類</th>
+                <th className="px-5 py-2.5 text-left font-semibold text-white">操作項目</th>
                 {ROLES.map((role) => (
-                  <th key={role} className="px-4 py-2.5 text-white font-semibold text-center whitespace-nowrap" style={{ fontSize: "11px" }}>{role}</th>
+                  <th key={role} className="whitespace-nowrap px-4 py-2.5 text-center font-semibold text-white" style={{ fontSize: "11px" }}>{role}</th>
                 ))}
               </tr>
             </thead>
@@ -155,15 +158,15 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                   return (
                     <tr
                       key={perm.action}
-                      className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+                      className="border-b border-slate-100 transition-colors hover:bg-slate-50"
                       style={{ backgroundColor: globalIdx % 2 === 1 ? "#FAFAFA" : "#FFFFFF" }}
                     >
                       {ci === 0 && (
-                        <td className="px-5 py-2.5 font-semibold text-gray-500 align-top" rowSpan={catPerms.length} style={{ fontSize: "11px", borderRight: "1px solid #F0F0F0" }}>
+                        <td className="align-top px-5 py-2.5 font-semibold text-slate-500" rowSpan={catPerms.length} style={{ fontSize: "11px", borderRight: "1px solid #E2E8F0" }}>
                           {cat}
                         </td>
                       )}
-                      <td className="px-5 py-2.5 text-gray-700">{perm.action}</td>
+                      <td className="px-5 py-2.5 text-slate-700">{perm.action}</td>
                       {ROLES.map((role) => (
                         <td key={role} className="px-4 py-2.5 text-center">
                           <button
@@ -173,7 +176,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                             aria-label={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
                             title={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
                             style={{
-                              backgroundColor: perm.roles[role] ? "#0F4F4A" : "#E2E8F0",
+                              backgroundColor: perm.roles[role] ? "#3A867B" : "#E2E8F0",
                               cursor: editing ? "pointer" : "default",
                             }}
                           >

@@ -289,7 +289,7 @@ export function DocumentListPage({
   }
 
   return (
-    <div className="flex h-full min-h-0 overflow-hidden bg-slate-100">
+    <div className="flex h-full min-h-0 overflow-hidden bg-transparent">
       <aside
         className={`brand-teal-bar flex h-full min-h-0 flex-col flex-shrink-0 overflow-hidden border-r brand-teal-border transition-all duration-200 ${
           sidebarCollapsed ? "w-[72px]" : "w-[320px]"
@@ -430,7 +430,7 @@ export function DocumentListPage({
         </div>
       </aside>
 
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-transparent">
         <div className="enterprise-panel-strong mb-5 overflow-hidden rounded-xl px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
