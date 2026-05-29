@@ -27,9 +27,9 @@ export function DepartmentCard({ value, onChange }: Props) {
   return (
     <Card title="文件所屬部門" icon="🏢">
       <div className="space-y-4">
-        <p className="flex items-center gap-1.5 text-xs text-gray-400">
-          <GitBranch size={12} />
-          這一區使用獨立的 HR scope 資料結構，不再混用知識樹分類。
+        <p className="flex items-center gap-1.5 text-xs text-slate-500">
+          <GitBranch size={12} className="text-teal-500" />
+          以 HR Excel 的公司 / 群 / 處 / 部 結構進行選擇
         </p>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -127,10 +127,10 @@ export function DepartmentCard({ value, onChange }: Props) {
 
         {payload.scopePath.length > 0 && (
           <div
-            className="flex flex-wrap items-center gap-2 rounded-lg border px-4 py-2.5 text-sm"
+            className="flex flex-wrap items-center gap-2 rounded-xl border px-4 py-2.5 text-sm shadow-sm"
             style={{ backgroundColor: "#F0FDFA", borderColor: "#99F6E4" }}
           >
-            <span className="text-xs font-medium text-teal-600">目前部門路徑：</span>
+            <span className="text-xs font-semibold text-teal-600">目前部門路徑：</span>
             {payload.scopePath.map((segment, index) => (
               <span key={`${segment}-${index}`} className="flex items-center gap-2">
                 <span className="text-xs font-semibold text-teal-800">{segment}</span>
@@ -170,14 +170,14 @@ function DeptSelect({
         >
           {step}
         </span>
-        <label className="text-xs font-semibold text-gray-600">{label}</label>
+        <label className="text-xs font-semibold text-slate-600">{label}</label>
       </div>
       <div className="relative">
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="w-full appearance-none rounded-lg border border-gray-200 px-3 py-2.5 pr-8 text-sm transition-all focus:border-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-full appearance-none rounded-xl border border-slate-200 px-3.5 py-3 pr-10 text-sm transition-all focus:border-teal-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           style={{
             backgroundColor: disabled ? "#F3F4F6" : "#F9FAFB",
             color: value ? "#1F2937" : "#9CA3AF",
@@ -190,7 +190,7 @@ function DeptSelect({
             </option>
           ))}
         </select>
-        <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+        <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
       </div>
     </div>
   );

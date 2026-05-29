@@ -149,7 +149,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
                       <button
                         type="button"
                         onClick={() => handleNotificationClick(item)}
-                        className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-teal-600 transition hover:text-teal-500"
+                        className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold text-red-600 transition hover:text-red-500"
                       >
                         Go
                         <ChevronRight size={14} />

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
+﻿import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 import { CloudUpload, File, FileSpreadsheet, FileText, Trash2, CheckCircle2 } from "lucide-react";
 import { Card } from "./BasicInfoCard";
 import type { WorkflowAttachment } from "../../workflow/workflowState";
@@ -66,7 +66,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
   }
 
   return (
-    <Card title="文件附件上傳" icon="📎">
+    <Card title="?辣?辣銝" icon="??">
       <div className="space-y-4">
         <div
           onDragEnter={(event) => handleDrag(event, true)}
@@ -74,7 +74,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
           onDragLeave={(event) => handleDrag(event, false)}
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
-          className="relative cursor-pointer select-none rounded-xl border-2 border-dashed transition-all"
+          className="relative cursor-pointer select-none rounded-3xl border-2 border-dashed transition-all"
           style={{
             borderColor: dragging ? "#0D9488" : "#D1D5DB",
             backgroundColor: dragging ? "#F0FDFA" : "#FAFAFA",
@@ -94,11 +94,11 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               />
             </div>
             <p className="mb-1 text-sm font-semibold text-gray-700">
-              拖曳檔案到這裡，或
-              <span className="text-teal-600"> 點擊上傳</span>
+              ?瑼??圈ㄐ嚗?
+              <span className="text-teal-600"> 暺?銝</span>
             </p>
             <p className="text-xs text-gray-400">
-              支援單檔 200MB，最多 {maxFiles} 個檔案，格式可為 PDF、Word、Excel、PPT 或 ZIP
+              ?舀?格? 200MB嚗?憭?{maxFiles} ??獢??澆??舐 PDF?ord?xcel?PT ??ZIP
             </p>
           </div>
 
@@ -107,14 +107,14 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               className="absolute inset-0 flex items-center justify-center rounded-xl"
               style={{ backgroundColor: "#0D948810", borderColor: "#0D9488" }}
             >
-              <p className="font-semibold text-teal-700">放開即可上傳</p>
+              <p className="font-semibold text-teal-700">?暸??喳銝</p>
             </div>
           )}
         </div>
 
         <div className="flex items-center justify-between text-xs text-gray-400">
           <span>
-            已選檔案 {files.length} / {maxFiles}
+            撌脤瑼? {files.length} / {maxFiles}
           </span>
           {files.length > 0 && (
             <button
@@ -122,7 +122,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
               onClick={clearFiles}
               className="text-red-400 transition-colors hover:text-red-600"
             >
-              清除全部
+              皜?券
             </button>
           )}
         </div>
@@ -136,7 +136,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
         )}
 
         {files.length === 0 && (
-          <div className="py-4 text-center text-xs text-gray-400">尚未上傳附件</div>
+          <div className="py-4 text-center text-xs text-gray-400">撠銝?辣</div>
         )}
       </div>
     </Card>
@@ -148,7 +148,7 @@ function FileRow({ file, onRemove }: { file: WorkflowAttachment; onRemove: () =>
   const color = fileColor(file.type);
 
   return (
-    <div className="group flex items-center gap-3 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 transition-all hover:bg-white hover:shadow-sm">
+    <div className="group flex items-center gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 transition-all hover:bg-white hover:shadow-sm">
       <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg" style={{ backgroundColor: `${color}15` }}>
         <Icon size={20} style={{ color }} strokeWidth={1.5} />
       </div>
@@ -159,8 +159,7 @@ function FileRow({ file, onRemove }: { file: WorkflowAttachment; onRemove: () =>
           <span className="text-xs text-gray-400">{file.size}</span>
           <span className="flex items-center gap-0.5 text-xs" style={{ color: "#10B981" }}>
             <CheckCircle2 size={11} />
-            已上傳
-          </span>
+            撌脖???          </span>
         </div>
       </div>
 
@@ -201,3 +200,4 @@ function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+

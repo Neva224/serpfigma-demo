@@ -397,7 +397,7 @@ export function DocumentListPage({
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm">
+        <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-[0_12px_40px_rgba(13,148,136,0.08)]">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs text-slate-400">

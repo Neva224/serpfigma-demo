@@ -172,8 +172,8 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4">
+    <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4">
         {icon && <span className="text-lg leading-none">{icon}</span>}
         <h2 className="text-gray-800" style={{ fontSize: "15px", fontWeight: 700 }}>
           {title}
@@ -196,9 +196,9 @@ export function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 flex items-center gap-0.5 text-sm text-gray-600" style={{ fontWeight: 600 }}>
+      <label className="mb-1.5 flex items-center gap-0.5 text-sm text-slate-600" style={{ fontWeight: 600 }}>
         {label}
-        {required && <span className="ml-0.5 text-red-500">*</span>}
+        {required && <span className="ml-0.5 font-semibold text-red-500">*</span>}
       </label>
       {children}
     </div>

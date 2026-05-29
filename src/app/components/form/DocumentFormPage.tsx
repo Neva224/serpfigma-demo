@@ -271,7 +271,7 @@ export function DocumentFormPage({
           </div>
         )}
 
-        <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm">
+        <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-[0_12px_40px_rgba(13,148,136,0.08)]">
           <div className="mb-2 flex items-center gap-1.5 text-xs text-gray-500">
             <span>首頁</span>
             <span>/</span>
