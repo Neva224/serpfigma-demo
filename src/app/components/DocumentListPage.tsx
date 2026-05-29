@@ -24,7 +24,6 @@ import type { WorkflowDocument } from "../workflow/workflowState";
 import { getDocumentStatusLabel } from "../workflow/statusCatalog";
 import {
   LEVEL_OPTIONS,
-  STATUS_OPTIONS,
   includesPathPrefix,
   type DocumentLevel,
   type DocumentRecord,
@@ -66,6 +65,14 @@ const KNOWLEDGE_TREE = buildLegacyKnowledgeTreeFromGenerated();
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
   { label: "FAQ常見問題專區", variant: "faq" as const },
+];
+
+const LIST_STATUS_OPTIONS = [
+  { value: "all", label: "全部狀態" },
+  { value: "上架", label: getDocumentStatusLabel("上架") },
+  { value: "已退回", label: getDocumentStatusLabel("已退回") },
+  { value: "已作廢", label: getDocumentStatusLabel("已作廢") },
+  { value: "已刪除", label: getDocumentStatusLabel("已刪除") },
 ];
 
 export function DocumentListPage({
@@ -284,34 +291,33 @@ export function DocumentListPage({
   return (
     <div className="flex h-full min-h-0 overflow-hidden bg-slate-100">
       <aside
-        className={`flex h-full min-h-0 flex-col flex-shrink-0 overflow-hidden border-r border-slate-200 bg-white transition-all duration-200 ${
+        className={`flex h-full min-h-0 flex-col flex-shrink-0 overflow-hidden border-r border-emerald-800 bg-emerald-700 transition-all duration-200 ${
           sidebarCollapsed ? "w-[72px]" : "w-[320px]"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className="flex items-center justify-between border-b border-white/15 px-4 py-3">
           <div className={`flex items-center gap-2 ${sidebarCollapsed ? "justify-center" : ""}`}>
             <button
               type="button"
               onClick={() => setSidebarCollapsed((current) => !current)}
-              className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white transition hover:bg-teal-500"
+              className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 text-white transition hover:bg-white/20 ring-1 ring-white/15"
               aria-label={sidebarCollapsed ? "展開側欄" : "收合側欄"}
             >
               <LayoutGrid size={16} />
             </button>
             {!sidebarCollapsed && (
               <div>
-                <div className="text-sm font-semibold text-slate-800">知識樹分類</div>
-                <div className="text-xs text-slate-400">Excel 來源的分類樹</div>
+                <div className="text-sm font-bold text-white">知識樹分類</div>
               </div>
             )}
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-3">
+        <div className="scrollbar-brand min-h-0 flex-1 overflow-y-auto px-3 py-3">
           <SectionCard
             collapsed={sidebarCollapsed}
             title="知識樹分類"
-            subtitle="來自 Excel 的分類樹"
+            subtitle=""
             icon={<LayoutGrid size={16} />}
             badge={String(publishedDocs.length)}
             open={knowledgeOpen}
@@ -428,17 +434,17 @@ export function DocumentListPage({
         <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-[0_12px_40px_rgba(13,148,136,0.08)]">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <button type="button" onClick={activateKnowledgeOverview} className="hover:text-slate-600">
+              <div className="flex items-center gap-2 text-xs text-white/80">
+                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-white">
                   首頁
                 </button>
                 <span>/</span>
-                <button type="button" onClick={activateKnowledgeOverview} className="hover:text-slate-600">
+                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-white">
                   主功能
                 </button>
               </div>
-              <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
-              <div className="mt-1 text-sm text-slate-500">
+              <div className="mt-1.5 text-lg font-bold text-white">{getViewTitle(view)}</div>
+              <div className="mt-1 text-sm font-semibold text-white/85">
                 {view.kind === "overview" ? "請選擇第一層分類查看下層資料夾與文件" : getViewDescription(view)}
               </div>
             </div>
@@ -447,7 +453,7 @@ export function DocumentListPage({
               <button
                 type="button"
                 onClick={activateCategoryBack}
-                className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-white/15"
               >
                 <ChevronRight size={12} className="rotate-180" />
                 返回上一頁
@@ -507,10 +513,11 @@ export function DocumentListPage({
                 onSearch={applyKeywordSearch}
                 level={level}
                 setLevel={setLevel}
-                status={status}
-                setStatus={setStatus}
-                uploader={uploader}
-                setUploader={setUploader}
+        status={status}
+        setStatus={setStatus}
+        statusOptions={LIST_STATUS_OPTIONS}
+        uploader={uploader}
+        setUploader={setUploader}
                 dateFrom={dateFrom}
                 setDateFrom={setDateFrom}
                 dateTo={dateTo}
@@ -640,6 +647,7 @@ function FilterBar({
   setLevel,
   status,
   setStatus,
+  statusOptions,
   uploader,
   setUploader,
   dateFrom,
@@ -665,6 +673,7 @@ function FilterBar({
   setLevel: (value: "all" | DocumentLevel) => void;
   status: "all" | DocumentStatus;
   setStatus: (value: "all" | DocumentStatus) => void;
+  statusOptions: Array<{ value: "all" | DocumentStatus; label: string }>;
   uploader: string;
   setUploader: (value: string) => void;
   dateFrom: string;
@@ -726,10 +735,7 @@ function FilterBar({
           label="文件狀態"
           value={status}
           onChange={(value) => setStatus(value as "all" | DocumentStatus)}
-          options={[
-            { value: "all", label: "全部狀態" },
-            ...STATUS_OPTIONS.map((option) => ({ value: option, label: getDocumentStatusLabel(option) })),
-          ]}
+          options={statusOptions}
         />
 
         <div className="flex min-w-[240px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
@@ -894,44 +900,44 @@ function SectionCard({
   return (
     <section
       className={`mb-3 overflow-hidden rounded-2xl border transition ${
-        active ? "border-teal-300 shadow-sm" : "border-slate-200"
+        active ? "border-white/30 shadow-sm" : "border-white/15"
       }`}
     >
       <div
         className={`flex w-full items-start justify-between gap-3 px-3 py-3 text-left transition ${
-          active ? "bg-teal-50/70" : "bg-white hover:bg-slate-50"
+          active ? "bg-white/10" : "bg-transparent hover:bg-white/10"
         } ${collapsed ? "px-2 py-2" : ""}`}
       >
         <button type="button" onClick={onHeaderClick} className="min-w-0 flex-1 text-left">
           <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15 text-white ring-1 ring-white/15">
               {icon}
             </span>
             {!collapsed && (
               <>
-                <span className="text-sm font-semibold text-slate-800">{title}</span>
+                <span className="text-sm font-bold text-white">{title}</span>
                 {badge && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                  <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold text-white">
                     {badge}
                   </span>
                 )}
               </>
             )}
           </div>
-          {!collapsed && <div className="mt-1 text-xs text-slate-400">{subtitle}</div>}
+          {!collapsed && subtitle.trim() && <div className="mt-1.5 text-xs leading-5 text-white/75">{subtitle}</div>}
         </button>
         {!collapsed && (
           <button
             type="button"
             onClick={onToggle}
-            className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white/80 transition hover:bg-white/10 hover:text-white"
             aria-label={open ? "收合區塊" : "展開區塊"}
           >
             <ChevronRight size={16} className={`transition-transform ${open ? "rotate-90" : ""}`} />
           </button>
         )}
       </div>
-      {open && !collapsed && <div className="border-t border-slate-100 bg-white px-3 py-3">{children}</div>}
+      {open && !collapsed && <div className="border-t border-white/10 bg-emerald-700 px-3 py-3">{children}</div>}
     </section>
   );
 }
@@ -951,8 +957,8 @@ function SelectionPill({
       onClick={onClick}
       className={`w-full rounded-xl border px-3 py-2 text-left text-sm transition ${
         active
-          ? "border-teal-300 bg-teal-50 text-teal-800"
-          : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+          ? "border-white/30 bg-white/15 text-white"
+          : "border-white/15 bg-white/5 text-white/90 hover:bg-white/10 hover:text-white"
       }`}
     >
       {label}
@@ -971,27 +977,27 @@ function FolderCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md hover:bg-teal-50/30"
+      className="flex items-start gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/10 hover:shadow-md"
     >
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/15">
         <FolderOpen size={18} />
       </div>
       <div className="min-w-0 flex-1">
-        <h4 className="truncate text-base font-semibold text-slate-800">{node.label}</h4>
+        <h4 className="truncate text-base font-bold text-white">{node.label}</h4>
 
         {node.children && node.children.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {node.children.slice(0, 4).map((child) => (
               <span
                 key={`${node.id}-${child.id}`}
-                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white"
               >
                 {child.label}
               </span>
             ))}
           </div>
         ) : (
-          <div className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500">
+          <div className="mt-3 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white/80">
             無子分類
           </div>
         )}
@@ -1017,13 +1023,13 @@ function KnowledgeOverview({
           key={`${node.id}-${getNodePath(node).join("|")}`}
           type="button"
           onClick={() => onOpenCategory(getNodePath(node), node.label)}
-          className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-teal-300 hover:shadow-md hover:bg-teal-50/30"
+          className="rounded-2xl border border-white/15 bg-white/5 p-4 text-left text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/10 hover:shadow-md"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <FolderOpen size={18} className="text-teal-600" />
-                <h4 className="truncate text-base font-semibold text-slate-800">{node.label}</h4>
+                <FolderOpen size={18} className="text-white" />
+                <h4 className="truncate text-base font-bold text-white">{node.label}</h4>
               </div>
             </div>
           </div>
@@ -1034,14 +1040,14 @@ function KnowledgeOverview({
                 {childPreview.map((child) => (
                   <span
                     key={`${node.id}-${child.id}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
+                    className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white"
                   >
                     {child.label}
                   </span>
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-slate-400">無子分類</div>
+              <div className="text-sm text-white/70">無子分類</div>
             )}
           </div>
         </button>

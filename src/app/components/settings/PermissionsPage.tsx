@@ -75,8 +75,11 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
             <span>系統設定 — 人員權限管理</span>
           </div>
           <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>系統設定 — 人員權限管理</h2>
-          <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的執行權限</p>
-        </div>
+          <p className="text-gray-500 text-sm mt-0.5">設定各角色對文件相關操作的權限</p>
+          <p className="mt-2 text-sm leading-6 text-gray-600">
+            本頁顯示目前角色權限設定。打勾代表可使用該功能，打叉代表不可使用。
+          </p>
+        </div>
       </div>
 
       {/* Role cards */}
@@ -104,7 +107,20 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
       {/* Permission matrix */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/60">
-          <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>權限設定矩陣</h3>
+          <div className="space-y-1.5">
+            <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>權限設定矩陣</h3>
+            <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+                <Check size={12} aria-hidden="true" />
+                可使用
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 font-semibold text-gray-600">
+                <X size={12} aria-hidden="true" />
+                不可使用
+              </span>
+              <span className="text-gray-400">打勾代表可使用該功能；打叉代表不可使用。</span>
+            </div>
+          </div>
           <button
             onClick={() => setEditing((v) => !v)}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg border transition-all"
@@ -154,6 +170,8 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
                             onClick={() => toggle(globalIdx, role)}
                             disabled={!editing}
                             className="mx-auto flex items-center justify-center w-6 h-6 rounded-full transition-all"
+                            aria-label={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
+                            title={`${role}${perm.roles[role] ? "可使用" : "不可使用"}${perm.action}`}
                             style={{
                               backgroundColor: perm.roles[role] ? "#0D9488" : "#F3F4F6",
                               cursor: editing ? "pointer" : "default",
@@ -174,7 +192,7 @@ export function PermissionsPage({ onBack, embedded = false }: Props) {
           </table>
         </div>
         <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/40 text-gray-400" style={{ fontSize: "11px" }}>
-          共 {PERMISSIONS.length} 項操作權限 · {editing ? "⚡ 編輯模式：點擊方格切換權限" : "點擊「編輯權限」以修改設定"}
+          共 {PERMISSIONS.length} 項功能權限 · {editing ? "編輯模式：點擊方格可切換可使用 / 不可使用" : "點擊「編輯權限」以修改設定"}
         </div>
       </div>
     </div>

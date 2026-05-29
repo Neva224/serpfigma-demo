@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from "react";
 import { ChevronDown, HelpCircle, Search, SlidersHorizontal, X } from "lucide-react";
 import { LEVEL_OPTIONS, STATUS_OPTIONS } from "./document-management/mockData";
+import { getDocumentStatusLabel } from "../workflow/statusCatalog";
 
 const LEVEL_LABELS = ["全部類別", ...LEVEL_OPTIONS.map((option) => option.label)];
-const STATUS_LABELS = ["全部狀態", ...STATUS_OPTIONS];
+const STATUS_LABELS = ["全部狀態", ...STATUS_OPTIONS.map((option) => getDocumentStatusLabel(option))];
 
 interface Props {
   onOpenEmployeeLookup: () => void;

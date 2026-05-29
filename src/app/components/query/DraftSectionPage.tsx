@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, FileText } from "lucide-react";
 import { CascadeSelectGroup } from "../ui/CascadeSelectGroup";
+import { CATEGORY_NODES, getCategoryLevelOptions, type CategorySelectionPath } from "../../data/catalogModels";
 import {
   createEmptyHrScopeSelection,
   getHrScopeLevelOptions,
@@ -23,7 +24,12 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
   const [submittedKeyword, setSubmittedKeyword] = useState("");
   const [advancedOpen, setAdvancedOpen] = useState(true);
   const [department, setDepartment] = useState<HrScopeSelection>(createEmptyHrScopeSelection());
-  const [source, setSource] = useState<HrScopeSelection>(createEmptyHrScopeSelection());
+  const [knowledgeTree, setKnowledgeTree] = useState<CategorySelectionPath>({
+    l1: "",
+    l2: "",
+    l3: "",
+    l4: "",
+  });
 
   const departmentOptions = useMemo(() => ({
     company: getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 0),
@@ -32,28 +38,30 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
     section: department.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 3) : [],
   }), [department]);
 
-  const sourceOptions = useMemo(() => ({
-    company: getHrScopeLevelOptions(HR_SCOPE_ROWS, source, 0),
-    group: source.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, source, 1) : [],
-    division: source.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, source, 2) : [],
-    section: source.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, source, 3) : [],
-  }), [source]);
+  const knowledgeOptions = useMemo(() => ({
+    l1: getCategoryLevelOptions(CATEGORY_NODES, []),
+    l2: knowledgeTree.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [knowledgeTree.l1]) : [],
+    l3: knowledgeTree.l2 ? getCategoryLevelOptions(CATEGORY_NODES, [knowledgeTree.l1, knowledgeTree.l2]) : [],
+    l4: knowledgeTree.l3
+      ? getCategoryLevelOptions(CATEGORY_NODES, [knowledgeTree.l1, knowledgeTree.l2, knowledgeTree.l3])
+      : [],
+  }), [knowledgeTree]);
 
   const results = useMemo(() => {
     const tokens = submittedKeyword.trim().toLowerCase().split(/\s+/).filter(Boolean);
     const selectedDepartmentPath = [department.companyName, department.groupName, department.divisionName, department.departmentName].filter(Boolean);
-    const selectedSourcePath = [source.companyName, source.groupName, source.divisionName, source.departmentName].filter(Boolean);
+    const selectedKnowledgePath = [knowledgeTree.l1, knowledgeTree.l2, knowledgeTree.l3, knowledgeTree.l4].filter(Boolean);
 
     return drafts
       .filter((doc) => {
         if (tokens.length === 0) return true;
-        const sourcePath = doc.sourceDepartmentPath?.join(" / ") ?? "";
+        const knowledgePath = doc.categoryPath?.join(" / ") ?? doc.knowledgePath?.join(" / ") ?? "";
         const searchable = [
           doc.docNo,
           doc.name,
           doc.summary ?? doc.subject ?? "",
           doc.department,
-          sourcePath,
+          knowledgePath,
           doc.tags.join(" "),
         ]
           .join(" ")
@@ -66,21 +74,18 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
         return selectedDepartmentPath.every((segment, index) => docPath[index] === segment);
       })
       .filter((doc) => {
-        if (selectedSourcePath.length === 0) return true;
-        const docPath =
-          doc.sourceDepartmentPath ??
-          doc.ownershipDepartmentPath ??
-          doc.department.split(" / ").map((item) => item.trim()).filter(Boolean);
-        return selectedSourcePath.every((segment, index) => docPath[index] === segment);
+        if (selectedKnowledgePath.length === 0) return true;
+        const docPath = doc.categoryPath ?? doc.knowledgePath ?? [];
+        return selectedKnowledgePath.every((segment, index) => docPath[index] === segment);
       })
       .sort((a, b) => (b.updatedAt ?? b.uploadDate).localeCompare(a.updatedAt ?? a.uploadDate));
-  }, [drafts, submittedKeyword, department, source]);
+  }, [drafts, submittedKeyword, department, knowledgeTree]);
 
   function reset() {
     setKeyword("");
     setSubmittedKeyword("");
     setDepartment(createEmptyHrScopeSelection());
-    setSource(createEmptyHrScopeSelection());
+    setKnowledgeTree({ l1: "", l2: "", l3: "", l4: "" });
     setAdvancedOpen(false);
   }
 
@@ -214,58 +219,56 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
             />
 
             <CascadeSelectGroup
-              title="資料來源"
-              description="比照文件上傳的人資來源邏輯，選擇草稿來源單位。"
+              title="知識樹分層"
+              description="以文件分類樹進行四層級選擇。"
               fields={[
                 {
-                  label: "公司",
-                  value: source.companyName,
-                  placeholder: "請選擇公司",
-                  options: sourceOptions.company,
-                  onChange: (companyName) =>
-                    setSource({
-                      ...createEmptyHrScopeSelection(),
-                      companyName,
+                  label: "第一層",
+                  value: knowledgeTree.l1,
+                  placeholder: "請選擇第一層",
+                  options: knowledgeOptions.l1,
+                  onChange: (l1) =>
+                    setKnowledgeTree({
+                      l1,
+                      l2: "",
+                      l3: "",
+                      l4: "",
                     }),
                 },
                 {
-                  label: "群",
-                  value: source.groupName,
-                  placeholder: source.companyName ? "請選擇群" : "請先選擇公司",
-                  options: sourceOptions.group,
-                  disabled: !source.companyName,
-                  onChange: (groupName) =>
-                    setSource({
-                      ...source,
-                      groupName,
-                      divisionName: "",
-                      departmentName: "",
+                  label: "第二層",
+                  value: knowledgeTree.l2,
+                  placeholder: knowledgeTree.l1 ? "請選擇第二層" : "請先選擇第一層",
+                  options: knowledgeOptions.l2,
+                  disabled: !knowledgeTree.l1,
+                  onChange: (l2) =>
+                    setKnowledgeTree({
+                      ...knowledgeTree,
+                      l2,
+                      l3: "",
+                      l4: "",
                     }),
                 },
                 {
-                  label: "處",
-                  value: source.divisionName,
-                  placeholder: source.groupName ? "請選擇處" : "請先選擇群",
-                  options: sourceOptions.division,
-                  disabled: !source.groupName,
-                  onChange: (divisionName) =>
-                    setSource({
-                      ...source,
-                      divisionName,
-                      departmentName: "",
+                  label: "第三層",
+                  value: knowledgeTree.l3,
+                  placeholder: knowledgeTree.l2 ? "請選擇第三層" : "請先選擇第二層",
+                  options: knowledgeOptions.l3,
+                  disabled: !knowledgeTree.l2,
+                  onChange: (l3) =>
+                    setKnowledgeTree({
+                      ...knowledgeTree,
+                      l3,
+                      l4: "",
                     }),
                 },
                 {
-                  label: "部",
-                  value: source.departmentName,
-                  placeholder: source.divisionName ? "請選擇部" : "請先選擇處",
-                  options: sourceOptions.section,
-                  disabled: !source.divisionName,
-                  onChange: (departmentName) =>
-                    setSource({
-                      ...source,
-                      departmentName,
-                    }),
+                  label: "第四層",
+                  value: knowledgeTree.l4,
+                  placeholder: knowledgeTree.l3 ? "請選擇第四層" : "請先選擇第三層",
+                  options: knowledgeOptions.l4,
+                  disabled: !knowledgeTree.l3,
+                  onChange: (l4) => setKnowledgeTree({ ...knowledgeTree, l4 }),
                 },
               ]}
             />
@@ -274,16 +277,16 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
       </section>
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="text-sm font-semibold text-slate-800">草稿清單</div>
-          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{results.length} 筆</span>
-        </div>
+          <div className="mb-3 flex items-center justify-between">
+            <div className="text-sm font-semibold text-slate-800">草稿清單</div>
+            <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{results.length} 筆</span>
+          </div>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-left">
             <thead className="bg-slate-50">
               <tr>
-                {["文件編號", "文件名稱", "所屬部門", "資料來源", "狀態", "建立或更新時間", "操作"].map((header) => (
+                {["文件編號", "文件名稱", "所屬部門", "知識樹分層", "狀態", "建立或更新時間", "操作"].map((header) => (
                   <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
                     {header}
                   </th>
@@ -292,7 +295,7 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
             </thead>
             <tbody>
               {results.map((doc) => {
-                const sourceLabel = (doc.sourceDepartmentPath ?? []).join(" / ") || doc.department || "未設定";
+                const knowledgeLabel = (doc.categoryPath ?? doc.knowledgePath ?? []).join(" / ") || "未設定";
                 return (
                   <tr key={doc.id} className="border-b border-slate-100 align-top">
                     <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{doc.docNo}</td>
@@ -304,7 +307,7 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
                       <div>{doc.department || "未選擇部門"}</div>
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-600">
-                      <div>{sourceLabel}</div>
+                      <div>{knowledgeLabel}</div>
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">

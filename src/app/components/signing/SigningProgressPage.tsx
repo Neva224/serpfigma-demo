@@ -1,11 +1,19 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { FileText, RotateCcw, Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import { type DocumentStatus } from "../document-management/mockData";
 import { toApprovalQueryRecord, type WorkflowDocument } from "../../workflow/workflowState";
 import { StatusRail } from "../ui/StatusRail";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 
-type SigningStatus = DocumentStatus | "";
+const APPROVAL_STATUSES = ["待主管簽核", "待文管簽核", "上架"] as const;
+type SigningStatus = "" | (typeof APPROVAL_STATUSES)[number];
 
 interface RecordItem {
   signingNo: string;
@@ -38,9 +46,7 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
   const [company, setCompany] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [statuses, setStatuses] = useState<SigningStatus[]>([]);
-  const [includeVoidedOnly, setIncludeVoidedOnly] = useState(false);
-  const [includeReturnedOnly, setIncludeReturnedOnly] = useState(false);
+  const [status, setStatus] = useState<SigningStatus>("");
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<RecordItem[]>([]);
 
@@ -50,38 +56,36 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
   );
 
   const statusOptions = useMemo(
-    () =>
-      Array.from(new Set(records.map((record) => record.status))).filter(Boolean).sort((a, b) =>
-        STATUS_ORDER.indexOf(a) - STATUS_ORDER.indexOf(b),
-      ),
+    () => APPROVAL_STATUSES.map((value) => ({ value, label: getDocumentStatusLabel(value) })),
+    [],
+  );
+
+  const approvalRecords = useMemo(
+    () => records.filter((record) => APPROVAL_STATUSES.includes(record.status as (typeof APPROVAL_STATUSES)[number])),
     [records],
   );
 
   const filtered = useMemo(() => {
-    let list = records;
+    let list = approvalRecords;
     if (signingNo) list = list.filter((item) => item.signingNo.includes(signingNo));
     if (docName) list = list.filter((item) => item.docName.includes(docName));
     if (subject) list = list.filter((item) => item.subject.includes(subject));
     if (requestUnitCode) list = list.filter((item) => item.requestUnitCode.includes(requestUnitCode));
     if (processUnitCode) list = list.filter((item) => item.processUnitCode.includes(processUnitCode));
     if (company) list = list.filter((item) => item.company.includes(company));
-    if (statuses.length > 0) list = list.filter((item) => statuses.includes(item.status));
-    if (includeVoidedOnly) list = list.filter((item) => item.includeVoided);
-    if (includeReturnedOnly) list = list.filter((item) => item.includeReturned);
+    if (status) list = list.filter((item) => item.status === status);
     if (startDate) list = list.filter((item) => item.submitDate >= startDate);
     if (endDate) list = list.filter((item) => item.submitDate <= endDate);
     return list;
   }, [
-    records,
+    approvalRecords,
     signingNo,
     docName,
     subject,
     requestUnitCode,
     processUnitCode,
     company,
-    statuses,
-    includeVoidedOnly,
-    includeReturnedOnly,
+    status,
     startDate,
     endDate,
   ]);
@@ -100,17 +104,9 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
     setCompany("");
     setStartDate("");
     setEndDate("");
-    setStatuses([]);
-    setIncludeVoidedOnly(false);
-    setIncludeReturnedOnly(false);
+    setStatus("");
     setResults([]);
     setSearched(false);
-  }
-
-  function toggleStatus(status: SigningStatus) {
-    setStatuses((current) =>
-      current.includes(status) ? current.filter((item) => item !== status) : [...current, status],
-    );
   }
 
   return (
@@ -129,12 +125,12 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
             <span>文件簽核進度查詢</span>
           </div>
           <h2 className="text-lg font-bold text-slate-800">文件簽核進度查詢</h2>
-          <p className="mt-1 text-sm text-slate-500">可依簽核號、文件名稱、狀態與日期區間查詢簽核進度</p>
+          <p className="mt-1 text-sm text-slate-500">可依簽核號、文件名稱、簽核狀態與日期區間查詢已進入簽核流程的文件</p>
         </div>
       </div>
 
       <div className="mb-5">
-        <StatusRail status={results[0]?.status ?? "草稿"} />
+        <StatusRail status={results[0]?.status ?? "待主管簽核"} />
       </div>
 
       <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -194,29 +190,22 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
             <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={inputClass} />
           </Field>
           <Field label="狀態">
-            <div className="flex flex-wrap gap-2">
-              {statusOptions.map((status) => (
-                <button
-                  type="button"
-                  key={status}
-                  onClick={() => toggleStatus(status)}
-                  className={`rounded-lg border px-3 py-2 text-sm font-semibold transition ${
-                    statuses.includes(status)
-                      ? "border-teal-600 bg-teal-50 text-teal-700"
-                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  {getDocumentStatusLabel(status)}
-                </button>
-              ))}
-            </div>
+            <Select value={status} onValueChange={(value) => setStatus(value as SigningStatus)}>
+              <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-slate-50 text-sm text-slate-700">
+                <SelectValue placeholder="全部狀態" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-4">
-          <Toggle label="含作廢" checked={includeVoidedOnly} onChange={setIncludeVoidedOnly} />
-          <Toggle label="含退件" checked={includeReturnedOnly} onChange={setIncludeReturnedOnly} />
-
           <div className="ml-auto flex gap-2">
             <button
               type="button"
@@ -297,8 +286,6 @@ export function SigningProgressPage({ onBack, embedded = false, documents }: Pro
   );
 }
 
-const STATUS_ORDER: DocumentStatus[] = ["草稿", "待主管簽核", "待文管審核", "上架", "退回", "作廢", "刪除"];
-
 const inputClass =
   "w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white";
 
@@ -307,28 +294,6 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
     <label className="space-y-1.5">
       <span className="block text-sm font-semibold text-slate-600">{label}</span>
       {children}
-    </label>
-  );
-}
-
-function Toggle({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string;
-  checked: boolean;
-  onChange: (next: boolean) => void;
-}) {
-  return (
-    <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-slate-600">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
-      />
-      {label}
     </label>
   );
 }
