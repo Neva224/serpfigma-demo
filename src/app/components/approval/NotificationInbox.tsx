@@ -105,7 +105,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
           <div className="flex items-center gap-2">
             <Bell size={16} style={{ color: "#0D9488" }} />
             <h2 className="text-gray-800" style={{ fontSize: "14px", fontWeight: 700 }}>
-              SERP Q 待辦通知
+              待辦通知
             </h2>
           </div>
           {unreadCount > 0 && (
@@ -190,7 +190,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
                 {n.message}
               </p>
 
-              {/* Doc title + GO */}
+              {/* 文件標題與前往按鈕 */}
               <div className="flex items-center justify-between">
                 <span
                   className="text-gray-600 truncate flex-1 mr-2"
@@ -202,7 +202,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
                   className="flex items-center gap-0.5 flex-shrink-0 transition-colors"
                   style={{ fontSize: "11px", fontWeight: 700, color: "#0D9488" }}
                 >
-                  GO <ChevronRight size={11} />
+                  前往 <ChevronRight size={11} />
                 </span>
               </div>
             </button>

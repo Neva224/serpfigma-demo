@@ -64,7 +64,7 @@ export function ActionPanel({ meta }: Props) {
               </div>
             } />
             <MetaRow label="上傳日期" value={meta.uploadDate} />
-            <MetaRow label="歸屬部門" value={meta.department} />
+            <MetaRow label="所屬部門" value={meta.department} />
             <MetaRow label="目前狀態" value={
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700" style={{ fontSize: "11px", fontWeight: 600 }}>
                 <Clock size={10} />

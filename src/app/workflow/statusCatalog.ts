@@ -14,9 +14,8 @@ export const DOCUMENT_STATUS_LABELS: Record<string, string> = {
   待主管簽核: "待主管簽核",
   待文管審核: "待文管簽核",
   待文管簽核: "待文管簽核",
-  待新主管簽核: "待新主管簽核",
-  上架: "已上架",
-  已上架: "已上架",
+  上架: "上架",
+  已上架: "上架",
   下架: "已下架",
   已下架: "已下架",
   退回: "已退回",
@@ -28,11 +27,9 @@ export const DOCUMENT_STATUS_LABELS: Record<string, string> = {
 };
 
 export const DOCUMENT_STATUS_STAGES: StatusStage[] = [
-  { key: "draft", label: "草稿", statuses: ["草稿"], tone: "slate" },
   { key: "manager", label: "待主管簽核", statuses: ["待主管簽核"], tone: "amber" },
   { key: "docadmin", label: "待文管簽核", statuses: ["待文管審核", "待文管簽核"], tone: "blue" },
-  { key: "transfer", label: "待新主管簽核", statuses: ["待新主管簽核"], tone: "cyan" },
-  { key: "published", label: "已上架", statuses: ["上架", "已上架"], tone: "emerald" },
+  { key: "published", label: "上架", statuses: ["上架", "已上架"], tone: "emerald" },
   { key: "archived", label: "已下架", statuses: ["下架", "已下架"], tone: "slate" },
   { key: "returned", label: "已退回", statuses: ["退回", "已退回"], tone: "orange" },
   { key: "voided", label: "已作廢", statuses: ["作廢", "已作廢"], tone: "red" },
@@ -66,10 +63,10 @@ export function getDocumentStatusStage(status: string) {
 }
 
 export function getDocumentStatusProgress(status: string) {
-  const currentIndex = Math.max(0, getDocumentStatusStageIndex(status));
+  const currentIndex = getDocumentStatusStageIndex(status);
   return DOCUMENT_STATUS_STAGES.map((stage, index) => ({
     ...stage,
     state:
-      index < currentIndex ? "done" : index === currentIndex ? "current" : "pending",
+      currentIndex < 0 ? "pending" : index < currentIndex ? "done" : index === currentIndex ? "current" : "pending",
   }));
 }

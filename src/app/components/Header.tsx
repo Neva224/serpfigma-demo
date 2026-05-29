@@ -6,9 +6,9 @@ type Screen = "list" | "form" | "re-edit" | "signing-progress" | "database" | "p
 
 const TYPE_LABEL: Record<WorkflowNotification["type"], string> = {
   manager_approval_pending: "待主管簽核",
-  docadmin_approval_pending: "待文管審核",
+  docadmin_approval_pending: "待文管簽核",
   rejected: "已退回",
-  published: "已上架",
+  published: "上架",
   voided: "已作廢",
 };
 
@@ -63,7 +63,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
             </div>
             <div className="leading-tight">
               <div className="text-[28px] font-extrabold tracking-tight text-slate-900">
-                SERP 文件管理
+                文件管理系統
               </div>
               <div className="text-[15px] text-slate-400">文件簽核與知識管理平台</div>
             </div>
@@ -95,11 +95,11 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
 
             <div className="ml-1 flex items-center gap-2 border-l border-slate-200 pl-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-600 text-xs font-bold text-white">
-                管
+                系
               </div>
                 <div className="hidden sm:block">
                   <div className="text-sm font-semibold text-slate-800">系統管理者</div>
-                  <div className="text-[11px] text-slate-400">管理員</div>
+                  <div className="text-[11px] text-slate-400">系統帳號</div>
                 </div>
               </div>
             </div>

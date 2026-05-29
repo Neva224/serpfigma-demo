@@ -215,7 +215,7 @@ export default function App() {
             setView({ kind: "documentUpload" });
           }}
           onApprove={(doc) => {
-            const stage: ApprovalStage = doc.status === "待文管審核" || doc.status === "待新主管簽核" ? "docadmin" : "manager";
+            const stage: ApprovalStage = doc.status === "待文管審核" ? "docadmin" : "manager";
             openApproval(doc.id, stage);
           }}
           onReEdit={openReEdit}

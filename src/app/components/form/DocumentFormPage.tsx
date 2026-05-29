@@ -257,7 +257,7 @@ export function DocumentFormPage({
                 className="ml-1 flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-white"
                 style={{ backgroundColor: "#0D9488" }}
               >
-                SERP
+                系統
               </div>
             </div>
           </div>

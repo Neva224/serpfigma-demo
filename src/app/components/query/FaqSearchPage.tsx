@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { CascadeSelectGroup } from "../ui/CascadeSelectGroup";
+import { createEmptyHrScopeSelection, getHrScopeLevelOptions, HR_SCOPE_ROWS, type HrScopeSelection } from "../../data/hrScopeModel";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 import type { WorkflowDocument } from "../../workflow/workflowState";
 
@@ -13,15 +15,18 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
   const publishedDocs = useMemo(() => documents.filter((doc) => doc.status === "上架"), [documents]);
   const [keyword, setKeyword] = useState("");
   const [submittedKeyword, setSubmittedKeyword] = useState("");
-  const [department, setDepartment] = useState("");
-  const [company, setCompany] = useState("");
-  const [group, setGroup] = useState("");
-  const [division, setDivision] = useState("");
-  const [section, setSection] = useState("");
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(true);
+  const [department, setDepartment] = useState<HrScopeSelection>(createEmptyHrScopeSelection());
+
+  const companyOptions = useMemo(() => getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 0), [department]);
+  const groupOptions = useMemo(() => (department.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 1) : []), [department]);
+  const divisionOptions = useMemo(() => (department.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 2) : []), [department]);
+  const sectionOptions = useMemo(() => (department.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 3) : []), [department]);
 
   const results = useMemo(() => {
     const tokens = submittedKeyword.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const selectedPath = [department.companyName, department.groupName, department.divisionName, department.departmentName].filter(Boolean);
+
     return publishedDocs
       .filter((doc) => {
         if (tokens.length === 0) return true;
@@ -40,26 +45,17 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         return tokens.every((token) => searchable.includes(token));
       })
       .filter((doc) => {
-        const parts = doc.ownershipDepartmentPath ?? doc.department.split(" / ").map((item) => item.trim()).filter(Boolean);
-        const fullDepartment = doc.department.toLowerCase();
-        if (department.trim() && !fullDepartment.includes(department.trim().toLowerCase())) return false;
-        if (company.trim() && !(parts[0] ?? "").toLowerCase().includes(company.trim().toLowerCase())) return false;
-        if (group.trim() && !(parts[1] ?? "").toLowerCase().includes(group.trim().toLowerCase())) return false;
-        if (division.trim() && !(parts[2] ?? "").toLowerCase().includes(division.trim().toLowerCase())) return false;
-        if (section.trim() && !(parts[3] ?? "").toLowerCase().includes(section.trim().toLowerCase())) return false;
-        return true;
+        if (selectedPath.length === 0) return true;
+        const docPath = doc.ownershipDepartmentPath ?? doc.department.split(" / ").map((item) => item.trim()).filter(Boolean);
+        return selectedPath.every((segment, index) => docPath[index] === segment);
       })
       .sort((a, b) => b.uploadDate.localeCompare(a.uploadDate));
-  }, [publishedDocs, submittedKeyword, company, group, division, section]);
+  }, [publishedDocs, submittedKeyword, department]);
 
   function reset() {
     setKeyword("");
     setSubmittedKeyword("");
-    setDepartment("");
-    setCompany("");
-    setGroup("");
-    setDivision("");
-    setSection("");
+    setDepartment(createEmptyHrScopeSelection());
     setAdvancedOpen(false);
   }
 
@@ -76,10 +72,10 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
               一般文件查詢
             </button>
             <span>/</span>
-            <span>常見問題查詢</span>
+            <span>FAQ常見問題專區</span>
           </div>
-          <h2 className="text-lg font-bold text-slate-800">常見問題查詢</h2>
-          <p className="mt-1 text-sm text-slate-500">可依關鍵字與部門層級快速查找常見問題文件</p>
+          <h2 className="text-lg font-bold text-slate-800">FAQ常見問題專區</h2>
+          <p className="mt-1 text-sm text-slate-500">可依關鍵字與組織層級快速查找常見問題文件</p>
         </div>
       </div>
 
@@ -109,15 +105,7 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3 px-4 py-4">
-          <FilterSelect
-            label="所屬部門"
-            value={department}
-            onChange={setDepartment}
-            placeholder="請輸入部門"
-          />
-          <FilterSelect label="公司" value={company} onChange={setCompany} placeholder="請輸入公司" />
-          <FilterSelect label="群" value={group} onChange={setGroup} placeholder="請輸入群" />
-
+          <div className="text-sm font-semibold text-slate-700">組織篩選</div>
           <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
@@ -144,12 +132,62 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
 
         {advancedOpen && (
           <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
-            <div className="grid gap-3 lg:grid-cols-3">
-              <TextField label="公司" value={company} onChange={setCompany} placeholder="請輸入公司名稱" />
-              <TextField label="群" value={group} onChange={setGroup} placeholder="請輸入群名稱" />
-              <TextField label="處" value={division} onChange={setDivision} placeholder="請輸入處名稱" />
-              <TextField label="部" value={section} onChange={setSection} placeholder="請輸入部名稱" />
-            </div>
+            <CascadeSelectGroup
+              title="組織篩選"
+              description="以 HR 組織資料來源進行四層級選擇。"
+              fields={[
+                {
+                  label: "公司",
+                  value: department.companyName,
+                  placeholder: "請選擇公司",
+                  options: companyOptions,
+                  onChange: (companyName) =>
+                    setDepartment({
+                      ...createEmptyHrScopeSelection(),
+                      companyName,
+                    }),
+                },
+                {
+                  label: "群",
+                  value: department.groupName,
+                  placeholder: department.companyName ? "請選擇群" : "請先選擇公司",
+                  options: groupOptions,
+                  disabled: !department.companyName,
+                  onChange: (groupName) =>
+                    setDepartment({
+                      ...department,
+                      groupName,
+                      divisionName: "",
+                      departmentName: "",
+                    }),
+                },
+                {
+                  label: "處",
+                  value: department.divisionName,
+                  placeholder: department.groupName ? "請選擇處" : "請先選擇群",
+                  options: divisionOptions,
+                  disabled: !department.groupName,
+                  onChange: (divisionName) =>
+                    setDepartment({
+                      ...department,
+                      divisionName,
+                      departmentName: "",
+                    }),
+                },
+                {
+                  label: "部",
+                  value: department.departmentName,
+                  placeholder: department.divisionName ? "請選擇部" : "請先選擇處",
+                  options: sectionOptions,
+                  disabled: !department.divisionName,
+                  onChange: (departmentName) =>
+                    setDepartment({
+                      ...department,
+                      departmentName,
+                    }),
+                },
+              ]}
+            />
           </div>
         )}
       </section>
@@ -197,53 +235,5 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
         </div>
       </div>
     </div>
-  );
-}
-
-function FilterSelect({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <label className="flex min-w-[220px] items-center rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
-      <span className="mr-2 text-xs font-semibold text-slate-500">{label}</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-      />
-    </label>
-  );
-}
-
-function TextField({
-  label,
-  value,
-  onChange,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-}) {
-  return (
-    <label className="space-y-1.5">
-      <span className="block text-sm font-semibold text-slate-600">{label}</span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500"
-      />
-    </label>
   );
 }

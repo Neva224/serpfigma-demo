@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
+import { Search } from "lucide-react";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 import type { WorkflowDocument, WorkflowHistoryEntry } from "../../workflow/workflowState";
 
@@ -26,11 +26,6 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
 
   const [keyword, setKeyword] = useState("");
   const [submittedKeyword, setSubmittedKeyword] = useState("");
-  const [advancedOpen, setAdvancedOpen] = useState(true);
-  const [originalTree, setOriginalTree] = useState("");
-  const [originalDepartment, setOriginalDepartment] = useState("");
-  const [newTree, setNewTree] = useState("");
-  const [newDepartment, setNewDepartment] = useState("");
 
   const results = useMemo(() => {
     const tokens = submittedKeyword.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -47,19 +42,9 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
       ]
         .join(" ")
         .toLowerCase();
-      const originalTreePath = (transfer.categoryPathBefore ?? []).join(" / ").toLowerCase();
-      const originalDepartmentPath = (transfer.ownershipDepartmentPathBefore ?? []).join(" / ").toLowerCase();
-      const newTreePath = (transfer.categoryPathAfter ?? []).join(" / ").toLowerCase();
-      const newDepartmentPath = (transfer.ownershipDepartmentPathAfter ?? []).join(" / ").toLowerCase();
-      return (
-        tokens.every((token) => searchable.includes(token)) &&
-        (!originalTree || originalTreePath.includes(originalTree.trim().toLowerCase())) &&
-        (!originalDepartment || originalDepartmentPath.includes(originalDepartment.trim().toLowerCase())) &&
-        (!newTree || newTreePath.includes(newTree.trim().toLowerCase())) &&
-        (!newDepartment || newDepartmentPath.includes(newDepartment.trim().toLowerCase()))
-      );
+      return tokens.every((token) => searchable.includes(token));
     });
-  }, [rows, submittedKeyword, originalTree, originalDepartment, newTree, newDepartment]);
+  }, [rows, submittedKeyword]);
 
   function reset() {
     setKeyword("");
@@ -82,7 +67,7 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
             <span>移轉單位</span>
           </div>
           <h2 className="text-lg font-bold text-slate-800">移轉單位</h2>
-          <p className="mt-1 text-sm text-slate-500">查詢文件移轉紀錄與新舊知識樹、部門層級資訊</p>
+          <p className="mt-1 text-sm text-slate-500">查詢文件移轉紀錄與移轉摘要資訊</p>
         </div>
       </div>
 
@@ -109,116 +94,91 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
             <Search size={15} />
             查詢
           </button>
-        </div>
 
-        <div className="flex flex-wrap items-center gap-3 px-4 py-4">
-          <div className="ml-auto flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setAdvancedOpen((current) => !current)}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
-                advancedOpen
-                  ? "border-teal-300 bg-teal-50 text-teal-700"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <SlidersHorizontal size={14} />
-              進階搜尋
-              <ChevronDown size={14} className={advancedOpen ? "rotate-180 transition-transform" : "transition-transform"} />
-            </button>
-            <button
-              type="button"
-              onClick={reset}
-              className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-              重設條件
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={reset}
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+          >
+            重設條件
+          </button>
         </div>
-
-        {advancedOpen && (
-          <div className="border-t border-slate-100 bg-slate-50/60 px-4 py-4">
-            <div className="grid gap-3 lg:grid-cols-4">
-              <TextField label="原單位知識樹分層" value={originalTree} onChange={setOriginalTree} placeholder="請輸入原知識樹層級" />
-              <TextField label="原所屬部門分層" value={originalDepartment} onChange={setOriginalDepartment} placeholder="請輸入原部門層級" />
-              <TextField label="新知識樹分層" value={newTree} onChange={setNewTree} placeholder="請輸入新知識樹層級" />
-              <TextField label="新所屬部門分層" value={newDepartment} onChange={setNewDepartment} placeholder="請輸入新部門層級" />
-            </div>
-          </div>
-        )}
       </section>
 
-      <div className="mt-4 space-y-3">
-        {results.map(({ doc, transfer }) => {
-          const performerLabel = transfer.actor === doc.uploaderName || transfer.actor === doc.requestor ? "上傳者" : "簽核主管";
-          return (
-            <article key={`${doc.id}-${transfer.timestamp}`} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1 space-y-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-mono text-xs text-slate-500">{doc.docNo}</span>
-                    <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
-                      {getDocumentStatusLabel(doc.status)}
-                    </span>
-                    <span className="text-sm font-semibold text-slate-800">{doc.name}</span>
-                  </div>
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-sm font-semibold text-slate-800">查詢結果</div>
+          <span className="rounded-full bg-teal-50 px-3 py-1 text-xs font-semibold text-teal-700">{results.length} 筆</span>
+        </div>
 
-                  <TransferField title="原單位知識樹分層" value={(transfer.categoryPathBefore ?? []).join(" / ") || "無"} />
-                  <TransferField title="原所屬部門分層" value={(transfer.ownershipDepartmentPathBefore ?? []).join(" / ") || "無"} />
-                  <TransferField title="新知識樹分層" value={(transfer.categoryPathAfter ?? []).join(" / ") || "無"} />
-                  <TransferField title="新所屬部門分層" value={(transfer.ownershipDepartmentPathAfter ?? []).join(" / ") || "無"} />
-                </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left">
+            <thead className="bg-slate-50">
+              <tr>
+                {["文件資訊", "原單位 → 新單位", "原知識樹 → 新知識樹", "操作人", "移轉時間"].map((header) => (
+                  <th key={header} className="whitespace-nowrap px-4 py-3 text-xs font-semibold text-slate-600">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {results.map(({ doc, transfer }) => {
+                const performerLabel = transfer.actor === doc.uploaderName || transfer.actor === doc.requestor ? "上傳者" : "簽核主管";
+                return (
+                  <tr key={`${doc.id}-${transfer.timestamp}`} className="border-b border-slate-100 align-top">
+                    <td className="px-4 py-4">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-mono text-xs text-slate-500">{doc.docNo}</span>
+                          <span className="rounded-full bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700">
+                            {getDocumentStatusLabel(doc.status)}
+                          </span>
+                        </div>
+                        <div className="text-sm font-semibold text-slate-800">{doc.name}</div>
+                        <div className="rounded-xl border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                          <div className="font-semibold text-slate-500">移轉摘要</div>
+                          <div className="mt-1 leading-6">
+                            原單位：{(transfer.ownershipDepartmentPathBefore ?? []).join(" / ") || "無"}<br />
+                            新單位：{(transfer.ownershipDepartmentPathAfter ?? []).join(" / ") || "無"}
+                          </div>
+                          <div className="mt-1 leading-6">
+                            原知識樹分層：{(transfer.categoryPathBefore ?? []).join(" / ") || "無"}<br />
+                            新知識樹分層：{(transfer.categoryPathAfter ?? []).join(" / ") || "無"}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-slate-600">
+                      <div>{(transfer.ownershipDepartmentPathBefore ?? []).join(" / ") || "無"}</div>
+                      <div className="mt-1 text-slate-400">→ {(transfer.ownershipDepartmentPathAfter ?? []).join(" / ") || "無"}</div>
+                    </td>
+                    <td className="px-4 py-4 text-sm text-slate-600">
+                      <div>{(transfer.categoryPathBefore ?? []).join(" / ") || "無"}</div>
+                      <div className="mt-1 text-slate-400">→ {(transfer.categoryPathAfter ?? []).join(" / ") || "無"}</div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700">
+                      <div className="font-semibold">{transfer.actor}</div>
+                      <div className="text-xs text-slate-400">（{performerLabel}）</div>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-600">
+                      {transfer.timestamp.slice(0, 16).replace("T", " ")}
+                    </td>
+                  </tr>
+                );
+              })}
 
-                <div className="flex min-w-[160px] flex-col items-end gap-2 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-right">
-                  <div className="text-xs font-semibold tracking-[0.18em] text-slate-400">操作角色</div>
-                  <div className="text-sm font-semibold text-slate-800">{performerLabel}</div>
-                  <div className="text-xs text-slate-400">{transfer.timestamp.slice(0, 16).replace("T", " ")}</div>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-
-        {results.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-5 py-12 text-center text-sm text-slate-400">
-            目前沒有符合條件的移轉資料
-          </div>
-        )}
+              {results.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-14 text-center text-sm text-slate-400">
+                    目前沒有符合條件的移轉資料
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function TextField({
-  label,
-  placeholder,
-  value,
-  onChange,
-}: {
-  label: string;
-  placeholder: string;
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="space-y-1.5">
-      <span className="block text-sm font-semibold text-slate-600">{label}</span>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-teal-500"
-      />
-    </label>
-  );
-}
-
-function TransferField({ title, value }: { title: string; value: string }) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
-      <div className="text-xs font-semibold tracking-[0.18em] text-slate-400">{title}</div>
-      <div className="mt-1 text-sm leading-6 text-slate-700">{value}</div>
     </div>
   );
 }

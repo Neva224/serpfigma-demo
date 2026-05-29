@@ -165,8 +165,8 @@ export function buildInitialNotifications(docs: WorkflowDocument[]): WorkflowNot
 export function createDemoUser(demoMode = true): WorkflowUser {
   return {
     id: "demo-user",
-    name: "SERP Demo",
-    code: "SERP-001",
+    name: "系統示範帳號",
+    code: "示範001",
     roles: demoMode ? ["uploader", "system_admin", "signing_manager", "doc_admin"] : ["uploader"],
   };
 }
@@ -210,9 +210,9 @@ function cloneDoc(doc: WorkflowDocument): WorkflowDocument {
 }
 
 function deriveCurrentHandlerForStatus(doc: WorkflowDocument, status: DocumentStatus) {
-  if (status === "上架") return "已上架";
+  if (status === "上架") return "上架";
   if (status === "待主管簽核") return "主管審核";
-  if (status === "待文管審核" || status === "待新主管簽核") return "文管審核";
+  if (status === "待文管審核") return "文管審核";
   if (status === "退回" || status === "作廢") return doc.uploaderName || doc.requestor || "上傳者";
   return status;
 }
@@ -401,7 +401,7 @@ export function applyWorkflowDecision(
         id: baseNotificationId(notifications),
         type: "published",
         title: "文件已審核通過並上架",
-        message: `${doc.name} 已上架`,
+        message: `${doc.name} 已完成上架`,
         docId: doc.id,
         signingNo: doc.signingNo ?? "",
         targetStage: "docadmin",
@@ -632,6 +632,6 @@ export function toApprovalQueryRecord(doc: WorkflowDocument) {
     status: doc.status,
     includeVoided: true,
     includeReturned: true,
-    currentHandler: doc.currentHandler ?? (doc.status === "上架" ? "已上架" : doc.status),
+    currentHandler: doc.currentHandler ?? (doc.status === "上架" ? "上架" : doc.status),
   };
 }

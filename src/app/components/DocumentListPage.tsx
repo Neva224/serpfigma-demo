@@ -62,7 +62,7 @@ const KNOWLEDGE_TREE = buildLegacyKnowledgeTreeFromGenerated();
 
 const QUERY_ITEMS = [
   { label: "一般文件查詢", variant: "general" as const },
-  { label: "常見問題", variant: "faq" as const },
+  { label: "FAQ常見問題專區", variant: "faq" as const },
 ];
 
 export function DocumentListPage({
@@ -123,7 +123,7 @@ export function DocumentListPage({
     } else if (view.kind === "signing") {
       const statuses: DocumentStatus[] =
         view.variant === "manager"
-          ? ["待主管簽核", "待新主管簽核"]
+          ? ["待主管簽核"]
           : view.variant === "docadmin"
             ? ["待文管審核"]
             : ["作廢"];
@@ -284,7 +284,7 @@ export function DocumentListPage({
               type="button"
               onClick={() => setSidebarCollapsed((current) => !current)}
               className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 text-white transition hover:bg-teal-500"
-              aria-label={sidebarCollapsed ? "撅??詨" : "?嗅??詨"}
+              aria-label={sidebarCollapsed ? "展開側欄" : "收合側欄"}
             >
               <LayoutGrid size={16} />
             </button>
@@ -319,7 +319,7 @@ export function DocumentListPage({
           <SectionCard
             collapsed={sidebarCollapsed}
             title="一般文件查詢"
-            subtitle="一般文件與常見問題查詢"
+            subtitle="一般文件與 FAQ常見問題專區"
             icon={<Search size={16} />}
             badge={String(publishedDocs.length)}
             open={queryOpen}
@@ -526,7 +526,6 @@ function countForSigningSection(docs: DocumentRecord[]) {
     (doc) =>
       doc.status === "待主管簽核" ||
       doc.status === "待文管審核" ||
-      doc.status === "待新主管簽核" ||
       doc.status === "上架" ||
       doc.status === "作廢",
   ).length;
@@ -549,7 +548,7 @@ function getViewTitle(view: ViewMode) {
     case "category":
       return view.label;
     case "query":
-      return view.variant === "general" ? "一般文件查詢" : "常見問題查詢";
+      return view.variant === "general" ? "一般文件查詢" : "FAQ常見問題專區";
     case "documentUpload":
       return "文件上傳專區";
     case "signingProgress":
@@ -581,7 +580,7 @@ function getViewDescription(view: ViewMode) {
     case "category":
       return `分類路徑 > ${view.path.join(" > ")}`;
     case "query":
-      return view.variant === "general" ? "一般文件條件查詢" : "常見問題條件查詢";
+      return view.variant === "general" ? "一般文件條件查詢" : "FAQ常見問題條件查詢";
     case "documentUpload":
       return "新增文件、選擇分類與送出簽核";
     case "signingProgress":
