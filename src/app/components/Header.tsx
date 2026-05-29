@@ -50,7 +50,7 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
 
   return (
     <>
-      <header className="z-20 flex h-[80px] flex-shrink-0 border-b border-emerald-700 bg-emerald-700">
+      <header className="brand-teal-bar z-20 flex h-[80px] flex-shrink-0 border-b brand-teal-border">
         <div className="flex h-full flex-1 items-center px-6">
           <button
             type="button"
@@ -111,8 +111,8 @@ export function Header({ onNavigate, onLogoClick, notifications, onNotificationC
       {panelOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setPanelOpen(false)} />
-          <div className="fixed right-4 top-14 z-50 w-[360px] overflow-hidden rounded-2xl border border-emerald-700 bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-emerald-700 bg-emerald-700 px-4 py-3">
+          <div className="fixed right-4 top-14 z-50 w-[360px] overflow-hidden rounded-2xl border brand-teal-border bg-white shadow-2xl">
+            <div className="brand-teal-bar flex items-center justify-between border-b brand-teal-border px-4 py-3">
               <div className="flex items-center gap-2">
                 <Bell size={16} className="text-white" />
                 <div className="text-sm font-bold text-white">Q留言</div>

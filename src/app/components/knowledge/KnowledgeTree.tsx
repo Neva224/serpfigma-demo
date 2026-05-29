@@ -27,8 +27,8 @@ export function KnowledgeTree({ totalCount, selectedPathKey, onSelectPath, count
         </div>
       </div>
 
-      <div className="border-t border-slate-100 bg-slate-50 px-4 py-3">
-        <p className="text-center text-xs text-slate-400">
+      <div className="border-t border-white/10 bg-white/5 px-4 py-3">
+        <p className="text-center text-xs text-white/75">
           共 {totalCount} 筆文件，{KNOWLEDGE_TREE.length} 個第一層分類
         </p>
       </div>

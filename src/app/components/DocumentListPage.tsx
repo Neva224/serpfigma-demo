@@ -291,7 +291,7 @@ export function DocumentListPage({
   return (
     <div className="flex h-full min-h-0 overflow-hidden bg-slate-100">
       <aside
-        className={`flex h-full min-h-0 flex-col flex-shrink-0 overflow-hidden border-r border-emerald-800 bg-emerald-700 transition-all duration-200 ${
+        className={`brand-teal-bar flex h-full min-h-0 flex-col flex-shrink-0 overflow-hidden border-r brand-teal-border transition-all duration-200 ${
           sidebarCollapsed ? "w-[72px]" : "w-[320px]"
         }`}
       >
@@ -431,20 +431,20 @@ export function DocumentListPage({
       </aside>
 
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-[0_12px_40px_rgba(13,148,136,0.08)]">
+        <div className="knowledge-card mb-5 overflow-hidden rounded-3xl px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <div className="flex items-center gap-2 text-xs text-white/80">
-                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-white">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-slate-700">
                   首頁
                 </button>
                 <span>/</span>
-                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-white">
+                <button type="button" onClick={activateKnowledgeOverview} className="font-semibold hover:text-slate-700">
                   主功能
                 </button>
               </div>
-              <div className="mt-1.5 text-lg font-bold text-white">{getViewTitle(view)}</div>
-              <div className="mt-1 text-sm font-semibold text-white/85">
+              <div className="mt-1.5 text-lg font-bold text-slate-800">{getViewTitle(view)}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-500">
                 {view.kind === "overview" ? "請選擇第一層分類查看下層資料夾與文件" : getViewDescription(view)}
               </div>
             </div>
@@ -453,7 +453,7 @@ export function DocumentListPage({
               <button
                 type="button"
                 onClick={activateCategoryBack}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-white/15"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 <ChevronRight size={12} className="rotate-180" />
                 返回上一頁
@@ -937,7 +937,7 @@ function SectionCard({
           </button>
         )}
       </div>
-      {open && !collapsed && <div className="border-t border-white/10 bg-emerald-700 px-3 py-3">{children}</div>}
+      {open && !collapsed && <div className="brand-teal-bar border-t border-white/10 px-3 py-3">{children}</div>}
     </section>
   );
 }
@@ -977,27 +977,27 @@ function FolderCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex items-start gap-3 rounded-2xl border border-white/15 bg-white/5 px-4 py-4 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/10 hover:shadow-md"
+      className="knowledge-card flex items-start gap-3 rounded-2xl px-4 py-4 text-left transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
     >
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/15 text-white ring-1 ring-white/15">
+      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-slate-200">
         <FolderOpen size={18} />
       </div>
       <div className="min-w-0 flex-1">
-        <h4 className="truncate text-base font-bold text-white">{node.label}</h4>
+        <h4 className="truncate text-base font-bold text-slate-800">{node.label}</h4>
 
         {node.children && node.children.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
             {node.children.slice(0, 4).map((child) => (
               <span
                 key={`${node.id}-${child.id}`}
-                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white"
+                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
               >
                 {child.label}
               </span>
             ))}
           </div>
         ) : (
-          <div className="mt-3 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold text-white/80">
+          <div className="mt-3 inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
             無子分類
           </div>
         )}
@@ -1023,13 +1023,13 @@ function KnowledgeOverview({
           key={`${node.id}-${getNodePath(node).join("|")}`}
           type="button"
           onClick={() => onOpenCategory(getNodePath(node), node.label)}
-          className="rounded-2xl border border-white/15 bg-white/5 p-4 text-left text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/10 hover:shadow-md"
+          className="knowledge-card rounded-2xl p-4 text-left text-slate-800 transition duration-200 hover:-translate-y-0.5 hover:border-slate-200 hover:shadow-md"
         >
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <FolderOpen size={18} className="text-white" />
-                <h4 className="truncate text-base font-bold text-white">{node.label}</h4>
+                <FolderOpen size={18} className="text-teal-700" />
+                <h4 className="truncate text-base font-bold text-slate-800">{node.label}</h4>
               </div>
             </div>
           </div>
@@ -1040,14 +1040,14 @@ function KnowledgeOverview({
                 {childPreview.map((child) => (
                   <span
                     key={`${node.id}-${child.id}`}
-                    className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-1 text-xs font-semibold text-white"
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700"
                   >
                     {child.label}
                   </span>
                 ))}
               </div>
             ) : (
-              <div className="text-sm text-white/70">無子分類</div>
+              <div className="text-sm text-slate-500">無子分類</div>
             )}
           </div>
         </button>

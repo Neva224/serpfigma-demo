@@ -188,6 +188,20 @@
 }
 
 @layer utilities {
+  .brand-teal-bar {
+    background-color: #115e59;
+  }
+
+  .brand-teal-border {
+    border-color: #134e4a;
+  }
+
+  .knowledge-card {
+    background-color: #ffffff;
+    border-color: rgba(15, 23, 42, 0.08);
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  }
+
   .scrollbar-brand {
     scrollbar-color: #0d9488 rgba(148, 163, 184, 0.18);
     scrollbar-width: thin;
