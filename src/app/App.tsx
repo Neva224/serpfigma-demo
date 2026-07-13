@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Toaster, toast } from "sonner";
 import { Header } from "./components/Header";
 import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
@@ -16,12 +16,22 @@ import {
   type ApprovalStage,
   type WorkflowDocument,
   type WorkflowNotification,
+  type WorkflowRole,
   type WorkflowUser,
 } from "./workflow/workflowState";
+import {
+  loadRoles,
+  loadWorkflowSnapshot,
+  saveRoles,
+  saveWorkflowSnapshot,
+} from "./data/documentRepository";
 import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
 
-const INITIAL_DOCUMENTS: WorkflowDocument[] = [];
-const INITIAL_NOTIFICATIONS: WorkflowNotification[] = [];
+// 無登入系統時的預設角色：開發環境給全角色方便 demo；正式環境給最小權限 uploader，
+// 使用者可再用 Header 的角色切換器手動調整（選擇會保存在 localStorage）。
+const DEFAULT_ROLES: WorkflowRole[] = import.meta.env.DEV
+  ? ["uploader", "signing_manager", "doc_admin", "system_admin"]
+  : ["uploader"];
 
 interface ApprovalTarget {
   docId: number;
@@ -29,19 +39,39 @@ interface ApprovalTarget {
 }
 
 export default function App() {
-  const demoMode = true;
-  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(demoMode), [demoMode]);
+  const initialSnapshot = useMemo(() => loadWorkflowSnapshot(), []);
+  const [roles, setRoles] = useState<WorkflowRole[]>(() => loadRoles() ?? DEFAULT_ROLES);
+  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(roles), [roles]);
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
-  const [documents, setDocuments] = useState<WorkflowDocument[]>(() => INITIAL_DOCUMENTS);
-  const [notifications, setNotifications] = useState<WorkflowNotification[]>(() => INITIAL_NOTIFICATIONS);
+  const [documents, setDocuments] = useState<WorkflowDocument[]>(() => initialSnapshot.documents);
+  const [notifications, setNotifications] = useState<WorkflowNotification[]>(
+    () => initialSnapshot.notifications,
+  );
   const [notificationPulse, setNotificationPulse] = useState(0);
+
+  // 持久化：文件／通知與角色選擇變動時寫回 localStorage（重整後保留）。
+  useEffect(() => {
+    saveWorkflowSnapshot({ documents, notifications });
+  }, [documents, notifications]);
+  useEffect(() => {
+    saveRoles(roles);
+  }, [roles]);
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
   const visibleDocuments = useMemo(() => normalizeWorkflowDocuments(documents), [documents]);
 
   const approvalDoc = approval ? visibleDocuments.find((item) => item.id === approval.docId) ?? null : null;
 
+  // 依角色決定可執行的簽核階段：主管簽核只給會簽主管、文管審核只給文管審核者。
+  const canApproveManager = currentUser.roles.includes("signing_manager");
+  const canApproveDocAdmin = currentUser.roles.includes("doc_admin");
+
   function openApproval(docId: number, stage: ApprovalStage) {
+    const allowed = stage === "manager" ? canApproveManager : canApproveDocAdmin;
+    if (!allowed) {
+      toast.error(stage === "manager" ? "僅「會簽主管」可執行主管簽核" : "僅「文管審核者」可執行文管審核");
+      return;
+    }
     setApproval({ docId, stage });
   }
 
@@ -224,6 +254,8 @@ export default function App() {
         notifications={notifications}
         onNotificationClick={handleNotificationClick}
         notificationPulse={notificationPulse}
+        roles={roles}
+        onRolesChange={setRoles}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
@@ -248,6 +280,8 @@ export default function App() {
           onSaveDraft={handleSaveDraft}
           canVoidPublishedDocs={canVoidPublishedDocs}
           canDeletePublishedDocs={canDeletePublishedDocs}
+          canApproveManager={canApproveManager}
+          canApproveDocAdmin={canApproveDocAdmin}
         />
       </div>
 

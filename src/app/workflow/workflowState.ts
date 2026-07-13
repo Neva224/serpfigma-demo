@@ -61,11 +61,21 @@ export interface WorkflowNotification {
   createdAt: string;
 }
 
+export type WorkflowRole = "uploader" | "system_admin" | "signing_manager" | "doc_admin";
+
+/** 可切換的角色清單（顯示順序即權限由小到大）。 */
+export const WORKFLOW_ROLES: ReadonlyArray<{ value: WorkflowRole; label: string }> = [
+  { value: "uploader", label: "文件上傳者" },
+  { value: "signing_manager", label: "會簽主管" },
+  { value: "doc_admin", label: "文管審核者" },
+  { value: "system_admin", label: "系統管理員" },
+];
+
 export interface WorkflowUser {
   id: string;
   name: string;
   code: string;
-  roles: Array<"uploader" | "system_admin" | "signing_manager" | "doc_admin">;
+  roles: WorkflowRole[];
 }
 
 export interface DocumentSubmissionInput {
@@ -188,12 +198,17 @@ export function buildInitialNotifications(docs: WorkflowDocument[]): WorkflowNot
   void docs;
   return [];
 }
-export function createDemoUser(demoMode = true): WorkflowUser {
+/**
+ * 依實際選定的角色建立當前使用者。
+ * 不再寫死全角色；角色由呼叫端（角色切換器 / 未來的登入身分）決定，
+ * 空陣列時退回最小權限 uploader。
+ */
+export function createDemoUser(roles: WorkflowRole[] = ["uploader"]): WorkflowUser {
   return {
     id: "demo-user",
     name: "系統示範帳號",
     code: "示範001",
-    roles: demoMode ? ["uploader", "system_admin", "signing_manager", "doc_admin"] : ["uploader"],
+    roles: roles.length > 0 ? [...roles] : ["uploader"],
   };
 }
 

@@ -30,6 +30,8 @@ interface Props {
   onRestoreVoided: (doc: DocumentRecord) => void;
   canVoidPublishedDocs: boolean;
   canDeletePublishedDocs: boolean;
+  canApproveManager: boolean;
+  canApproveDocAdmin: boolean;
 }
 
 type TablePanel =
@@ -89,6 +91,8 @@ export function DocumentTable({
   onRestoreVoided,
   canVoidPublishedDocs,
   canDeletePublishedDocs,
+  canApproveManager,
+  canApproveDocAdmin,
 }: Props) {
   const DEFAULT_PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -278,7 +282,11 @@ export function DocumentTable({
             {pagedDocs.map((doc, index) => {
               const level = LEVEL_META[doc.level];
               const status = STATUS_STYLES[doc.status];
-              const needsApproval = doc.status === STATUS_MANAGER_PENDING || doc.status === STATUS_DOCADMIN_PENDING;
+              // 只有具備對應階段角色的使用者才看得到「審核」按鈕：
+              // 待主管簽核→會簽主管、待文管審核→文管審核者。
+              const needsApproval =
+                (doc.status === STATUS_MANAGER_PENDING && canApproveManager) ||
+                (doc.status === STATUS_DOCADMIN_PENDING && canApproveDocAdmin);
               const canReEdit = doc.status === STATUS_RETURNED;
               const canRestore = doc.status === STATUS_VOIDED && canVoidPublishedDocs;
               const canManagePublished = doc.status === STATUS_PUBLISHED && canVoidPublishedDocs;

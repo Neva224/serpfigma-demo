@@ -1,1 +1,13 @@
 node_modules/
+
+# 含真實人資資料的來源檔，不進版控（由 scripts/generateKnowledgeTree.js 於本機產生去識別化的 domainCatalog.ts）
+人資資料.xlsx
+
+# 建置產物由 Vercel 從原始碼重建，不進版控（先前提交的 dist 內含未遮罩的員工資料）
+dist/
+
+# 內部資料：產品線心智圖含真實主管姓名與照片（PII），不進版控
+雄旅網內部.png
+
+# 打包交付用壓縮檔，非原始碼，不進版控
+打包給IT.zip

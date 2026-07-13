@@ -52,6 +52,8 @@ interface Props {
   onSaveDraft: (payload: DocumentFormSubmitPayload) => void;
   canVoidPublishedDocs: boolean;
   canDeletePublishedDocs: boolean;
+  canApproveManager: boolean;
+  canApproveDocAdmin: boolean;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
   formDoc: WorkflowDocument | null;
   view: ViewMode;
@@ -86,6 +88,8 @@ export function DocumentListPage({
   onSaveDraft,
   canVoidPublishedDocs,
   canDeletePublishedDocs,
+  canApproveManager,
+  canApproveDocAdmin,
   onSubmitDocument,
   formDoc,
   view,
@@ -546,6 +550,8 @@ export function DocumentListPage({
                   onRestoreVoided={onRestoreVoided}
                   canVoidPublishedDocs={canVoidPublishedDocs}
                   canDeletePublishedDocs={canDeletePublishedDocs}
+                  canApproveManager={canApproveManager}
+                  canApproveDocAdmin={canApproveDocAdmin}
                 />
               </div>
             </>

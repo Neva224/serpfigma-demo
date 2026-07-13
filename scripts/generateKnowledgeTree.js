@@ -23,16 +23,42 @@ const knowledgeWorkbookPath = path.resolve(projectRoot, "知識樹分類.xlsx");
 const hrWorkbookPath = path.resolve(projectRoot, "人資資料.xlsx");
 const outputPath = path.resolve(projectRoot, "src/app/data/generated/domainCatalog.ts");
 
-if (!fs.existsSync(knowledgeWorkbookPath)) {
-  throw new Error(`Knowledge tree source file not found: ${knowledgeWorkbookPath}`);
-}
-
-if (!fs.existsSync(hrWorkbookPath)) {
-  throw new Error(`HR scope source file not found: ${hrWorkbookPath}`);
+// 來源 xlsx（含真實人資資料）刻意不進版控。若本機缺檔（例如 CI/Vercel），
+// 就略過重新產生、沿用已提交且已去識別化的 domainCatalog.ts，避免建置失敗。
+if (!fs.existsSync(knowledgeWorkbookPath) || !fs.existsSync(hrWorkbookPath)) {
+  const missing = [
+    fs.existsSync(knowledgeWorkbookPath) ? null : path.basename(knowledgeWorkbookPath),
+    fs.existsSync(hrWorkbookPath) ? null : path.basename(hrWorkbookPath),
+  ].filter(Boolean);
+  console.warn(
+    `[generateKnowledgeTree] 找不到來源檔 (${missing.join(", ")})，略過重新產生，` +
+      `沿用既有 ${path.relative(projectRoot, outputPath)}`,
+  );
+  process.exit(0);
 }
 
 function normalizeText(value) {
   return String(value ?? "").trim();
+}
+
+// 去識別化：只遮罩中文姓名，保留姓氏，其餘改成 oo（例：王曉明 → 王oo）。
+// 英文別名與員編依需求保留原值，不在此處理。
+const COMPOUND_SURNAMES = [
+  "歐陽", "司馬", "諸葛", "上官", "司徒", "夏侯", "皇甫", "尉遲",
+  "端木", "公孫", "令狐", "慕容", "長孫", "宇文", "赫連", "澹台",
+  "濮陽", "東方", "獨孤", "南宮",
+];
+
+function maskPersonName(value) {
+  const name = normalizeText(value);
+  if (!name) return name;
+  // 含空白的西方/羅馬拼音姓名：保留第一段（姓），其餘以 oo 取代
+  if (/\s/.test(name)) {
+    const [first] = name.split(/\s+/);
+    return `${first} oo`;
+  }
+  const surnameLength = COMPOUND_SURNAMES.some((surname) => name.startsWith(surname)) ? 2 : 1;
+  return `${name.slice(0, surnameLength)}oo`;
 }
 
 function toBoolean(value) {
@@ -255,7 +281,7 @@ function buildHrScopeCatalog(workbook) {
     const node = {
       id,
       empId: empId || null,
-      name: name || null,
+      name: maskPersonName(name) || null,
       englishAlias: englishAlias || null,
       regionName: regionName || null,
       companyName: companyName || null,
