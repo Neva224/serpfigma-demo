@@ -123,6 +123,14 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             <InfoRow label="上傳日期" value={doc.uploadDate} />
             <InfoRow label="狀態" value={getDocumentStatusLabel(doc.status)} />
             <InfoRow label="所屬部門" value={doc.department} />
+            <InfoRow
+              label="指定簽核主管"
+              value={
+                doc.signingManagerName
+                  ? `${doc.signingManagerName}${doc.signingManagerEmpId ? `（${doc.signingManagerEmpId}）` : ""}`
+                  : "未指派"
+              }
+            />
             <InfoRow label="文件階級" value={LEVEL_META[doc.level].label} />
             <InfoRow label="摘要 / 主旨" value={previewSummary} />
             <InfoRow label="有效起日" value={doc.validFrom || "－"} />

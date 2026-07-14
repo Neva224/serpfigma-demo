@@ -23,14 +23,43 @@ export interface OrgRepository {
   getSigningManager(departmentPath: string[]): Promise<SigningManager | null>;
 }
 
+// 職稱由高階到低階；用於在部門內推斷「誰是簽核主管」（靜態資料無明確對應時的近似）。
+const MANAGER_TITLE_RANK = [
+  "董事長", "總經理", "協理", "總監", "處長", "部長", "經理", "課長", "店長", "組長", "主任", "督導",
+];
+
+function managerRank(title: string | null): number {
+  const value = title ?? "";
+  for (let index = 0; index < MANAGER_TITLE_RANK.length; index += 1) {
+    if (value.includes(MANAGER_TITLE_RANK[index])) return index;
+  }
+  return Number.POSITIVE_INFINITY;
+}
+
 /** 現階段：使用打包進來的靜態資料。 */
 export const staticOrgRepository: OrgRepository = {
   async getDepartmentRows() {
     return HR_SCOPE_ROWS;
   },
-  async getSigningManager() {
-    // 靜態資料尚無「部門→主管」對應；BFF/HCM 上線後由後端回傳實際主管。
-    return null;
+  async getSigningManager(departmentPath) {
+    // 靜態資料無明確「部門→簽核主管」對應，改以「該歸屬部門內職稱最高者」近似；
+    // BFF/HCM 上線後由後端回傳正式簽核主管即可（介面不變）。
+    const [company, group, division, department] = departmentPath;
+    let best: HrScopeSourceRow | null = null;
+    let bestRank = Number.POSITIVE_INFINITY;
+    for (const row of HR_SCOPE_ROWS) {
+      if (company && row.company !== company) continue;
+      if (group && row.group !== group) continue;
+      if (division && row.division !== division) continue;
+      if (department && row.department !== department) continue;
+      const rank = managerRank(row.title);
+      if (rank < bestRank) {
+        bestRank = rank;
+        best = row;
+      }
+    }
+    if (!best || bestRank === Number.POSITIVE_INFINITY) return null;
+    return { name: best.name ?? "", empId: best.empId };
   },
 };
 

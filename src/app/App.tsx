@@ -26,6 +26,7 @@ import {
   saveRoles,
   saveWorkflowSnapshot,
 } from "./data/documentRepository";
+import { orgRepository } from "./data/orgRepository";
 import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
 
 // 無登入系統時的預設角色：開發環境給全角色方便 demo；正式環境給最小權限 uploader，
@@ -118,11 +119,15 @@ export default function App() {
     }
   }
 
-  function handleFormSubmit(payload: DocumentFormSubmitPayload) {
+  async function handleFormSubmit(payload: DocumentFormSubmitPayload) {
+    // 依歸屬部門帶入對應簽核主管（目前靜態、未來由 BFF/HCM API 提供）
+    const signingManager = await orgRepository.getSigningManager(payload.ownershipDepartmentPath);
     const result = submitDocument(documents, notifications, currentUser, {
       ...payload,
       uploaderName: currentUser.name,
       uploaderCode: currentUser.code,
+      signingManagerName: signingManager?.name ?? null,
+      signingManagerEmpId: signingManager?.empId ?? null,
       editingDocId: formDoc?.id ?? null,
       existingDoc: formDoc,
     });

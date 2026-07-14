@@ -43,6 +43,8 @@ export interface WorkflowDocument extends DocumentRecord {
   approvalNo?: string;
   categoryId?: string;
   categoryCode?: string;
+  signingManagerName?: string | null;
+  signingManagerEmpId?: string | null;
   ownershipDepartmentPath?: string[];
   sourceDepartmentPath?: string[];
   attachments?: WorkflowAttachment[];
@@ -90,6 +92,8 @@ export interface DocumentSubmissionInput {
   categoryId: string;
   categoryCode?: string;
   categoryPath: string[];
+  signingManagerName?: string | null;
+  signingManagerEmpId?: string | null;
   ownershipDepartmentPath: string[];
   attachments: WorkflowAttachment[];
   level: DocumentLevel;
@@ -354,6 +358,8 @@ export interface DraftDocumentInput {
   categoryId: string;
   categoryCode?: string;
   categoryPath: string[];
+  signingManagerName?: string | null;
+  signingManagerEmpId?: string | null;
   ownershipDepartmentPath: string[];
   attachments: WorkflowAttachment[];
   level: DocumentLevel;
@@ -488,6 +494,9 @@ export function submitDocument(
   };
   // 分類編號（由知識樹各層英文代碼組成，規格書 UP-02）；編修時若表單未帶則沿用既有值
   updatedDoc.categoryCode = input.categoryCode ?? updatedDoc.categoryCode;
+  // 依歸屬部門帶入的簽核主管（規格書：依文件歸屬部門帶入對應簽核主管）
+  updatedDoc.signingManagerName = input.signingManagerName ?? updatedDoc.signingManagerName ?? null;
+  updatedDoc.signingManagerEmpId = input.signingManagerEmpId ?? updatedDoc.signingManagerEmpId ?? null;
 
   const nextDocuments = existing
     ? docs.map((doc) => (doc.id === existing.id ? updatedDoc : doc))
@@ -497,7 +506,7 @@ export function submitDocument(
     id: baseNotificationId(notifications),
     type: "manager_approval_pending",
     title: "有一筆文件待主管簽核，請盡快處理",
-    message: `${updatedDoc.name} 等待主管簽核`,
+    message: `${updatedDoc.name} 等待主管簽核${updatedDoc.signingManagerName ? `（簽核主管：${updatedDoc.signingManagerName}）` : ""}`,
     docId: updatedDoc.id,
     signingNo,
     targetStage: "manager",
