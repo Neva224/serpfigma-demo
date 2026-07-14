@@ -21,6 +21,7 @@ export interface DocumentFormSubmitPayload {
   summary: string;
   tags: string[];
   categoryId: string;
+  categoryCode: string;
   categoryPath: string[];
   ownershipDepartmentPath: string[];
   attachments: WorkflowAttachment[];
@@ -186,6 +187,7 @@ export function DocumentFormPage({
       .map((tag) => tag.trim())
       .filter(Boolean);
     const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const categoryCode = String(formData.get("categoryCode") ?? "").trim();
     const categoryPath = String(formData.get("categoryPath") ?? "")
       .split(" / ")
       .map((segment) => segment.trim())
@@ -211,6 +213,7 @@ export function DocumentFormPage({
       summary,
       tags,
       categoryId,
+      categoryCode,
       categoryPath,
       ownershipDepartmentPath,
       attachments,
@@ -233,6 +236,7 @@ export function DocumentFormPage({
       .map((tag) => tag.trim())
       .filter(Boolean);
     const categoryId = String(formData.get("categoryId") ?? "").trim();
+    const categoryCode = String(formData.get("categoryCode") ?? "").trim();
     const categoryPath = String(formData.get("categoryPath") ?? "")
       .split(" / ")
       .map((segment) => segment.trim())
@@ -253,6 +257,7 @@ export function DocumentFormPage({
       summary,
       tags,
       categoryId,
+      categoryCode,
       categoryPath,
       ownershipDepartmentPath,
       attachments,
@@ -425,7 +430,7 @@ export function DocumentFormPage({
                 <h3 className="mt-1 text-sm font-semibold text-slate-800">分類結果</h3>
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-teal-700 shadow-sm">
-                分類編號 {categoryPayload.categoryId || "尚未選擇"}
+                分類代碼 {categoryPayload.categoryCode || "尚未選擇"}
               </span>
             </div>
             <p className="mt-2 text-sm text-slate-600">

@@ -229,12 +229,29 @@ export interface CategorySelectionPath {
   l4: string;
 }
 
+/**
+ * 依規格書 UP-02 組出文件分類編號：沿選取路徑逐層取各節點的英文代碼（nodeCode），
+ * 以「-」串接（例：人資資源管理/組織/管理辦法 → HRM-OR-MR）。
+ * 第一層（事業群）在來源資料中無代碼，會自動略過。
+ */
+export function buildCategoryCode(nodes: CategoryNode[], pathNames: string[]): string {
+  const path = normalizeSegments(pathNames);
+  const codes: string[] = [];
+  for (let depth = 1; depth <= path.length; depth += 1) {
+    const node = resolveCategoryNode(nodes, path.slice(0, depth));
+    const code = node?.nodeCode?.trim();
+    if (code) codes.push(code);
+  }
+  return codes.join("-");
+}
+
 export function buildCategoryPayload(nodes: CategoryNode[], selection: CategorySelectionPath) {
   const path = normalizeSegments([selection.l1, selection.l2, selection.l3, selection.l4]);
   const node = resolveCategoryNode(nodes, path);
   const resolvedPath = node?.pathNames ?? path;
   return {
     categoryId: node?.id ?? (resolvedPath.length > 0 ? pathKey(resolvedPath) : ""),
+    categoryCode: buildCategoryCode(nodes, resolvedPath),
     categoryPath: resolvedPath,
     categoryPathNames: resolvedPath,
     selectableLevel: node?.level ?? resolvedPath.length,

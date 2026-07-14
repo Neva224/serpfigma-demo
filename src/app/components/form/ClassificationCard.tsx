@@ -94,7 +94,8 @@ export function ClassificationCard({ value, onChange, initialLevel }: Props) {
               ))}
             </div>
             <p className="mt-1 text-[11px] text-teal-700/80">
-              categoryId: <span className="font-mono">{payload.categoryId || "未選擇"}</span>
+              分類代碼：<span className="font-mono font-semibold">{payload.categoryCode || "—"}</span>
+              <span className="ml-2 text-teal-500/70">內部 id：{payload.categoryId || "未選擇"}</span>
             </p>
           </div>
         )}
@@ -110,6 +111,7 @@ export function ClassificationCard({ value, onChange, initialLevel }: Props) {
           </Field>
           <input type="hidden" name="documentLevel" value={selectedLevel} />
           <input type="hidden" name="categoryId" value={payload.categoryId} />
+          <input type="hidden" name="categoryCode" value={payload.categoryCode} />
           <input type="hidden" name="categoryPath" value={payload.categoryPath.join(" / ")} />
           <p className="mt-1.5 text-xs text-slate-400">
             文件階級只用於 UI 顯示，分類識別仍以 categoryId / categoryPath 為準。

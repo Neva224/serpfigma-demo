@@ -298,7 +298,7 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
                 const knowledgeLabel = (doc.categoryPath ?? doc.knowledgePath ?? []).join(" / ") || "未設定";
                 return (
                   <tr key={doc.id} className="border-b border-slate-100 align-top hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{doc.docNo}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-xs font-mono text-slate-500">{doc.docNo || "未編號"}</td>
                     <td className="px-4 py-3">
                       <div className="text-sm font-semibold text-slate-800">{doc.name}</div>
                       <div className="mt-1 text-xs text-slate-400">{doc.summary ?? doc.subject ?? "尚未填寫摘要"}</div>

@@ -41,6 +41,7 @@ export interface WorkflowDocument extends DocumentRecord {
   updatedAt?: string;
   approvalNo?: string;
   categoryId?: string;
+  categoryCode?: string;
   ownershipDepartmentPath?: string[];
   sourceDepartmentPath?: string[];
   attachments?: WorkflowAttachment[];
@@ -86,6 +87,7 @@ export interface DocumentSubmissionInput {
   summary: string;
   tags: string[];
   categoryId: string;
+  categoryCode?: string;
   categoryPath: string[];
   ownershipDepartmentPath: string[];
   attachments: WorkflowAttachment[];
@@ -216,8 +218,35 @@ export function buildInitialHistory(doc: DocumentRecord): WorkflowHistoryEntry[]
   void doc;
   return [];
 }
-function createDocumentNo(nextSequence: number) {
-  return `DOC-${buildDateStamp()}-${pad(nextSequence)}`;
+function levelDigit(level: DocumentLevel): string {
+  const match = /(\d)/.exec(level);
+  const value = match ? Number(match[1]) : 0;
+  return value >= 1 && value <= 6 ? String(value) : "";
+}
+
+function twoDigitYear(isoString = nowIso()) {
+  return String(new Date(isoString).getFullYear()).slice(-2);
+}
+
+/**
+ * 文件編號：{階級1-6}-{分類英文代碼}-{YY}{三碼流水號}，例 6-VISA-CN-26003。
+ * 流水號依前綴「{階級}-{代碼}-{YY}」分群：同前綴延續遞增，不同前綴各自從 001 起。
+ */
+function buildDocumentNo(
+  docs: WorkflowDocument[],
+  level: DocumentLevel,
+  categoryCode: string,
+  isoString = nowIso(),
+) {
+  const prefix = `${levelDigit(level)}-${categoryCode}-${twoDigitYear(isoString)}`;
+  let maxSerial = 0;
+  for (const doc of docs) {
+    const no = doc.docNo ?? "";
+    if (!no.startsWith(prefix)) continue;
+    const match = /^(\d{3})$/.exec(no.slice(prefix.length));
+    if (match) maxSerial = Math.max(maxSerial, Number(match[1]));
+  }
+  return `${prefix}${String(maxSerial + 1).padStart(3, "0")}`;
 }
 
 function createSigningNo(nextSequence: number) {
@@ -259,6 +288,7 @@ export interface DraftDocumentInput {
   summary: string;
   tags: string[];
   categoryId: string;
+  categoryCode?: string;
   categoryPath: string[];
   ownershipDepartmentPath: string[];
   attachments: WorkflowAttachment[];
@@ -306,8 +336,9 @@ export function submitDocument(
 ): WorkflowSubmissionResult {
   const existing = input.existingDoc ?? (input.editingDocId != null ? docs.find((doc) => doc.id === input.editingDocId) ?? null : null);
   const sequence = nextSequenceFromDocs(docs);
-  const docNo = existing?.docNo ?? createDocumentNo(sequence);
-  const signingNo = existing?.signingNo ?? createSigningNo(sequence);
+  // 只有正式送簽才給編號：草稿的 docNo / signingNo 為空字串，視為尚未編號、於此產生。
+  const docNo = existing?.docNo?.trim() ? existing.docNo : buildDocumentNo(docs, input.level, input.categoryCode ?? "");
+  const signingNo = existing?.signingNo?.trim() ? existing.signingNo : createSigningNo(sequence);
   const timestamp = nowIso();
   const title = input.title.trim();
   const summary = input.summary.trim();
@@ -391,6 +422,8 @@ export function submitDocument(
     uploaderCode: input.uploaderCode,
     uploadDate: baseDoc.uploadDate || timestamp.slice(0, 10),
   };
+  // 分類編號（由知識樹各層英文代碼組成，規格書 UP-02）；編修時若表單未帶則沿用既有值
+  updatedDoc.categoryCode = input.categoryCode ?? updatedDoc.categoryCode;
 
   const nextDocuments = existing
     ? docs.map((doc) => (doc.id === existing.id ? updatedDoc : doc))
@@ -417,7 +450,7 @@ export function submitDocument(
 export function saveDraftDocument(docs: WorkflowDocument[], input: DraftDocumentInput) {
   const existing = input.existingDoc ?? (input.editingDocId != null ? docs.find((doc) => doc.id === input.editingDocId) ?? null : null);
   const sequence = nextSequenceFromDocs(docs);
-  const docNo = existing?.docNo ?? createDocumentNo(sequence);
+  const docNo = existing?.docNo ?? ""; // 草稿不佔正式編號，送簽時才產生
   const timestamp = nowIso();
   const title = input.title.trim() || existing?.name || "未命名草稿";
   const summary = input.summary.trim() || existing?.summary || existing?.subject || "";
@@ -505,6 +538,8 @@ export function saveDraftDocument(docs: WorkflowDocument[], input: DraftDocument
     isPublished: false,
     history: nextHistory,
   };
+  // 分類編號（草稿一併保存；編修時若表單未帶則沿用既有值）
+  updatedDoc.categoryCode = input.categoryCode ?? updatedDoc.categoryCode;
 
   const nextDocuments = existing
     ? docs.map((doc) => (doc.id === existing.id ? updatedDoc : doc))

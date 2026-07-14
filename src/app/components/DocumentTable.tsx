@@ -299,7 +299,7 @@ export function DocumentTable({
                   style={{ backgroundColor: index % 2 === 0 ? "#ffffff" : "#fafafa" }}
                 >
                   <td className="whitespace-nowrap px-4 py-3">
-                    <span className="font-mono text-xs text-slate-500">{doc.docNo}</span>
+                    <span className="font-mono text-xs text-slate-500">{doc.docNo || "未編號"}</span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-col gap-1">
