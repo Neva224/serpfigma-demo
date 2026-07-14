@@ -6,6 +6,8 @@
  * 未來要改由後端 API 供應時，只需替換此檔的資料來源。
  */
 
+import { PRODUCT_LINE_KEYWORDS } from "./productLineCatalog";
+
 export interface TagItem {
   tag: string;
   description: string;
@@ -35,7 +37,13 @@ export const TAG_VOCABULARY: TagItem[] = [
 /** 單一文件可掛的標籤數上限（規格書 UP-01）。 */
 export const MAX_TAGS = 10;
 
-/** 供表單關鍵字欄位自動建議用的詞庫（僅啟用中的標籤，去掉開頭的 #）。 */
-export const TAG_SUGGESTIONS: string[] = TAG_VOCABULARY
-  .filter((item) => item.enabled)
-  .map((item) => item.tag.replace(/^#/, ""));
+/**
+ * 供表單關鍵字欄位自動建議用的詞庫：
+ * 標籤資料庫（去掉開頭 #）＋ 產品線分類的地區/類型關鍵字，去除重複。
+ */
+export const TAG_SUGGESTIONS: string[] = Array.from(
+  new Set([
+    ...TAG_VOCABULARY.filter((item) => item.enabled).map((item) => item.tag.replace(/^#/, "")),
+    ...PRODUCT_LINE_KEYWORDS,
+  ]),
+);
