@@ -1,12 +1,10 @@
 import { ChevronDown, GitBranch } from "lucide-react";
 import { Card } from "./BasicInfoCard";
 import {
-  buildHrScopePayload,
   createEmptyHrScopeSelection,
-  getHrScopeLevelOptions,
-  HR_SCOPE_ROWS,
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
+import { useOrgDirectory } from "../../hooks/useOrgDirectory";
 
 export interface DepartmentSelection extends HrScopeSelection {}
 
@@ -18,11 +16,13 @@ interface Props {
 }
 
 export function DepartmentCard({ value, onChange }: Props) {
-  const companyOptions = getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 0);
-  const groupOptions = value.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 1) : [];
-  const divisionOptions = value.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 2) : [];
-  const departmentOptions = value.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, value, 3) : [];
-  const payload = buildHrScopePayload(HR_SCOPE_ROWS, value);
+  // 部門資料改由 orgRepository（目前靜態、未來 BFF/HCM API）供應
+  const { getLevelOptions, buildPayload } = useOrgDirectory();
+  const companyOptions = getLevelOptions(value, 0);
+  const groupOptions = value.companyName ? getLevelOptions(value, 1) : [];
+  const divisionOptions = value.groupName ? getLevelOptions(value, 2) : [];
+  const departmentOptions = value.divisionName ? getLevelOptions(value, 3) : [];
+  const payload = buildPayload(value);
 
   return (
     <Card title="文件所屬部門" icon="🏢">
