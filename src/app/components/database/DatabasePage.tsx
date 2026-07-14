@@ -1,19 +1,10 @@
 import { useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { Plus, Tag, TrendingUp, Users, X } from "lucide-react";
 import { LEVEL_OPTIONS } from "../document-management/mockData";
+import { TAG_VOCABULARY as INITIAL_TAGS, type TagItem } from "../../data/tagVocabulary";
 
 type Tab = "contacts" | "clicks" | "tags";
 type UserRole = "系統管理員" | "文管人員" | "部門主管" | "一般使用者" | "唯讀使用者";
-
-interface TagItem {
-  tag: string;
-  description: string;
-  levels: string[];
-  owner: string;
-  enabled: boolean;
-  count: number;
-  docs: string[];
-}
 
 interface TagFormState {
   name: string;
@@ -50,21 +41,6 @@ const CLICKS = [
   { name: "系統架構說明書", level: "三階", clicks: 142, trend: "-1%" },
   { name: "差旅費申請單", level: "四階", clicks: 139, trend: "+30%" },
   { name: "供應商評鑑標準", level: "三階", clicks: 117, trend: "+4%" },
-];
-
-const INITIAL_TAGS: TagItem[] = [
-  { tag: "#資安", count: 42, description: "資訊安全與權限控管標籤", levels: ["一階", "三階"], owner: "林建宏", enabled: true, docs: ["資訊安全管理政策", "弱點掃描規範", "資安稽核表"] },
-  { tag: "#政策", count: 38, description: "政策與制度文件", levels: ["一階", "二階"], owner: "王大明", enabled: true, docs: ["資訊安全管理政策", "人力資源政策", "採購政策"] },
-  { tag: "#財務", count: 35, description: "財務與報支類文件", levels: ["四階"], owner: "陳美玲", enabled: true, docs: ["年度預算規劃表", "帳務處理辦法", "差旅費申請單"] },
-  { tag: "#訓練", count: 29, description: "教育訓練與教材", levels: ["五階"], owner: "趙雅婷", enabled: true, docs: ["員工教育訓練計畫", "新人訓練手冊"] },
-  { tag: "#表單", count: 27, description: "申請單與簽核單", levels: ["四階"], owner: "林建宏", enabled: true, docs: ["差旅費申請單", "請假申請單", "設備借用單"] },
-  { tag: "#合約", count: 22, description: "合約與契約文件", levels: ["二階", "三階"], owner: "張志遠", enabled: true, docs: ["供應商合約範本", "服務合約書"] },
-  { tag: "#開發", count: 19, description: "開發與系統規格", levels: ["三階"], owner: "吳俊傑", enabled: true, docs: ["軟體開發管理辦法", "系統架構說明書"] },
-  { tag: "#採購", count: 16, description: "採購與評鑑流程", levels: ["二階"], owner: "陳美玲", enabled: true, docs: ["供應商評鑑標準", "採購作業程序"] },
-  { tag: "#人資", count: 15, description: "人資管理文件", levels: ["二階"], owner: "李小華", enabled: true, docs: ["人力資源管理程序書", "薪酬管理辦法"] },
-  { tag: "#外來", count: 12, description: "外來文件與法規", levels: ["六階"], owner: "蔡宛芸", enabled: true, docs: ["外部法規文件", "國際標準文件"] },
-  { tag: "#行銷", count: 10, description: "行銷企劃文件", levels: ["一階", "三階"], owner: "林建宏", enabled: true, docs: ["行銷企劃須知", "品牌形象手冊"] },
-  { tag: "#年度", count: 9, description: "年度計畫與報表", levels: ["一階", "四階"], owner: "王大明", enabled: true, docs: ["年度預算規劃表", "年度稽核計畫"] },
 ];
 
 interface Props {
@@ -159,7 +135,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
           </div>
           <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>資料庫</h2>
           <p className="text-gray-500 text-sm mt-0.5">文件知識管理總覽：窗口對應、點擊統計與標籤索引</p>
-        </div>
+        </div>
       </div>
 
       <div className="flex gap-1 p-1 rounded-xl bg-white border border-gray-200 mb-5 w-fit">

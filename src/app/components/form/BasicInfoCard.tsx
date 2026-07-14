@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { User, CalendarDays, Tag, AlignLeft } from "lucide-react";
+import { MAX_TAGS, TAG_SUGGESTIONS } from "../../data/tagVocabulary";
 
 export interface BasicInfoValue {
   title: string;
@@ -24,10 +25,16 @@ export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
   const [tags, setTags] = useState(initialValue?.tags?.length ? initialValue.tags : ["制度", "流程", "2024"]);
   const maxLength = 30;
 
+  const tagLimitReached = tags.length >= MAX_TAGS;
+
   function addTag(raw: string) {
     const next = raw.trim();
     if (!next) return;
-    setTags((current) => (current.includes(next) ? current : [...current, next]));
+    setTags((current) => {
+      if (current.includes(next)) return current;
+      if (current.length >= MAX_TAGS) return current; // 規格書 UP-01：最多 10 筆
+      return [...current, next];
+    });
   }
 
   return (
@@ -124,7 +131,9 @@ export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
             />
             <input
               type="text"
+              list="tag-vocabulary"
               value={tagInput}
+              disabled={tagLimitReached}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
@@ -133,10 +142,22 @@ export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
                   setTagInput("");
                 }
               }}
-              placeholder="輸入關鍵字後可按 Enter 新增"
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none"
+              placeholder={tagLimitReached ? `已達上限 ${MAX_TAGS} 個標籤` : "輸入或選擇關鍵字後按 Enter 新增"}
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-2.5 pl-9 pr-4 text-sm text-gray-800 transition-all placeholder:text-gray-400 focus:border-teal-500 focus:bg-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             />
+            <datalist id="tag-vocabulary">
+              {TAG_SUGGESTIONS.map((suggestion) => (
+                <option key={suggestion} value={suggestion} />
+              ))}
+            </datalist>
           </div>
+          <p className="mt-1.5 text-xs text-gray-400">
+            來自標籤資料庫，可自由輸入；最多 {MAX_TAGS} 個（
+            <span className={tagLimitReached ? "font-semibold text-red-500" : "text-gray-500"}>
+              {tags.length}/{MAX_TAGS}
+            </span>
+            ）
+          </p>
           <input type="hidden" name="tags" value={tags.join(",")} />
           <div className="mt-2 flex flex-wrap gap-1.5">
             {tags.map((tag) => (
@@ -156,6 +177,24 @@ export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
               </span>
             ))}
           </div>
+          {!tagLimitReached && (
+            <div className="mt-3">
+              <div className="mb-1.5 text-xs font-medium text-gray-500">建議標籤（來自標籤資料庫，點擊加入）</div>
+              <div className="flex flex-wrap gap-1.5">
+                {TAG_SUGGESTIONS.filter((suggestion) => !tags.includes(suggestion)).map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => addTag(suggestion)}
+                    className="inline-flex items-center gap-0.5 rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 transition hover:bg-teal-100"
+                  >
+                    <span className="leading-none">＋</span>
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </Field>
       </div>
     </Card>
