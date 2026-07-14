@@ -32,6 +32,7 @@ interface Props {
   canDeletePublishedDocs: boolean;
   canApproveManager: boolean;
   canApproveDocAdmin: boolean;
+  currentUserEmpId: string | null;
 }
 
 type TablePanel =
@@ -93,6 +94,7 @@ export function DocumentTable({
   canDeletePublishedDocs,
   canApproveManager,
   canApproveDocAdmin,
+  currentUserEmpId,
 }: Props) {
   const DEFAULT_PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -283,9 +285,13 @@ export function DocumentTable({
               const level = LEVEL_META[doc.level];
               const status = STATUS_STYLES[doc.status];
               // 只有具備對應階段角色的使用者才看得到「審核」按鈕：
-              // 待主管簽核→會簽主管、待文管審核→文管審核者。
+              // 待主管簽核→會簽主管，且若文件有指定簽核主管，需登入身分（員編）相符；
+              // 待文管審核→文管審核者。
+              const canApproveThisManager =
+                canApproveManager &&
+                (!doc.signingManagerEmpId || doc.signingManagerEmpId === currentUserEmpId);
               const needsApproval =
-                (doc.status === STATUS_MANAGER_PENDING && canApproveManager) ||
+                (doc.status === STATUS_MANAGER_PENDING && canApproveThisManager) ||
                 (doc.status === STATUS_DOCADMIN_PENDING && canApproveDocAdmin);
               const canReEdit = doc.status === STATUS_RETURNED;
               const canRestore = doc.status === STATUS_VOIDED && canVoidPublishedDocs;

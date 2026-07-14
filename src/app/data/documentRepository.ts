@@ -14,6 +14,7 @@ import type {
 
 const WORKFLOW_STORAGE_KEY = "serp-dms/workflow-state/v1";
 const ROLES_STORAGE_KEY = "serp-dms/roles/v1";
+const EMP_ID_STORAGE_KEY = "serp-dms/emp-id/v1";
 
 export interface WorkflowSnapshot {
   documents: WorkflowDocument[];
@@ -83,5 +84,26 @@ export function saveRoles(roles: WorkflowRole[]): void {
     storage.setItem(ROLES_STORAGE_KEY, JSON.stringify(roles));
   } catch (error) {
     console.warn("[documentRepository] 寫入角色設定失敗", error);
+  }
+}
+
+/** 模擬登入身分（員編）；未來由真正的登入/SSO 提供。 */
+export function loadEmpId(): string {
+  const storage = getStorage();
+  if (!storage) return "";
+  try {
+    return storage.getItem(EMP_ID_STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+export function saveEmpId(empId: string): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.setItem(EMP_ID_STORAGE_KEY, empId);
+  } catch (error) {
+    console.warn("[documentRepository] 寫入登入員編失敗", error);
   }
 }

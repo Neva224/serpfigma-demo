@@ -21,8 +21,10 @@ import {
   type WorkflowUser,
 } from "./workflow/workflowState";
 import {
+  loadEmpId,
   loadRoles,
   loadWorkflowSnapshot,
+  saveEmpId,
   saveRoles,
   saveWorkflowSnapshot,
 } from "./data/documentRepository";
@@ -47,7 +49,8 @@ export default function App() {
     return { ...snapshot, documents: migrateWorkflowDocuments(snapshot.documents) };
   }, []);
   const [roles, setRoles] = useState<WorkflowRole[]>(() => loadRoles() ?? DEFAULT_ROLES);
-  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(roles), [roles]);
+  const [empId, setEmpId] = useState<string>(() => loadEmpId());
+  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(roles, empId), [roles, empId]);
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
   const [documents, setDocuments] = useState<WorkflowDocument[]>(() => initialSnapshot.documents);
   const [notifications, setNotifications] = useState<WorkflowNotification[]>(
@@ -62,6 +65,9 @@ export default function App() {
   useEffect(() => {
     saveRoles(roles);
   }, [roles]);
+  useEffect(() => {
+    saveEmpId(empId);
+  }, [empId]);
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
   const visibleDocuments = useMemo(() => normalizeWorkflowDocuments(documents), [documents]);
@@ -73,9 +79,19 @@ export default function App() {
   const canApproveDocAdmin = currentUser.roles.includes("doc_admin");
 
   function openApproval(docId: number, stage: ApprovalStage) {
-    const allowed = stage === "manager" ? canApproveManager : canApproveDocAdmin;
-    if (!allowed) {
-      toast.error(stage === "manager" ? "僅「會簽主管」可執行主管簽核" : "僅「文管審核者」可執行文管審核");
+    if (stage === "manager") {
+      if (!canApproveManager) {
+        toast.error("僅「會簽主管」可執行主管簽核");
+        return;
+      }
+      // 指定主管才可簽：文件若有指定簽核主管，需登入身分（員編）相符
+      const doc = documents.find((item) => item.id === docId);
+      if (doc?.signingManagerEmpId && currentUser.empId !== doc.signingManagerEmpId) {
+        toast.error(`此文件指定由簽核主管（員編 ${doc.signingManagerEmpId}）簽核，您目前登入身分無法簽核`);
+        return;
+      }
+    } else if (!canApproveDocAdmin) {
+      toast.error("僅「文管審核者」可執行文管審核");
       return;
     }
     setApproval({ docId, stage });
@@ -266,6 +282,8 @@ export default function App() {
         notificationPulse={notificationPulse}
         roles={roles}
         onRolesChange={setRoles}
+        empId={empId}
+        onEmpIdChange={setEmpId}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden bg-transparent">
@@ -292,6 +310,7 @@ export default function App() {
           canDeletePublishedDocs={canDeletePublishedDocs}
           canApproveManager={canApproveManager}
           canApproveDocAdmin={canApproveDocAdmin}
+          currentUserEmpId={currentUser.empId}
         />
       </div>
 

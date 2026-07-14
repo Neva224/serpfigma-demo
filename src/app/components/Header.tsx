@@ -25,6 +25,8 @@ interface Props {
   notificationPulse: number;
   roles: WorkflowRole[];
   onRolesChange: (roles: WorkflowRole[]) => void;
+  empId: string;
+  onEmpIdChange: (empId: string) => void;
 }
 
 export function Header({
@@ -35,6 +37,8 @@ export function Header({
   notificationPulse,
   roles,
   onRolesChange,
+  empId,
+  onEmpIdChange,
 }: Props) {
   const [panelOpen, setPanelOpen] = useState(false);
   const [rolePanelOpen, setRolePanelOpen] = useState(false);
@@ -170,6 +174,19 @@ export function Header({
                           </label>
                         );
                       })}
+                    </div>
+                    <div className="border-t border-slate-100 px-4 py-3">
+                      <div className="text-sm font-bold text-slate-700">模擬登入身分（員編）</div>
+                      <div className="mb-2 mt-0.5 text-[11px] text-slate-400">
+                        主管簽核時，只有員編＝文件「指定簽核主管」者才可簽
+                      </div>
+                      <input
+                        type="text"
+                        value={empId}
+                        onChange={(e) => onEmpIdChange(e.target.value.trim())}
+                        placeholder="例如 000001（留空＝未登入）"
+                        className="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-teal-500 focus:outline-none"
+                      />
                     </div>
                   </div>
                 </>

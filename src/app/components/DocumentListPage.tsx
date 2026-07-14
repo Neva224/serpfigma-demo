@@ -54,6 +54,7 @@ interface Props {
   canDeletePublishedDocs: boolean;
   canApproveManager: boolean;
   canApproveDocAdmin: boolean;
+  currentUserEmpId: string | null;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
   formDoc: WorkflowDocument | null;
   view: ViewMode;
@@ -90,6 +91,7 @@ export function DocumentListPage({
   canDeletePublishedDocs,
   canApproveManager,
   canApproveDocAdmin,
+  currentUserEmpId,
   onSubmitDocument,
   formDoc,
   view,
@@ -552,6 +554,7 @@ export function DocumentListPage({
                   canDeletePublishedDocs={canDeletePublishedDocs}
                   canApproveManager={canApproveManager}
                   canApproveDocAdmin={canApproveDocAdmin}
+                  currentUserEmpId={currentUserEmpId}
                 />
               </div>
             </>
