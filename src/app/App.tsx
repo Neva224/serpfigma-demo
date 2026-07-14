@@ -9,6 +9,7 @@ import {
   createDemoUser,
   deleteWorkflowDocument,
   markNotificationRead,
+  migrateWorkflowDocuments,
   normalizeWorkflowDocuments,
   restoreWorkflowDocument,
   saveDraftDocument,
@@ -39,7 +40,11 @@ interface ApprovalTarget {
 }
 
 export default function App() {
-  const initialSnapshot = useMemo(() => loadWorkflowSnapshot(), []);
+  const initialSnapshot = useMemo(() => {
+    const snapshot = loadWorkflowSnapshot();
+    // 載入時把舊有資料的文件編號更新為最新規則（草稿清空、舊格式重編）
+    return { ...snapshot, documents: migrateWorkflowDocuments(snapshot.documents) };
+  }, []);
   const [roles, setRoles] = useState<WorkflowRole[]>(() => loadRoles() ?? DEFAULT_ROLES);
   const currentUser = useMemo<WorkflowUser>(() => createDemoUser(roles), [roles]);
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);

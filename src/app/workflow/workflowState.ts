@@ -1,4 +1,5 @@
 ﻿import type { DocumentLevel, DocumentRecord, DocumentStatus } from "../components/document-management/mockData";
+import { buildCategoryCode, CATEGORY_NODES } from "../data/catalogModels";
 
 export type ApprovalStage = "manager" | "docadmin";
 export type WorkflowAction = "create" | "resubmit" | "manager_approve" | "manager_reject" | "manager_void" | "docadmin_approve" | "docadmin_reject" | "docadmin_void";
@@ -247,6 +248,69 @@ function buildDocumentNo(
     if (match) maxSerial = Math.max(maxSerial, Number(match[1]));
   }
   return `${prefix}${String(maxSerial + 1).padStart(3, "0")}`;
+}
+
+const NEW_DOCNO_PATTERN = /^\d-.*-\d{5}$/;
+
+function docYearIso(doc: WorkflowDocument) {
+  if (doc.createdAt) return doc.createdAt;
+  if (doc.uploadDate) return `${doc.uploadDate}T00:00:00`;
+  return nowIso();
+}
+
+/**
+ * 將舊有資料的文件編號更新為最新規則（載入時執行一次，具冪等性）：
+ * - 草稿一律清為未編號（不佔號）
+ * - 非草稿且非新格式者，依 階級 + 分類代碼 + 年份 重新編號；流水號依前綴、按建立順序遞增
+ * - 已是新格式者維持不變，其流水號會被納入計算避免撞號
+ */
+export function migrateWorkflowDocuments(docs: WorkflowDocument[]): WorkflowDocument[] {
+  if (docs.length === 0) return docs;
+  const serialByPrefix = new Map<string, number>();
+
+  // pass 1：先記錄已是新格式者的流水號，避免重新編號時撞號
+  for (const doc of docs) {
+    if (doc.status === "草稿") continue;
+    const no = doc.docNo ?? "";
+    if (NEW_DOCNO_PATTERN.test(no)) {
+      const prefix = no.slice(0, no.length - 3);
+      serialByPrefix.set(prefix, Math.max(serialByPrefix.get(prefix) ?? 0, Number(no.slice(-3))));
+    }
+  }
+
+  // pass 2：依建立順序決定新編號
+  const nextDocNo = new Map<number, string>();
+  const nextCode = new Map<number, string | undefined>();
+  const ordered = [...docs].sort(
+    (a, b) => (a.createdAt ?? "").localeCompare(b.createdAt ?? "") || a.id - b.id,
+  );
+  for (const doc of ordered) {
+    if (doc.status === "草稿") {
+      nextDocNo.set(doc.id, "");
+      nextCode.set(doc.id, doc.categoryCode);
+      continue;
+    }
+    const categoryCode = doc.categoryCode ?? buildCategoryCode(CATEGORY_NODES, doc.categoryPath ?? []);
+    nextCode.set(doc.id, categoryCode);
+    const no = doc.docNo ?? "";
+    if (NEW_DOCNO_PATTERN.test(no)) {
+      nextDocNo.set(doc.id, no);
+      continue;
+    }
+    const prefix = `${levelDigit(doc.level)}-${categoryCode}-${twoDigitYear(docYearIso(doc))}`;
+    const next = (serialByPrefix.get(prefix) ?? 0) + 1;
+    serialByPrefix.set(prefix, next);
+    nextDocNo.set(doc.id, `${prefix}${String(next).padStart(3, "0")}`);
+  }
+
+  let changed = false;
+  const result = docs.map((doc) => {
+    const docNo = nextDocNo.get(doc.id) ?? doc.docNo;
+    const categoryCode = nextCode.has(doc.id) ? nextCode.get(doc.id) : doc.categoryCode;
+    if (docNo !== doc.docNo || categoryCode !== doc.categoryCode) changed = true;
+    return { ...doc, docNo, categoryCode };
+  });
+  return changed ? result : docs;
 }
 
 function createSigningNo(nextSequence: number) {
