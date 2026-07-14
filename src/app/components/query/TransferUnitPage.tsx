@@ -8,10 +8,9 @@ import {
 } from "../../data/catalogModels";
 import {
   createEmptyHrScopeSelection,
-  getHrScopeLevelOptions,
-  HR_SCOPE_ROWS,
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
+import { useOrgDirectory } from "../../hooks/useOrgDirectory";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 import type { WorkflowDocument, WorkflowHistoryEntry } from "../../workflow/workflowState";
 
@@ -59,14 +58,15 @@ export function TransferUnitPage({ onBack, embedded = false, documents }: Props)
     [knowledgeTree],
   );
 
+  const { getLevelOptions } = useOrgDirectory();
   const departmentOptions = useMemo(
     () => ({
-      company: getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 0),
-      group: department.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 1) : [],
-      division: department.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 2) : [],
-      section: department.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 3) : [],
+      company: getLevelOptions(department, 0),
+      group: department.companyName ? getLevelOptions(department, 1) : [],
+      division: department.groupName ? getLevelOptions(department, 2) : [],
+      section: department.divisionName ? getLevelOptions(department, 3) : [],
     }),
-    [department],
+    [department, getLevelOptions],
   );
 
   const results = useMemo(() => {

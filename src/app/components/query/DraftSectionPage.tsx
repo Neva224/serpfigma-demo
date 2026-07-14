@@ -4,10 +4,9 @@ import { CascadeSelectGroup } from "../ui/CascadeSelectGroup";
 import { CATEGORY_NODES, getCategoryLevelOptions, type CategorySelectionPath } from "../../data/catalogModels";
 import {
   createEmptyHrScopeSelection,
-  getHrScopeLevelOptions,
-  HR_SCOPE_ROWS,
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
+import { useOrgDirectory } from "../../hooks/useOrgDirectory";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 import type { WorkflowDocument } from "../../workflow/workflowState";
 
@@ -31,12 +30,13 @@ export function DraftSectionPage({ onBack, embedded = false, documents, onEditDr
     l4: "",
   });
 
+  const { getLevelOptions } = useOrgDirectory();
   const departmentOptions = useMemo(() => ({
-    company: getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 0),
-    group: department.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 1) : [],
-    division: department.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 2) : [],
-    section: department.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 3) : [],
-  }), [department]);
+    company: getLevelOptions(department, 0),
+    group: department.companyName ? getLevelOptions(department, 1) : [],
+    division: department.groupName ? getLevelOptions(department, 2) : [],
+    section: department.divisionName ? getLevelOptions(department, 3) : [],
+  }), [department, getLevelOptions]);
 
   const knowledgeOptions = useMemo(() => ({
     l1: getCategoryLevelOptions(CATEGORY_NODES, []),

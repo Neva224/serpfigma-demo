@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import { CascadeSelectGroup } from "../ui/CascadeSelectGroup";
-import { createEmptyHrScopeSelection, getHrScopeLevelOptions, HR_SCOPE_ROWS, type HrScopeSelection } from "../../data/hrScopeModel";
+import { createEmptyHrScopeSelection, type HrScopeSelection } from "../../data/hrScopeModel";
+import { useOrgDirectory } from "../../hooks/useOrgDirectory";
 import { getDocumentStatusLabel } from "../../workflow/statusCatalog";
 import type { WorkflowDocument } from "../../workflow/workflowState";
 
@@ -18,10 +19,11 @@ export function FaqSearchPage({ onBack, embedded = false, documents }: Props) {
   const [advancedOpen, setAdvancedOpen] = useState(true);
   const [department, setDepartment] = useState<HrScopeSelection>(createEmptyHrScopeSelection());
 
-  const companyOptions = useMemo(() => getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 0), [department]);
-  const groupOptions = useMemo(() => (department.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 1) : []), [department]);
-  const divisionOptions = useMemo(() => (department.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 2) : []), [department]);
-  const sectionOptions = useMemo(() => (department.divisionName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, department, 3) : []), [department]);
+  const { getLevelOptions } = useOrgDirectory();
+  const companyOptions = useMemo(() => getLevelOptions(department, 0), [department, getLevelOptions]);
+  const groupOptions = useMemo(() => (department.companyName ? getLevelOptions(department, 1) : []), [department, getLevelOptions]);
+  const divisionOptions = useMemo(() => (department.groupName ? getLevelOptions(department, 2) : []), [department, getLevelOptions]);
+  const sectionOptions = useMemo(() => (department.divisionName ? getLevelOptions(department, 3) : []), [department, getLevelOptions]);
 
   const results = useMemo(() => {
     const tokens = submittedKeyword.trim().toLowerCase().split(/\s+/).filter(Boolean);

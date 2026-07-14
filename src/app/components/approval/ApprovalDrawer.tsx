@@ -7,12 +7,10 @@ import {
   type CategorySelectionPath,
 } from "../../data/catalogModels";
 import {
-  buildHrScopePayload,
   createEmptyHrScopeSelection,
-  getHrScopeLevelOptions,
-  HR_SCOPE_ROWS,
   type HrScopeSelection,
 } from "../../data/hrScopeModel";
+import { useOrgDirectory } from "../../hooks/useOrgDirectory";
 import { LEVEL_META } from "../document-management/mockData";
 import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
 import { StatusRail } from "../ui/StatusRail";
@@ -49,9 +47,10 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
   });
   const [transferDepartment, setTransferDepartment] = useState<HrScopeSelection>(createEmptyHrScopeSelection());
 
+  const { getLevelOptions, buildPayload } = useOrgDirectory();
   const attachments = doc.attachments ?? [];
   const categoryPayload = useMemo(() => resolveCategoryPayload(CATEGORY_NODES, transferCategory), [transferCategory]);
-  const departmentPayload = useMemo(() => buildHrScopePayload(HR_SCOPE_ROWS, transferDepartment), [transferDepartment]);
+  const departmentPayload = useMemo(() => buildPayload(transferDepartment), [transferDepartment, buildPayload]);
   const isOtherReason = rejectType === "其他原因";
   const canTransfer = role === "manager";
   const rejectReady = rejectType.length > 0 && (!isOtherReason || rejectReason.trim().length > 0);
@@ -264,7 +263,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                         rows={[
                           {
                             label: "公司",
-                            options: getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 0),
+                            options: getLevelOptions(transferDepartment,0),
                             value: transferDepartment.companyName,
                             placeholder: "請選擇公司",
                             onChange: (companyName) =>
@@ -275,7 +274,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                           },
                           {
                             label: "群",
-                            options: transferDepartment.companyName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 1) : [],
+                            options: transferDepartment.companyName ? getLevelOptions(transferDepartment,1) : [],
                             value: transferDepartment.groupName,
                             placeholder: transferDepartment.companyName ? "請選擇群" : "請先選擇公司",
                             onChange: (groupName) =>
@@ -288,7 +287,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                           },
                           {
                             label: "處",
-                            options: transferDepartment.groupName ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 2) : [],
+                            options: transferDepartment.groupName ? getLevelOptions(transferDepartment,2) : [],
                             value: transferDepartment.divisionName,
                             placeholder: transferDepartment.groupName ? "請選擇處" : "請先選擇群",
                             onChange: (divisionName) =>
@@ -301,7 +300,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
                           {
                             label: "部",
                             options: transferDepartment.divisionName
-                              ? getHrScopeLevelOptions(HR_SCOPE_ROWS, transferDepartment, 3)
+                              ? getLevelOptions(transferDepartment,3)
                               : [],
                             value: transferDepartment.departmentName,
                             placeholder: transferDepartment.divisionName ? "請選擇部" : "請先選擇處",

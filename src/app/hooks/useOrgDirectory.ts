@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { orgRepository } from "../data/orgRepository";
 import {
   buildHrScopePayload,
@@ -41,13 +41,16 @@ export function useOrgDirectory() {
     };
   }, []);
 
-  return {
-    loading,
-    error,
-    rows,
-    getLevelOptions: (selection: HrScopeSelection, levelIndex: number) =>
+  // 以 useCallback 綁定 rows，helper 參照僅在資料載入後變動，方便當作 useMemo 依賴。
+  const getLevelOptions = useCallback(
+    (selection: HrScopeSelection, levelIndex: number) =>
       getHrScopeLevelOptions(rows, selection, levelIndex),
-    buildPayload: (selection: HrScopeSelection): HrScopePayload =>
-      buildHrScopePayload(rows, selection),
-  };
+    [rows],
+  );
+  const buildPayload = useCallback(
+    (selection: HrScopeSelection): HrScopePayload => buildHrScopePayload(rows, selection),
+    [rows],
+  );
+
+  return { loading, error, rows, getLevelOptions, buildPayload };
 }
