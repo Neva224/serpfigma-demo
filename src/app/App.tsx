@@ -85,9 +85,12 @@ export default function App() {
 
   const approvalDoc = approval ? visibleDocuments.find((item) => item.id === approval.docId) ?? null : null;
 
-  // 依角色決定可執行的簽核階段：主管簽核只給會簽主管、文管審核只給文管審核者。
-  const canApproveManager = currentUser.roles.includes("signing_manager");
-  const canApproveDocAdmin = currentUser.roles.includes("doc_admin");
+  // 角色權限：
+  // 系統管理員＝全部審核＋文件異動；會簽主管＝僅主管審核；文管審核者＝僅文管審核；
+  // 一般上傳者＝無審核（上傳/查詢/追蹤不受限，各角色皆可）。
+  const isSystemAdmin = currentUser.roles.includes("system_admin");
+  const canApproveManager = currentUser.roles.includes("signing_manager") || isSystemAdmin;
+  const canApproveDocAdmin = currentUser.roles.includes("doc_admin") || isSystemAdmin;
 
   function openApproval(docId: number, stage: ApprovalStage) {
     if (stage === "manager") {
@@ -95,9 +98,9 @@ export default function App() {
         toast.error("僅「會簽主管」可執行主管簽核");
         return;
       }
-      // 指定主管才可簽：文件若有指定簽核主管，需登入身分（員編）相符
+      // 指定主管才可簽：文件若有指定簽核主管，需登入身分（員編）相符；系統管理員可覆核。
       const doc = documents.find((item) => item.id === docId);
-      if (doc?.signingManagerEmpId && currentUser.empId !== doc.signingManagerEmpId) {
+      if (!isSystemAdmin && doc?.signingManagerEmpId && currentUser.empId !== doc.signingManagerEmpId) {
         toast.error(`此文件指定由簽核主管（員編 ${doc.signingManagerEmpId}）簽核，您目前登入身分無法簽核`);
         return;
       }
@@ -275,11 +278,9 @@ export default function App() {
     }
   }
 
-  const canVoidPublishedDocs =
-    currentUser.roles.includes("system_admin") ||
-    currentUser.roles.includes("signing_manager") ||
-    currentUser.roles.includes("doc_admin");
-  const canDeletePublishedDocs = currentUser.roles.includes("system_admin");
+  // 已上架文件的異動（作廢/還原/刪除）僅系統管理員（後台直接操作）。
+  const canVoidPublishedDocs = isSystemAdmin;
+  const canDeletePublishedDocs = isSystemAdmin;
 
   // 未登入 → 顯示登入頁（所有 hooks 已於上方無條件呼叫）
   if (!account) {
@@ -331,6 +332,7 @@ export default function App() {
           canApproveManager={canApproveManager}
           canApproveDocAdmin={canApproveDocAdmin}
           currentUserEmpId={currentUser.empId}
+          managerIdentityBypass={isSystemAdmin}
         />
       </div>
 

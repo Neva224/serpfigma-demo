@@ -48,7 +48,7 @@ export class ErrorBoundary extends Component<Props, State> {
             type="button"
             onClick={this.handleReload}
             className="mt-5 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: "#3A867B" }}
+            style={{ backgroundColor: "var(--color-primary)" }}
           >
             重新載入
           </button>

@@ -76,7 +76,7 @@ const NOTIFICATIONS: Notification[] = [
 ];
 
 const TYPE_LABEL: Record<Notification["type"], { text: string; color: string; bg: string }> = {
-  pending: { text: "待簽核", color: "#3A867B", bg: "#EAF6F3" },
+  pending: { text: "待簽核", color: "var(--color-primary)", bg: "#EAF6F3" },
   returned: { text: "已退回", color: "#EF4444", bg: "#FEF2F2" },
   approved: { text: "已核准", color: "#10B981", bg: "#F0FDF4" },
 };
@@ -103,7 +103,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
       <div className="px-4 pt-5 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Bell size={16} style={{ color: "#3A867B" }} />
+            <Bell size={16} style={{ color: "var(--color-primary)" }} />
             <h2 className="text-gray-800" style={{ fontSize: "14px", fontWeight: 700 }}>
               待辦通知
             </h2>
@@ -155,7 +155,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
               {isSelected && (
                 <div
                   className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r"
-                  style={{ backgroundColor: "#3A867B" }}
+                  style={{ backgroundColor: "var(--color-primary)" }}
                 />
               )}
 
@@ -174,14 +174,14 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
               <div className="flex items-center gap-1.5 mb-1.5">
                 <div
                   className="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                  style={{ fontSize: "9px", fontWeight: 700, backgroundColor: "#3A867B" }}
+                  style={{ fontSize: "9px", fontWeight: 700, backgroundColor: "var(--color-primary)" }}
                 >
                   {n.sender[0]}
                 </div>
                 <span className="text-gray-700" style={{ fontSize: "12px", fontWeight: 600 }}>{n.sender}</span>
                 <span className="text-gray-400" style={{ fontSize: "10px" }}>· {n.role}</span>
                 {n.unread && (
-                  <span className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "#3A867B" }} />
+                  <span className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: "var(--color-primary)" }} />
                 )}
               </div>
 
@@ -200,7 +200,7 @@ export function NotificationInbox({ selectedId, onSelect }: Props) {
                 </span>
                 <span
                   className="flex items-center gap-0.5 flex-shrink-0 transition-colors"
-                  style={{ fontSize: "11px", fontWeight: 700, color: "#3A867B" }}
+                  style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-primary)" }}
                 >
                   前往 <ChevronRight size={11} />
                 </span>

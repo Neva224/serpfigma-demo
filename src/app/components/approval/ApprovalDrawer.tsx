@@ -413,7 +413,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
             type="button"
             onClick={onApprove}
             className="flex items-center gap-2 rounded-lg px-6 py-2 font-semibold text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ backgroundColor: "#3A867B", fontSize: "13px" }}
+            style={{ backgroundColor: "var(--color-primary)", fontSize: "13px" }}
           >
             <CheckCircle2 size={15} />
             {role === "manager" ? "主管簽核通過" : "文管簽核通過"}

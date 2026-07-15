@@ -33,6 +33,7 @@ interface Props {
   canApproveManager: boolean;
   canApproveDocAdmin: boolean;
   currentUserEmpId: string | null;
+  managerIdentityBypass: boolean;
 }
 
 type TablePanel =
@@ -95,6 +96,7 @@ export function DocumentTable({
   canApproveManager,
   canApproveDocAdmin,
   currentUserEmpId,
+  managerIdentityBypass,
 }: Props) {
   const DEFAULT_PAGE_SIZE = 10;
   const [page, setPage] = useState(1);
@@ -289,7 +291,9 @@ export function DocumentTable({
               // 待文管審核→文管審核者。
               const canApproveThisManager =
                 canApproveManager &&
-                (!doc.signingManagerEmpId || doc.signingManagerEmpId === currentUserEmpId);
+                (managerIdentityBypass ||
+                  !doc.signingManagerEmpId ||
+                  doc.signingManagerEmpId === currentUserEmpId);
               const needsApproval =
                 (doc.status === STATUS_MANAGER_PENDING && canApproveThisManager) ||
                 (doc.status === STATUS_DOCADMIN_PENDING && canApproveDocAdmin);

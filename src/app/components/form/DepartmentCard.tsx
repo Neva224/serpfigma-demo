@@ -104,7 +104,7 @@ export function DepartmentCard({ value, onChange }: Props) {
                     (index === 1 && value.groupName) ||
                     (index === 2 && value.divisionName) ||
                     (index === 3 && value.departmentName)
-                      ? "#3A867B"
+                      ? "var(--color-primary)"
                       : "#E5E7EB",
                 }}
               />
@@ -116,7 +116,7 @@ export function DepartmentCard({ value, onChange }: Props) {
                       (index === 0 && value.groupName) ||
                       (index === 1 && value.divisionName) ||
                       (index === 2 && value.departmentName)
-                        ? "#3A867B"
+                        ? "var(--color-primary)"
                         : "#E5E7EB",
                   }}
                 />
@@ -166,7 +166,7 @@ function DeptSelect({
       <div className="mb-1.5 flex items-center gap-1.5">
         <span
           className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-white"
-          style={{ fontSize: "9px", fontWeight: 700, backgroundColor: disabled ? "#D1D5DB" : "#3A867B" }}
+          style={{ fontSize: "9px", fontWeight: 700, backgroundColor: disabled ? "#D1D5DB" : "var(--color-primary)" }}
         >
           {step}
         </span>

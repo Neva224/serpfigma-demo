@@ -164,7 +164,7 @@ export function BasicInfoCard({ initialValue }: BasicInfoCardProps) {
               <span
                 key={tag}
                 className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
-                style={{ backgroundColor: "#3A867B18", color: "#3A867B" }}
+                style={{ backgroundColor: "#3A867B18", color: "var(--color-primary)" }}
               >
                 {tag}
                 <button

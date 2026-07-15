@@ -16,8 +16,8 @@ const LANGUAGES = [
 ];
 
 // 沿用專案品牌色（theme.css --color-primary / --color-primary-hover）
-const BRAND = "#3A867B";
-const BRAND_HOVER = "#2F766D";
+const BRAND = "var(--color-primary)";
+const BRAND_HOVER = "var(--color-primary-hover)";
 const LION_RED = "#C8102E";
 const TEXT_MAIN = "#203040";
 const TEXT_SUB = "#718096";
@@ -211,7 +211,7 @@ function LogoLockup({ compact = false }: { compact?: boolean }) {
       <img
         src={lionGroupLogo}
         alt="雄獅集團 LION GROUP"
-        style={{ objectFit: "contain", width: compact ? 132 : 176, height: "auto" }}
+        style={{ objectFit: "contain", width: compact ? 132 : 176, height: "auto", mixBlendMode: "multiply" }}
       />
       <div
         className={compact ? "mt-3 text-[26px]" : "mt-4 text-[40px]"}
@@ -239,12 +239,12 @@ function WorldBackdrop() {
       style={{ opacity: 0.12 }}
       aria-hidden="true"
     >
-      <g stroke="#3A867B" strokeWidth="1" fill="none">
+      <g stroke="var(--color-primary)" strokeWidth="1" fill="none">
         <path d="M60 300 Q200 120 340 210 T560 120" />
         <path d="M90 90 Q260 260 470 200" />
         <path d="M40 200 Q220 200 300 60" />
       </g>
-      <g fill="#2F766D">
+      <g fill="var(--color-primary-hover)">
         {[
           [60, 300], [340, 210], [560, 120], [90, 90], [470, 200],
           [40, 200], [300, 60], [200, 160], [420, 320], [520, 300], [150, 250],

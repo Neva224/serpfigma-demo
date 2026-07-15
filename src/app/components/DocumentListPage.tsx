@@ -55,6 +55,7 @@ interface Props {
   canApproveManager: boolean;
   canApproveDocAdmin: boolean;
   currentUserEmpId: string | null;
+  managerIdentityBypass: boolean;
   onSubmitDocument: (payload: DocumentFormSubmitPayload) => void;
   formDoc: WorkflowDocument | null;
   view: ViewMode;
@@ -92,6 +93,7 @@ export function DocumentListPage({
   canApproveManager,
   canApproveDocAdmin,
   currentUserEmpId,
+  managerIdentityBypass,
   onSubmitDocument,
   formDoc,
   view,
@@ -556,6 +558,7 @@ export function DocumentListPage({
                   canApproveManager={canApproveManager}
                   canApproveDocAdmin={canApproveDocAdmin}
                   currentUserEmpId={currentUserEmpId}
+                  managerIdentityBypass={managerIdentityBypass}
                 />
               </div>
             </>

@@ -115,6 +115,18 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  /* 將 Tailwind teal 家族重新對映到品牌色（單一來源）：teal-500/600 = 品牌主色，
+     teal-700 = 品牌 hover，其餘為由品牌延伸的深淺階，全站 teal-* 一致 */
+  --color-teal-50: #eff6f5;
+  --color-teal-100: #dcece8;
+  --color-teal-200: #c3ddd8;
+  --color-teal-300: #9ec7bf;
+  --color-teal-400: #6aa89b;
+  --color-teal-500: #3a867b;
+  --color-teal-600: #3a867b;
+  --color-teal-700: #2f766d;
+  --color-teal-800: #285f57;
+  --color-teal-900: #204a44;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

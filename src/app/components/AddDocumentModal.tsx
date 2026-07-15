@@ -72,7 +72,7 @@ export function AddDocumentModal({ onClose }: AddDocumentModalProps) {
               <p className="text-sm text-slate-500">拖曳檔案至此，或</p>
               <button
                 className="text-sm font-medium mt-1 transition-colors"
-                style={{ color: "#2F766D" }}
+                style={{ color: "var(--color-primary-hover)" }}
               >
                 點擊瀏覽檔案
               </button>
