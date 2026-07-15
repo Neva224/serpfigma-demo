@@ -30,7 +30,7 @@ const CONTACTS = [
   { level: "六階", desc: "外來文件", count: 45, contact: "蔡宛芸", dept: "採購管理處", code: "250350" },
 ];
 
-const LEVEL_COLORS = ["#7C3AED", "#1D4ED8", "#0F766E", "#15803D", "#B45309", "#4B5563"];
+const LEVEL_COLORS = ["#7C3AED", "#1D4ED8", "#3A867B", "#15803D", "#B45309", "#4B5563"];
 
 const CLICKS = [
   { name: "資訊安全管理政策", level: "一階", clicks: 384, trend: "+12%" },
@@ -122,19 +122,19 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
     <div className={embedded ? "h-full overflow-y-auto px-6 py-5" : "flex-1 overflow-y-auto px-6 py-5"} style={{ backgroundColor: "#F3F4F6" }}>
       <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-sm flex items-start justify-between gap-4">
         <div>
-          <div className="mb-1 flex items-center gap-1.5 text-xs text-gray-400">
-            <button type="button" onClick={onBack} className="hover:text-gray-600">
+          <div className="mb-1 flex items-center gap-1.5 text-xs text-slate-400">
+            <button type="button" onClick={onBack} className="hover:text-slate-600">
               首頁
             </button>
             <span>/</span>
-            <button type="button" onClick={onBack} className="hover:text-gray-600">
+            <button type="button" onClick={onBack} className="hover:text-slate-600">
               文件管理
             </button>
             <span>/</span>
             <span>資料庫</span>
           </div>
-          <h2 className="text-gray-800" style={{ fontSize: "18px", fontWeight: 700 }}>資料庫</h2>
-          <p className="text-gray-500 text-sm mt-0.5">文件知識管理總覽：窗口對應、點擊統計與標籤索引</p>
+          <h2 className="text-slate-800" style={{ fontSize: "18px", fontWeight: 700 }}>資料庫</h2>
+          <p className="text-slate-500 text-sm mt-0.5">文件知識管理總覽：窗口對應、點擊統計與標籤索引</p>
         </div>
       </div>
 
@@ -164,7 +164,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
       {tab === "contacts" && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/60">
-            <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>各分層文件對應窗口一覽表</h3>
+            <h3 className="text-slate-700 font-semibold" style={{ fontSize: "13px" }}>各分層文件對應窗口一覽表</h3>
           </div>
           <table className="w-full" style={{ fontSize: "13px" }}>
             <thead>
@@ -182,18 +182,18 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                       {row.level}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-gray-600">{row.desc}</td>
-                  <td className="px-5 py-3 font-semibold text-gray-800">{row.count}</td>
+                  <td className="px-5 py-3 text-slate-600">{row.desc}</td>
+                  <td className="px-5 py-3 font-semibold text-slate-800">{row.count}</td>
                   <td className="px-5 py-3">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full flex items-center justify-center text-white" style={{ fontSize: "10px", fontWeight: 700, backgroundColor: "#3A867B" }}>{row.contact[0]}</div>
-                      <span className="text-gray-800 font-medium">{row.contact}</span>
+                      <span className="text-slate-800 font-medium">{row.contact}</span>
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-gray-600">{row.dept}</td>
-                  <td className="px-5 py-3 font-mono text-gray-500" style={{ fontSize: "12px" }}>{row.code}</td>
+                  <td className="px-5 py-3 text-slate-600">{row.dept}</td>
+                  <td className="px-5 py-3 font-mono text-slate-500" style={{ fontSize: "12px" }}>{row.code}</td>
                   <td className="px-5 py-3">
-                    <button className="px-3 py-1 rounded border border-gray-200 text-gray-500 hover:border-teal-400 hover:text-teal-600 transition-all" style={{ fontSize: "11px" }}>發送訊息</button>
+                    <button className="px-3 py-1 rounded border border-gray-200 text-slate-500 hover:border-teal-400 hover:text-teal-600 transition-all" style={{ fontSize: "11px" }}>發送訊息</button>
                   </td>
                 </tr>
               ))}
@@ -205,7 +205,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
       {tab === "clicks" && (
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50/60">
-            <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>文件點擊率排行榜（本月）</h3>
+            <h3 className="text-slate-700 font-semibold" style={{ fontSize: "13px" }}>文件點擊率排行榜（本月）</h3>
           </div>
           <table className="w-full" style={{ fontSize: "13px" }}>
             <thead>
@@ -231,11 +231,11 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                         {i + 1}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-gray-800 font-medium">{row.name}</td>
+                    <td className="px-5 py-3 text-slate-800 font-medium">{row.name}</td>
                     <td className="px-5 py-3">
-                      <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: "#F0FDFA", color: "#0F766E", fontWeight: 600 }}>{row.level}</span>
+                      <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: "#F0FDFA", color: "#3A867B", fontWeight: 600 }}>{row.level}</span>
                     </td>
-                    <td className="px-5 py-3 font-semibold text-gray-800">{row.clicks.toLocaleString()}</td>
+                    <td className="px-5 py-3 font-semibold text-slate-800">{row.clicks.toLocaleString()}</td>
                     <td className="px-5 py-3">
                       <span style={{ color: isUp ? "#16A34A" : "#DC2626", fontSize: "12px", fontWeight: 600 }}>{row.trend}</span>
                     </td>
@@ -244,7 +244,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                         <div className="flex-1 bg-gray-100 rounded-full h-2" style={{ maxWidth: "100px" }}>
                           <div className="h-2 rounded-full" style={{ width: `${pct}%`, backgroundColor: "#3A867B" }} />
                         </div>
-                        <span className="text-gray-400" style={{ fontSize: "10px" }}>{pct}%</span>
+                        <span className="text-slate-400" style={{ fontSize: "10px" }}>{pct}%</span>
                       </div>
                     </td>
                   </tr>
@@ -259,8 +259,8 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50/60">
             <div>
-              <h3 className="text-gray-700 font-semibold" style={{ fontSize: "13px" }}>標籤索引庫</h3>
-              <p className="mt-0.5 text-xs text-gray-400">目前登入角色：{CURRENT_USER.role}</p>
+              <h3 className="text-slate-700 font-semibold" style={{ fontSize: "13px" }}>標籤索引庫</h3>
+              <p className="mt-0.5 text-xs text-slate-400">目前登入角色：{CURRENT_USER.role}</p>
             </div>
             <button
               type="button"
@@ -295,7 +295,7 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                       fontWeight: expandedTag === t.tag ? 700 : 500,
                       borderColor: expandedTag === t.tag ? "#3A867B" : "#E5E7EB",
                       backgroundColor: expandedTag === t.tag ? "#F0FDFA" : `${LEVEL_COLORS[i % 6]}0A`,
-                      color: expandedTag === t.tag ? "#0F766E" : "#374151",
+                      color: expandedTag === t.tag ? "#3A867B" : "#374151",
                     }}
                   >
                     {t.tag}
@@ -323,8 +323,8 @@ export function DatabasePage({ onBack, embedded = false }: Props) {
                 <div className="space-y-2">
                   {tags.find((t) => t.tag === expandedTag)?.docs.map((d) => (
                     <div key={d} className="flex items-center gap-2 py-2 px-3 rounded-lg bg-white border border-teal-100 hover:border-teal-300 transition-colors cursor-pointer">
-                      <span className="text-gray-400">📄</span>
-                      <span className="text-gray-700 text-sm">{d}</span>
+                      <span className="text-slate-400">📄</span>
+                      <span className="text-slate-700 text-sm">{d}</span>
                     </div>
                   ))}
                 </div>
@@ -413,7 +413,7 @@ function TagModal({
                     style={{
                       borderColor: active ? "#3A867B" : "#E5E7EB",
                       backgroundColor: active ? "#F0FDFA" : "#FFFFFF",
-                      color: active ? "#0F766E" : "#475569",
+                      color: active ? "#3A867B" : "#475569",
                     }}
                   >
                     {option.label}
