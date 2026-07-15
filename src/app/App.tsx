@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Toaster, toast } from "sonner";
 import { Header } from "./components/Header";
+import { LoginPage } from "./components/LoginPage";
 import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import {
@@ -17,25 +18,18 @@ import {
   type ApprovalStage,
   type WorkflowDocument,
   type WorkflowNotification,
-  type WorkflowRole,
   type WorkflowUser,
 } from "./workflow/workflowState";
 import {
-  loadEmpId,
-  loadRoles,
+  clearSession,
+  loadSessionUser,
   loadWorkflowSnapshot,
-  saveEmpId,
-  saveRoles,
+  saveSessionUser,
   saveWorkflowSnapshot,
 } from "./data/documentRepository";
+import { authenticate, findAccountByUser } from "./data/demoAccounts";
 import { orgRepository } from "./data/orgRepository";
 import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
-
-// 無登入系統時的預設角色：開發環境給全角色方便 demo；正式環境給最小權限 uploader，
-// 使用者可再用 Header 的角色切換器手動調整（選擇會保存在 localStorage）。
-const DEFAULT_ROLES: WorkflowRole[] = import.meta.env.DEV
-  ? ["uploader", "signing_manager", "doc_admin", "system_admin"]
-  : ["uploader"];
 
 interface ApprovalTarget {
   docId: number;
@@ -48,9 +42,16 @@ export default function App() {
     // 載入時把舊有資料的文件編號更新為最新規則（草稿清空、舊格式重編）
     return { ...snapshot, documents: migrateWorkflowDocuments(snapshot.documents) };
   }, []);
-  const [roles, setRoles] = useState<WorkflowRole[]>(() => loadRoles() ?? DEFAULT_ROLES);
-  const [empId, setEmpId] = useState<string>(() => loadEmpId());
-  const currentUser = useMemo<WorkflowUser>(() => createDemoUser(roles, empId), [roles, empId]);
+  // 登入 session：以帳號決定角色與登入身分（員編）。未登入時顯示登入頁。
+  const [sessionUser, setSessionUser] = useState<string | null>(() => loadSessionUser());
+  const account = useMemo(() => findAccountByUser(sessionUser), [sessionUser]);
+  const currentUser = useMemo<WorkflowUser>(
+    () =>
+      account
+        ? createDemoUser([account.role], account.empId, account.name)
+        : createDemoUser(["uploader"]),
+    [account],
+  );
   const [view, setView] = useState<ViewMode>(OVERVIEW_VIEW);
   const [documents, setDocuments] = useState<WorkflowDocument[]>(() => initialSnapshot.documents);
   const [notifications, setNotifications] = useState<WorkflowNotification[]>(
@@ -58,16 +59,26 @@ export default function App() {
   );
   const [notificationPulse, setNotificationPulse] = useState(0);
 
-  // 持久化：文件／通知與角色選擇變動時寫回 localStorage（重整後保留）。
+  // 持久化：文件／通知變動時寫回 localStorage（重整後保留）。
   useEffect(() => {
     saveWorkflowSnapshot({ documents, notifications });
   }, [documents, notifications]);
-  useEffect(() => {
-    saveRoles(roles);
-  }, [roles]);
-  useEffect(() => {
-    saveEmpId(empId);
-  }, [empId]);
+
+  function handleLogin(user: string, pass: string): boolean {
+    const matched = authenticate(user, pass);
+    if (!matched) return false;
+    saveSessionUser(matched.user);
+    setSessionUser(matched.user);
+    return true;
+  }
+
+  function handleLogout() {
+    clearSession();
+    setSessionUser(null);
+    setView(OVERVIEW_VIEW);
+    setApproval(null);
+    setFormDoc(null);
+  }
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
   const visibleDocuments = useMemo(() => normalizeWorkflowDocuments(documents), [documents]);
@@ -270,6 +281,16 @@ export default function App() {
     currentUser.roles.includes("doc_admin");
   const canDeletePublishedDocs = currentUser.roles.includes("system_admin");
 
+  // 未登入 → 顯示登入頁（所有 hooks 已於上方無條件呼叫）
+  if (!account) {
+    return (
+      <>
+        <Toaster position="top-right" richColors closeButton />
+        <LoginPage onLogin={handleLogin} />
+      </>
+    );
+  }
+
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-transparent">
       <Toaster position="top-right" richColors closeButton />
@@ -280,10 +301,9 @@ export default function App() {
         notifications={notifications}
         onNotificationClick={handleNotificationClick}
         notificationPulse={notificationPulse}
-        roles={roles}
-        onRolesChange={setRoles}
-        empId={empId}
-        onEmpIdChange={setEmpId}
+        userName={account.name}
+        roleLabel={account.roleLabel}
+        onLogout={handleLogout}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden bg-transparent">

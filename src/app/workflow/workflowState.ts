@@ -212,11 +212,15 @@ export function buildInitialNotifications(docs: WorkflowDocument[]): WorkflowNot
  * 不再寫死全角色；角色由呼叫端（角色切換器 / 未來的登入身分）決定，
  * 空陣列時退回最小權限 uploader。
  */
-export function createDemoUser(roles: WorkflowRole[] = ["uploader"], empId: string | null = null): WorkflowUser {
+export function createDemoUser(
+  roles: WorkflowRole[] = ["uploader"],
+  empId: string | null = null,
+  name = "系統示範帳號",
+): WorkflowUser {
   return {
     id: "demo-user",
-    name: "系統示範帳號",
-    code: "示範001",
+    name,
+    code: empId && empId.trim() ? empId.trim() : "示範001",
     empId: empId && empId.trim() ? empId.trim() : null,
     roles: roles.length > 0 ? [...roles] : ["uploader"],
   };

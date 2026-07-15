@@ -363,7 +363,7 @@ export function DocumentListPage({
           <SectionCard
             collapsed={sidebarCollapsed}
             title="文件上傳專區"
-            subtitle="新增文件、選擇分類與送出簽核"
+            subtitle="新增文件、草稿與送出簽核"
             icon={<FileText size={16} />}
             badge="新增"
             open={uploadOpen}
@@ -372,25 +372,15 @@ export function DocumentListPage({
           >
             <div className="space-y-1.5">
               <SelectionPill
-                label="文件上傳專區"
+                label="新增文件"
                 active={view.kind === "documentUpload"}
                 onClick={activateUpload}
               />
-            </div>
-          </SectionCard>
-
-          <SectionCard
-            collapsed={sidebarCollapsed}
-            title="草稿專區"
-            subtitle="已儲存的草稿文件"
-            icon={<FileText size={16} />}
-            badge={String(countForDraftSection(documents))}
-            open={draftOpen}
-            onToggle={() => setDraftOpen((current) => !current)}
-            onHeaderClick={activateDrafts}
-          >
-            <div className="space-y-1.5">
-              <SelectionPill label="草稿專區" active={view.kind === "drafts"} onClick={activateDrafts} />
+              <SelectionPill
+                label={`草稿專區（${countForDraftSection(documents)}）`}
+                active={view.kind === "drafts"}
+                onClick={activateDrafts}
+              />
             </div>
           </SectionCard>
 
@@ -425,13 +415,24 @@ export function DocumentListPage({
           <SectionCard
             collapsed={sidebarCollapsed}
             title="系統後台管理"
-            subtitle="權限與系統設定"
+            subtitle="權限與資料庫"
             icon={<Settings size={16} />}
             open={adminOpen}
             onToggle={() => setAdminOpen((current) => !current)}
             onHeaderClick={() => onViewChange({ kind: "systemAdmin" })}
           >
-            <div className="text-sm text-slate-500">權限與系統設定</div>
+            <div className="space-y-1.5">
+              <SelectionPill
+                label="人員權限管理"
+                active={view.kind === "systemAdmin"}
+                onClick={() => onViewChange({ kind: "systemAdmin" })}
+              />
+              <SelectionPill
+                label="資料庫"
+                active={view.kind === "database"}
+                onClick={() => onViewChange({ kind: "database" })}
+              />
+            </div>
           </SectionCard>
         </div>
       </aside>

@@ -15,6 +15,7 @@ import type {
 const WORKFLOW_STORAGE_KEY = "serp-dms/workflow-state/v1";
 const ROLES_STORAGE_KEY = "serp-dms/roles/v1";
 const EMP_ID_STORAGE_KEY = "serp-dms/emp-id/v1";
+const SESSION_STORAGE_KEY = "serp-dms/session/v1";
 
 export interface WorkflowSnapshot {
   documents: WorkflowDocument[];
@@ -105,5 +106,36 @@ export function saveEmpId(empId: string): void {
     storage.setItem(EMP_ID_STORAGE_KEY, empId);
   } catch (error) {
     console.warn("[documentRepository] 寫入登入員編失敗", error);
+  }
+}
+
+/** 登入 session：儲存登入者的使用者代碼（未來由真正的登入/SSO 取代）。 */
+export function loadSessionUser(): string | null {
+  const storage = getStorage();
+  if (!storage) return null;
+  try {
+    return storage.getItem(SESSION_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveSessionUser(user: string): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.setItem(SESSION_STORAGE_KEY, user);
+  } catch (error) {
+    console.warn("[documentRepository] 寫入登入 session 失敗", error);
+  }
+}
+
+export function clearSession(): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    storage.removeItem(SESSION_STORAGE_KEY);
+  } catch (error) {
+    console.warn("[documentRepository] 清除登入 session 失敗", error);
   }
 }

@@ -1,10 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, ChevronDown, ChevronRight, FileText, Settings, UserCog, X } from "lucide-react";
-import {
-  WORKFLOW_ROLES,
-  type WorkflowNotification,
-  type WorkflowRole,
-} from "../workflow/workflowState";
+import { Bell, ChevronDown, ChevronRight, FileText, LogOut, Settings, UserCog, X } from "lucide-react";
+import { type WorkflowNotification } from "../workflow/workflowState";
 
 type Screen = "list" | "form" | "re-edit" | "signing-progress" | "database" | "permissions";
 
@@ -23,10 +19,9 @@ interface Props {
   notifications: WorkflowNotification[];
   onNotificationClick: (notification: WorkflowNotification) => void;
   notificationPulse: number;
-  roles: WorkflowRole[];
-  onRolesChange: (roles: WorkflowRole[]) => void;
-  empId: string;
-  onEmpIdChange: (empId: string) => void;
+  userName: string;
+  roleLabel: string;
+  onLogout: () => void;
 }
 
 export function Header({
@@ -35,27 +30,12 @@ export function Header({
   notifications,
   onNotificationClick,
   notificationPulse,
-  roles,
-  onRolesChange,
-  empId,
-  onEmpIdChange,
+  userName,
+  roleLabel,
+  onLogout,
 }: Props) {
   const [panelOpen, setPanelOpen] = useState(false);
-  const [rolePanelOpen, setRolePanelOpen] = useState(false);
-  const activeRoleLabel = useMemo(() => {
-    const labels = WORKFLOW_ROLES.filter((role) => roles.includes(role.value)).map((role) => role.label);
-    if (labels.length === 0) return "未設定角色";
-    if (labels.length === WORKFLOW_ROLES.length) return "全部角色";
-    if (labels.length <= 2) return labels.join("、");
-    return `${labels[0]} 等 ${labels.length} 種角色`;
-  }, [roles]);
-
-  function toggleRole(role: WorkflowRole) {
-    const next = roles.includes(role) ? roles.filter((item) => item !== role) : [...roles, role];
-    // 至少保留一個角色，避免整個系統無任何可用功能
-    if (next.length === 0) return;
-    onRolesChange(next);
-  }
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const unreadCount = useMemo(
     () => notifications.filter((notification) => notification.unread).length,
     [notifications],
@@ -131,63 +111,40 @@ export function Header({
             <div className="relative ml-1 border-l border-white/18 pl-3">
               <button
                 type="button"
-                onClick={() => setRolePanelOpen((current) => !current)}
+                onClick={() => setUserMenuOpen((current) => !current)}
                 className="flex items-center gap-2 rounded-md py-1 pl-1 pr-2 transition hover:bg-white/10"
-                aria-label="切換角色"
-                aria-expanded={rolePanelOpen}
+                aria-label="使用者選單"
+                aria-expanded={userMenuOpen}
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/12 text-xs font-bold text-white ring-1 ring-white/10">
                   <UserCog size={16} />
                 </div>
                 <div className="hidden text-left sm:block">
-                  <div className="text-sm font-bold text-white">系統示範帳號</div>
-                  <div className="text-[11px] font-semibold text-white/80">{activeRoleLabel}</div>
+                  <div className="text-sm font-bold text-white">{userName}</div>
+                  <div className="text-[11px] font-semibold text-white/80">{roleLabel}</div>
                 </div>
                 <ChevronDown size={15} className="text-white/80" />
               </button>
 
-              {rolePanelOpen && (
+              {userMenuOpen && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setRolePanelOpen(false)} />
-                  <div className="absolute right-0 top-12 z-50 w-[248px] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10">
-                    <div className="border-b border-slate-100 px-4 py-2.5">
-                      <div className="text-sm font-bold text-slate-700">切換角色（示範用）</div>
-                      <div className="mt-0.5 text-[11px] text-slate-400">
-                        正式環境無登入系統，暫以手動切換模擬權限
-                      </div>
+                  <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                  <div className="absolute right-0 top-12 z-50 w-[220px] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10">
+                    <div className="border-b border-slate-100 px-4 py-3">
+                      <div className="text-sm font-bold text-slate-700">{userName}</div>
+                      <div className="mt-0.5 text-[11px] text-slate-400">目前角色：{roleLabel}</div>
                     </div>
-                    <div className="py-1">
-                      {WORKFLOW_ROLES.map((role) => {
-                        const checked = roles.includes(role.value);
-                        return (
-                          <label
-                            key={role.value}
-                            className="flex cursor-pointer items-center gap-3 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleRole(role.value)}
-                              className="h-4 w-4 accent-teal-600"
-                            />
-                            <span className="font-medium">{role.label}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                    <div className="border-t border-slate-100 px-4 py-3">
-                      <div className="text-sm font-bold text-slate-700">模擬登入身分（員編）</div>
-                      <div className="mb-2 mt-0.5 text-[11px] text-slate-400">
-                        主管簽核時，只有員編＝文件「指定簽核主管」者才可簽
-                      </div>
-                      <input
-                        type="text"
-                        value={empId}
-                        onChange={(e) => onEmpIdChange(e.target.value.trim())}
-                        placeholder="例如 000001（留空＝未登入）"
-                        className="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-teal-500 focus:outline-none"
-                      />
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        onLogout();
+                      }}
+                      className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <LogOut size={15} className="text-slate-400" />
+                      登出
+                    </button>
                   </div>
                 </>
               )}
