@@ -99,7 +99,7 @@ export function ApprovalDrawer({ doc, role, onClose, onApprove, onReject }: Prop
 
   return (
     <DrawerShell onClose={onClose}>
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3" style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}>
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3" style={{ background: "linear-gradient(180deg, #2E6E5C 0%, #24594A 100%)" }}>
         <div>
           <h2 className="text-white" style={{ fontSize: "14px", fontWeight: 700 }}>
             {pageTitle}

@@ -10,6 +10,7 @@ const TYPE_LABEL: Record<WorkflowNotification["type"], string> = {
   rejected: "已退回",
   published: "上架",
   voided: "已作廢",
+  expiring_soon: "即將到期",
 };
 
 interface Props {

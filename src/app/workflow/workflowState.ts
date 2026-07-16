@@ -8,7 +8,11 @@ export type WorkflowNotificationType =
   | "docadmin_approval_pending"
   | "rejected"
   | "published"
-  | "voided";
+  | "voided"
+  | "expiring_soon";
+
+/** 到期前幾天開始提醒（見 buildExpiryWarningNotifications）。 */
+export const EXPIRY_WARNING_DAYS = 7;
 
 export interface WorkflowHistoryEntry {
   action: string;
@@ -163,6 +167,45 @@ function todayYmd() {
 function isExpiredByValidTo(validTo?: string) {
   if (!validTo) return false;
   return todayYmd() > validTo;
+}
+
+function daysUntil(validTo: string): number {
+  const today = new Date(todayYmd());
+  const target = new Date(validTo);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
+/**
+ * 到期前 EXPIRY_WARNING_DAYS 天內、尚在上架中的文件，產生一次「即將到期」提醒
+ * （呼叫端須自行過濾掉已經發過的 docId，避免每次載入都重複產生）。
+ */
+export function buildExpiryWarningNotifications(
+  docs: WorkflowDocument[],
+  notifications: WorkflowNotification[],
+): WorkflowNotification[] {
+  const alreadyNotified = new Set(
+    notifications.filter((item) => item.type === "expiring_soon").map((item) => item.docId),
+  );
+  let nextId = baseNotificationId(notifications);
+  const additions: WorkflowNotification[] = [];
+
+  for (const doc of docs) {
+    if (!doc.validTo || doc.status !== "上架" || alreadyNotified.has(doc.id)) continue;
+    const remaining = daysUntil(doc.validTo);
+    if (remaining < 0 || remaining > EXPIRY_WARNING_DAYS) continue;
+    additions.push({
+      id: nextId++,
+      type: "expiring_soon",
+      title: `《${doc.name}》將於 ${doc.validTo} 到期（剩 ${remaining} 天），請留意續簽或下架`,
+      docId: doc.id,
+      signingNo: doc.signingNo ?? doc.docNo ?? "",
+      targetStage: "docadmin",
+      unread: true,
+      createdAt: nowIso(),
+    });
+  }
+
+  return additions;
 }
 
 export function normalizeWorkflowStatus(status: string, validTo?: string): DocumentStatus {

@@ -7,6 +7,7 @@ import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import {
   applyWorkflowDecision,
   applyWorkflowTransfer,
+  buildExpiryWarningNotifications,
   createDemoUser,
   deleteWorkflowDocument,
   markNotificationRead,
@@ -29,6 +30,7 @@ import {
 } from "./data/documentRepository";
 import { authenticate, findAccountByUser } from "./data/demoAccounts";
 import { orgRepository } from "./data/orgRepository";
+import { rehydrateAttachmentUrl } from "./data/attachmentStore";
 import type { DocumentFormSubmitPayload } from "./components/form/DocumentFormPage";
 
 interface ApprovalTarget {
@@ -64,6 +66,33 @@ export default function App() {
     saveWorkflowSnapshot({ documents, notifications });
   }, [documents, notifications]);
 
+  // 附件的 downloadUrl 是 blob: 網址，只在建立當次的分頁存活期間有效；重新整理或
+  // 關閉分頁後會失效。載入時用 IndexedDB 裡實際存的檔案內容重新產生一次，
+  // 這樣附件才不會「看得到檔名、點下去卻打不開」。
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const rehydrated = await Promise.all(
+        documents.map(async (doc) => {
+          if (!doc.attachments || doc.attachments.length === 0) return doc;
+          const attachments = await Promise.all(
+            doc.attachments.map(async (attachment) => {
+              const freshUrl = await rehydrateAttachmentUrl(attachment.id);
+              return freshUrl ? { ...attachment, downloadUrl: freshUrl } : attachment;
+            }),
+          );
+          return { ...doc, attachments };
+        }),
+      );
+      if (!cancelled) setDocuments(rehydrated);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // 只需要在應用程式啟動、載入完初始資料時做一次；之後的附件異動已經是活的 blob 網址。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function handleLogin(user: string, pass: string): boolean {
     const matched = authenticate(user, pass);
     if (!matched) return false;
@@ -82,6 +111,16 @@ export default function App() {
   const [approval, setApproval] = useState<ApprovalTarget | null>(null);
   const [formDoc, setFormDoc] = useState<WorkflowDocument | null>(null);
   const visibleDocuments = useMemo(() => normalizeWorkflowDocuments(documents), [documents]);
+
+  // 文件到期前 7 天主動提醒一次（見 buildExpiryWarningNotifications），
+  // 不用等使用者自己想到要去篩選「含過期」才發現。
+  useEffect(() => {
+    const additions = buildExpiryWarningNotifications(visibleDocuments, notifications);
+    if (additions.length > 0) {
+      setNotifications((current) => [...current, ...additions]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleDocuments]);
 
   const approvalDoc = approval ? visibleDocuments.find((item) => item.id === approval.docId) ?? null : null;
 
@@ -144,7 +183,11 @@ export default function App() {
       return;
     }
 
-    if (notification.type === "published" || notification.type === "voided") {
+    if (
+      notification.type === "published" ||
+      notification.type === "voided" ||
+      notification.type === "expiring_soon"
+    ) {
       setView(OVERVIEW_VIEW);
     }
   }

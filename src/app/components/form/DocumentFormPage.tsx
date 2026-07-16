@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { ArrowLeft, Bell, FileText } from "lucide-react";
+import { ArrowLeft, Bell, FileText, History } from "lucide-react";
 import { toast } from "sonner";
 import { BasicInfoCard, type BasicInfoValue } from "./BasicInfoCard";
 import {
@@ -12,6 +12,14 @@ import { FileUploadCard } from "./FileUploadCard";
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import type { DocumentLevel } from "../document-management/mockData";
 import type { WorkflowAttachment, WorkflowDocument } from "../../workflow/workflowState";
+import {
+  clearFormAutosave,
+  isFormAutosaveEmpty,
+  loadFormAutosave,
+  saveFormAutosave,
+  type FormAutosavePayload,
+} from "../../data/formAutosave";
+import { rehydrateAttachmentUrl } from "../../data/attachmentStore";
 
 export interface DocumentFormSubmitPayload {
   title: string;
@@ -68,6 +76,19 @@ export function DocumentFormPage({
   const [pendingSubmit, setPendingSubmit] = useState<DocumentFormSubmitPayload | null>(null);
   const [backConfirmOpen, setBackConfirmOpen] = useState(false);
   const [draftBusy, setDraftBusy] = useState(false);
+  const [restoredBasicInfo, setRestoredBasicInfo] = useState<BasicInfoValue | null>(null);
+  const [restoredLevel, setRestoredLevel] = useState<DocumentLevel | "" | null>(null);
+  const [restoreVersion, setRestoreVersion] = useState(0);
+  const [autosaveBanner, setAutosaveBanner] = useState<FormAutosavePayload | null>(null);
+
+  const autosaveKey = editingDoc ? `doc-${editingDoc.id}` : "new";
+  const classificationRef = useRef(classification);
+  classificationRef.current = classification;
+  const departmentRef = useRef(department);
+  departmentRef.current = department;
+  const attachmentsRef = useRef(attachments);
+  attachmentsRef.current = attachments;
+  const lastAutosaveJsonRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!editingDoc) {
@@ -79,31 +100,100 @@ export function DocumentFormPage({
       setSubmitBusy(false);
       setBackConfirmOpen(false);
       setDraftBusy(false);
-      return;
+    } else {
+      const categoryPath = editingDoc.categoryPath ?? editingDoc.knowledgePath ?? [];
+      setClassification({
+        l1: categoryPath[0] ?? "",
+        l2: categoryPath[1] ?? "",
+        l3: categoryPath[2] ?? "",
+        l4: categoryPath[3] ?? "",
+      });
+
+      const path = splitPath(editingDoc.department);
+      setDepartment({
+        companyName: path[0] ?? "",
+        groupName: path[1] ?? "",
+        divisionName: path[2] ?? "",
+        departmentName: path[3] ?? "",
+      });
+      setAttachments(editingDoc.attachments ? [...editingDoc.attachments] : []);
+      setPendingSubmit(null);
+      setSubmitConfirmOpen(false);
+      setSubmitBusy(false);
+      setBackConfirmOpen(false);
+      setDraftBusy(false);
     }
 
-    const categoryPath = editingDoc.categoryPath ?? editingDoc.knowledgePath ?? [];
-    setClassification({
-      l1: categoryPath[0] ?? "",
-      l2: categoryPath[1] ?? "",
-      l3: categoryPath[2] ?? "",
-      l4: categoryPath[3] ?? "",
-    });
+    setRestoredBasicInfo(null);
+    setRestoredLevel(null);
+    setRestoreVersion((current) => current + 1);
+    lastAutosaveJsonRef.current = null;
 
-    const path = splitPath(editingDoc.department);
-    setDepartment({
-      companyName: path[0] ?? "",
-      groupName: path[1] ?? "",
-      divisionName: path[2] ?? "",
-      departmentName: path[3] ?? "",
-    });
-    setAttachments(editingDoc.attachments ? [...editingDoc.attachments] : []);
-    setPendingSubmit(null);
-    setSubmitConfirmOpen(false);
-    setSubmitBusy(false);
-    setBackConfirmOpen(false);
-    setDraftBusy(false);
+    const key = editingDoc ? `doc-${editingDoc.id}` : "new";
+    const saved = loadFormAutosave(key);
+    setAutosaveBanner(saved && !isFormAutosaveEmpty(saved) ? saved : null);
   }, [editingDoc]);
+
+  // 每 4 秒把目前填寫的內容存一次暫存（見 formAutosave.ts），內容沒變就不寫，
+  // 避免瀏覽器當機或不小心切走頁面時整份表單全部消失。
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const form = formRef.current;
+      if (!form) return;
+      const formData = new FormData(form);
+      const snapshot: FormAutosavePayload = {
+        savedAt: new Date().toISOString(),
+        title: String(formData.get("title") ?? ""),
+        ownerName: String(formData.get("ownerName") ?? ""),
+        validFrom: String(formData.get("validFrom") ?? ""),
+        validTo: String(formData.get("validTo") ?? ""),
+        summary: String(formData.get("summary") ?? ""),
+        tags: String(formData.get("tags") ?? ""),
+        classification: classificationRef.current,
+        level: (String(formData.get("documentLevel") ?? "") || "") as DocumentLevel | "",
+        department: departmentRef.current,
+        attachments: attachmentsRef.current,
+      };
+      if (isFormAutosaveEmpty(snapshot)) return;
+      const signature = JSON.stringify({ ...snapshot, savedAt: undefined });
+      if (signature === lastAutosaveJsonRef.current) return;
+      lastAutosaveJsonRef.current = signature;
+      saveFormAutosave(autosaveKey, snapshot);
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [autosaveKey]);
+
+  async function restoreAutosave() {
+    if (!autosaveBanner) return;
+    setClassification(autosaveBanner.classification);
+    setRestoredLevel(autosaveBanner.level);
+    setDepartment(autosaveBanner.department);
+    // 暫存裡的 downloadUrl 可能是上次分頁存活期間的 blob 網址，重開瀏覽器後已失效，
+    // 用 IndexedDB 裡實際存的檔案內容重新產生一次（見 attachmentStore.ts）。
+    const attachments = await Promise.all(
+      autosaveBanner.attachments.map(async (attachment) => {
+        const freshUrl = await rehydrateAttachmentUrl(attachment.id);
+        return freshUrl ? { ...attachment, downloadUrl: freshUrl } : attachment;
+      }),
+    );
+    setAttachments(attachments);
+    setRestoredBasicInfo({
+      title: autosaveBanner.title,
+      ownerName: autosaveBanner.ownerName,
+      validFrom: autosaveBanner.validFrom,
+      validTo: autosaveBanner.validTo,
+      summary: autosaveBanner.summary,
+      tags: autosaveBanner.tags.split(",").map((item) => item.trim()).filter(Boolean),
+    });
+    setRestoreVersion((current) => current + 1);
+    setAutosaveBanner(null);
+    toast.success("已還原暫存內容");
+  }
+
+  function discardAutosave() {
+    clearFormAutosave(autosaveKey);
+    setAutosaveBanner(null);
+  }
 
   const categoryPayload = buildCategoryPayload(classification);
   const canShowBackButton = showBackButton ?? false;
@@ -137,15 +227,16 @@ export function DocumentFormPage({
     };
   }, [editingDoc]);
   const initialBasicInfo: BasicInfoValue = useMemo(
-    () => ({
-      title: editingDoc?.name ?? "",
-      ownerName: editingDoc?.requestor ?? editingDoc?.ownerName ?? editingDoc?.uploaderName ?? "",
-      validFrom: editingDoc?.validFrom ?? "",
-      validTo: editingDoc?.validTo ?? "",
-      summary: editingDoc?.summary ?? editingDoc?.subject ?? "",
-      tags: editingDoc?.tags ?? [],
-    }),
-    [editingDoc],
+    () =>
+      restoredBasicInfo ?? {
+        title: editingDoc?.name ?? "",
+        ownerName: editingDoc?.requestor ?? editingDoc?.ownerName ?? editingDoc?.uploaderName ?? "",
+        validFrom: editingDoc?.validFrom ?? "",
+        validTo: editingDoc?.validTo ?? "",
+        summary: editingDoc?.summary ?? editingDoc?.subject ?? "",
+        tags: editingDoc?.tags ?? [],
+      },
+    [editingDoc, restoredBasicInfo],
   );
 
   function handleSaveDraft() {
@@ -155,6 +246,7 @@ export function DocumentFormPage({
     Promise.resolve()
       .then(() => onSaveDraft?.(payload))
       .then(() => {
+        clearFormAutosave(autosaveKey);
         if (!onSaveDraft) {
           toast.success(editingDoc ? `已儲存草稿：${editingDoc.name}` : "已儲存草稿");
         }
@@ -270,6 +362,7 @@ export function DocumentFormPage({
     setSubmitBusy(true);
     try {
       await Promise.resolve(onSubmit?.(pendingSubmit));
+      clearFormAutosave(autosaveKey);
       toast.success(editingDoc ? "文件已更新並送出審核" : "文件已送出審核");
       setSubmitConfirmOpen(false);
       setPendingSubmit(null);
@@ -366,6 +459,39 @@ export function DocumentFormPage({
           </div>
         )}
 
+        {autosaveBanner && (
+          <div className="mb-4 flex flex-wrap items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50 px-4 py-3">
+            <History size={16} className="text-teal-600" />
+            <span className="text-sm text-teal-700">
+              偵測到{" "}
+              {new Date(autosaveBanner.savedAt).toLocaleString("zh-TW", {
+                month: "numeric",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              未完成的暫存內容，是否要繼續編輯？
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={restoreAutosave}
+                className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white transition hover:opacity-90"
+                style={{ backgroundColor: "var(--color-primary)" }}
+              >
+                恢復暫存內容
+              </button>
+              <button
+                type="button"
+                onClick={discardAutosave}
+                className="rounded-lg border border-teal-300 px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
+              >
+                捨棄
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="mb-5 overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-white px-5 py-5 shadow-[0_12px_40px_rgba(13,148,136,0.08)]">
           <div className="mb-2 flex items-center gap-1.5 text-xs text-gray-500">
             <span>首頁</span>
@@ -416,8 +542,13 @@ export function DocumentFormPage({
         </div>
 
         <div className="mx-auto max-w-screen-xl space-y-5 px-0">
-          <BasicInfoCard key={editingDoc?.id ?? "new"} initialValue={initialBasicInfo} />
-          <ClassificationCard key={`classification-${editingDoc?.id ?? "new"}`} value={classification} onChange={setClassification} initialLevel={editingDoc?.level} />
+          <BasicInfoCard key={`${editingDoc?.id ?? "new"}-${restoreVersion}`} initialValue={initialBasicInfo} />
+          <ClassificationCard
+            key={`classification-${editingDoc?.id ?? "new"}-${restoreVersion}`}
+            value={classification}
+            onChange={setClassification}
+            initialLevel={restoredLevel || editingDoc?.level}
+          />
           <DepartmentCard value={department} onChange={setDepartment} />
           <FileUploadCard files={attachments} onFilesChange={setAttachments} />
         </div>

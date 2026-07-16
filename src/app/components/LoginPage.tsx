@@ -94,7 +94,7 @@ export function LoginPage({ onLogin }: Props) {
                   <select
                     value={lang}
                     onChange={(e) => setLang(e.target.value)}
-                    className="h-[50px] w-full appearance-none rounded-xl bg-white pl-11 pr-10 text-[16px] outline-none transition focus:ring-2 focus:ring-[#3a867b]/35"
+                    className="h-[50px] w-full appearance-none rounded-xl bg-white pl-11 pr-10 text-[16px] outline-none transition focus:ring-2 focus:ring-[#2e6e5c]/35"
                     style={{ border: `1px solid ${BORDER}`, color: TEXT_MAIN }}
                   >
                     {LANGUAGES.map((l) => (
@@ -119,7 +119,7 @@ export function LoginPage({ onLogin }: Props) {
                     }}
                     autoFocus
                     placeholder="請輸入使用者代碼"
-                    className="h-[50px] w-full rounded-xl bg-white pl-11 pr-4 text-[16px] outline-none transition focus:ring-2 focus:ring-[#3a867b]/35"
+                    className="h-[50px] w-full rounded-xl bg-white pl-11 pr-4 text-[16px] outline-none transition focus:ring-2 focus:ring-[#2e6e5c]/35"
                     style={{ border: `1px solid ${BORDER}`, color: TEXT_MAIN }}
                   />
                 </InputWrap>
@@ -136,7 +136,7 @@ export function LoginPage({ onLogin }: Props) {
                       setError("");
                     }}
                     placeholder="請輸入通行碼"
-                    className="h-[50px] w-full rounded-xl bg-white pl-11 pr-12 text-[16px] outline-none transition focus:ring-2 focus:ring-[#3a867b]/35"
+                    className="h-[50px] w-full rounded-xl bg-white pl-11 pr-12 text-[16px] outline-none transition focus:ring-2 focus:ring-[#2e6e5c]/35"
                     style={{ border: `1px solid ${BORDER}`, color: TEXT_MAIN }}
                   />
                   <button
@@ -176,7 +176,7 @@ export function LoginPage({ onLogin }: Props) {
                       const acc = DEMO_ACCOUNTS.find((a) => a.role === e.target.value);
                       if (acc) onLogin(acc.user, acc.pass);
                     }}
-                    className="h-[46px] w-full appearance-none rounded-xl bg-white px-4 pr-10 text-[15px] outline-none transition focus:ring-2 focus:ring-[#3a867b]/35"
+                    className="h-[46px] w-full appearance-none rounded-xl bg-white px-4 pr-10 text-[15px] outline-none transition focus:ring-2 focus:ring-[#2e6e5c]/35"
                     style={{ border: `1px solid ${BORDER}`, color: TEXT_MAIN }}
                   >
                     <option value="" disabled>

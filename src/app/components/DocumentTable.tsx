@@ -22,6 +22,8 @@ export type DocRecord = DocumentRecord;
 
 interface Props {
   docs: DocumentRecord[];
+  /** 篩選/檢視條件的簽章字串；只有它改變時才把分頁跳回第 1 頁（見下方 useEffect）。 */
+  filterKey?: string;
   onAdd: () => void;
   onApprove: (doc: DocumentRecord) => void;
   onReEdit: (doc: DocumentRecord) => void;
@@ -85,6 +87,7 @@ const STATUS_STYLES: Record<DocumentStatus, { bg: string; text: string; dot: str
 
 export function DocumentTable({
   docs,
+  filterKey,
   onAdd,
   onApprove,
   onReEdit,
@@ -117,7 +120,7 @@ export function DocumentTable({
 
   useEffect(() => {
     setPage(1);
-  }, [docs, pageSize]);
+  }, [filterKey, pageSize]);
 
   const totalPages = Math.max(1, Math.ceil(docs.length / pageSize));
   const safePage = Math.min(page, totalPages);

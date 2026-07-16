@@ -20,8 +20,8 @@ const ROLE_COLORS: Record<Role, { bg: string; text: string }> = {
 };
 
 const PERMISSIONS: Permission[] = [
-  { action: "新增文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: true,  唯讀使用者: false } },
-  { action: "編輯文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: true,  唯讀使用者: false } },
+  { action: "新增文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: true,  一般使用者: true,  唯讀使用者: false } },
+  { action: "編輯文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: true,  一般使用者: true,  唯讀使用者: false } },
   { action: "刪除文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: false, 一般使用者: false, 唯讀使用者: false } },
   { action: "下載文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: true,  一般使用者: true,  唯讀使用者: true  } },
   { action: "查看文件",    category: "文件操作", roles: { 系統管理員: true,  文管人員: true,  部門主管: true,  一般使用者: true,  唯讀使用者: true  } },

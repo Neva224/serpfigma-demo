@@ -34,7 +34,7 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="enterprise-panel relative w-full max-w-2xl overflow-hidden rounded-xl bg-white">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3" style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}>
+        <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3" style={{ background: "linear-gradient(180deg, #2E6E5C 0%, #24594A 100%)" }}>
           <h3 className="text-white font-semibold" style={{ fontSize: "14px" }}>查詢員工代號</h3>
           <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
             <X size={18} />
@@ -67,7 +67,7 @@ export function EmployeeLookupModal({ onClose, onSelect }: Props) {
         <div className="overflow-auto" style={{ maxHeight: "320px" }}>
           <table className="w-full" style={{ fontSize: "12px" }}>
             <thead className="sticky top-0">
-              <tr style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}>
+              <tr style={{ background: "linear-gradient(180deg, #2E6E5C 0%, #24594A 100%)" }}>
                 {["編號", "姓名", "英文名", "公司", "單位", ""].map((h) => (
                   <th key={h} className="text-left px-4 py-2 text-white font-semibold whitespace-nowrap">{h}</th>
                 ))}

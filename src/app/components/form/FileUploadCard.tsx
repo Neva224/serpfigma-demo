@@ -2,6 +2,7 @@
 import { CloudUpload, File, FileSpreadsheet, FileText, Trash2, CheckCircle2 } from "lucide-react";
 import { Card } from "./BasicInfoCard";
 import type { WorkflowAttachment } from "../../workflow/workflowState";
+import { deleteAttachmentBlob, putAttachmentBlob } from "../../data/attachmentStore";
 
 interface Props {
   files: WorkflowAttachment[];
@@ -38,7 +39,8 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
   function addFiles(raw: File[]) {
     if (files.length >= maxFiles) return;
 
-    const newEntries: WorkflowAttachment[] = raw.slice(0, maxFiles - files.length).map((file, index) => ({
+    const accepted = raw.slice(0, maxFiles - files.length);
+    const newEntries: WorkflowAttachment[] = accepted.map((file, index) => ({
       id: `${Date.now()}-${index}`,
       name: file.name,
       size: formatSize(file.size),
@@ -46,6 +48,12 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
       uploadedAt: new Date().toISOString(),
       downloadUrl: URL.createObjectURL(file),
     }));
+
+    // 把實際檔案內容存進 IndexedDB，這樣關掉分頁重新整理後，downloadUrl 才能重新產生
+    // 而不是變成失效的 blob: 網址（見 attachmentStore.ts 的說明）。
+    newEntries.forEach((entry, index) => {
+      void putAttachmentBlob(entry.id, accepted[index]);
+    });
 
     onFilesChange([...files, ...newEntries]);
   }
@@ -55,12 +63,14 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
     if (removed?.downloadUrl) {
       URL.revokeObjectURL(removed.downloadUrl);
     }
+    void deleteAttachmentBlob(id);
     onFilesChange(files.filter((file) => file.id !== id));
   }
 
   function clearFiles() {
     currentFilesRef.current.forEach((file) => {
       if (file.downloadUrl) URL.revokeObjectURL(file.downloadUrl);
+      void deleteAttachmentBlob(file.id);
     });
     onFilesChange([]);
   }
@@ -105,7 +115,7 @@ export function FileUploadCard({ files, onFilesChange }: Props) {
           {dragging && (
             <div
               className="absolute inset-0 flex items-center justify-center rounded-xl"
-              style={{ backgroundColor: "#3A867B10", borderColor: "var(--color-primary)" }}
+              style={{ backgroundColor: "#2E6E5C10", borderColor: "var(--color-primary)" }}
             >
               <p className="font-semibold text-teal-700">可直接拖放檔案上傳</p>
             </div>

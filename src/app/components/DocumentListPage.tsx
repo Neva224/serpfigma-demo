@@ -219,6 +219,15 @@ export function DocumentListPage({
     dateTo,
   ]);
 
+  // 篩選條件的簽章：只有使用者實際變更篩選/檢視時才需要把分頁跳回第 1 頁。
+  // docsForView 的陣列參照會因為 documents 內容變動（例如別處核准了某份文件）而改變，
+  // 但那不代表使用者的篩選條件變了，所以分頁重置不能綁在 docsForView 本身上。
+  const filterKey = useMemo(
+    () =>
+      JSON.stringify([view, keywordQuery, level, status, uploader, docNo, department, tag, dateFrom, dateTo]),
+    [view, keywordQuery, level, status, uploader, docNo, department, tag, dateFrom, dateTo],
+  );
+
   const docsCount = docsForView.length;
   const categoryChildren = currentNode?.children ?? [];
   const rootSummaries = KNOWLEDGE_TREE.map((node) => ({
@@ -315,7 +324,7 @@ export function DocumentListPage({
             </button>
             {!sidebarCollapsed && (
               <div>
-                <div className="text-sm font-bold text-white">知識樹分類</div>
+                <div className="text-sm font-bold text-white">功能選單總覽</div>
               </div>
             )}
           </div>
@@ -547,6 +556,7 @@ export function DocumentListPage({
               <div className="mt-4">
               <DocumentTable
                   docs={docsForView}
+                  filterKey={filterKey}
                   onAdd={onAdd}
                   onApprove={onApprove}
                   onReEdit={onReEdit}

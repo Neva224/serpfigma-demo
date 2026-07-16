@@ -82,7 +82,7 @@ export function SearchFilterBar({ onOpenEmployeeLookup }: Props) {
           onClick={() => setAdvanced((value) => !value)}
           className="ml-auto flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-all"
           style={{
-            borderColor: advanced ? "rgba(58, 134, 123, 0.26)" : "rgba(58, 134, 123, 0.18)",
+            borderColor: advanced ? "rgba(46, 110, 92, 0.26)" : "rgba(46, 110, 92, 0.18)",
             color: advanced ? "var(--color-primary-hover)" : "#64748B",
             backgroundColor: advanced ? "rgba(234, 246, 243, 0.8)" : "rgba(255,255,255,0.72)",
           }}

@@ -18,7 +18,7 @@ export function AddDocumentModal({ onClose }: AddDocumentModalProps) {
         {/* Header */}
         <div
           className="flex items-center justify-between rounded-t-2xl px-6 py-4"
-          style={{ background: "linear-gradient(180deg, #3A867B 0%, #2F766D 100%)" }}
+          style={{ background: "linear-gradient(180deg, #2E6E5C 0%, #24594A 100%)" }}
         >
           <h2 className="text-white" style={{ fontSize: "16px", fontWeight: 600 }}>新增文件</h2>
           <button
