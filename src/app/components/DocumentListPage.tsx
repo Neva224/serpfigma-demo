@@ -18,6 +18,7 @@ import { DraftSectionPage } from "./query/DraftSectionPage";
 import { TransferUnitPage } from "./query/TransferUnitPage";
 import { DatabasePage } from "./database/DatabasePage";
 import { PermissionsPage } from "./settings/PermissionsPage";
+import { TestDataImportPage } from "./settings/TestDataImportPage";
 import { KnowledgeTree } from "./knowledge/KnowledgeTree";
 import { buildLegacyKnowledgeTreeFromGenerated, type LegacyKnowledgeTreeNode } from "../data/catalogModels";
 import type { WorkflowDocument } from "../workflow/workflowState";
@@ -39,7 +40,8 @@ export type ViewMode =
   | { kind: "documentUpload" }
   | { kind: "signingProgress" }
   | { kind: "database" }
-  | { kind: "systemAdmin" };
+  | { kind: "systemAdmin" }
+  | { kind: "testDataImport" };
 
 interface Props {
   documents: DocumentRecord[];
@@ -60,6 +62,8 @@ interface Props {
   formDoc: WorkflowDocument | null;
   view: ViewMode;
   onViewChange: (view: ViewMode) => void;
+  onImportTestDocuments: (count: number) => void;
+  onClearTestData: () => void;
 }
 
 export const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
@@ -98,6 +102,8 @@ export function DocumentListPage({
   formDoc,
   view,
   onViewChange,
+  onImportTestDocuments,
+  onClearTestData,
 }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
@@ -136,6 +142,7 @@ export function DocumentListPage({
     if (view.kind === "signingProgress") return [];
     if (view.kind === "database") return [];
     if (view.kind === "systemAdmin") return [];
+    if (view.kind === "testDataImport") return [];
     if (view.kind === "signing" && view.variant === "transfer") return [];
 
     let baseDocs = view.kind === "signing" ? documents : publishedDocs;
@@ -443,6 +450,11 @@ export function DocumentListPage({
                 active={view.kind === "database"}
                 onClick={() => onViewChange({ kind: "database" })}
               />
+              <SelectionPill
+                label="匯入測試資料"
+                active={view.kind === "testDataImport"}
+                onClick={() => onViewChange({ kind: "testDataImport" })}
+              />
             </div>
           </SectionCard>
         </div>
@@ -499,6 +511,14 @@ export function DocumentListPage({
             <DatabasePage onBack={activateKnowledgeOverview} embedded />
           ) : view.kind === "systemAdmin" ? (
             <PermissionsPage onBack={activateKnowledgeOverview} embedded />
+          ) : view.kind === "testDataImport" ? (
+            <TestDataImportPage
+              onBack={activateKnowledgeOverview}
+              embedded
+              documents={documents}
+              onImport={onImportTestDocuments}
+              onClearTestData={onClearTestData}
+            />
           ) : view.kind === "query" && view.variant === "faq" ? (
             <FaqSearchPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : view.kind === "signing" && view.variant === "transfer" ? (
@@ -621,6 +641,8 @@ function getViewTitle(view: ViewMode) {
       return "資料庫";
     case "systemAdmin":
       return "系統後台管理";
+    case "testDataImport":
+      return "匯入測試資料";
     case "signing":
       switch (view.variant) {
         case "manager":
@@ -655,6 +677,8 @@ function getViewDescription(view: ViewMode) {
       return "資料查詢與彙整";
     case "systemAdmin":
       return "權限與系統設定";
+    case "testDataImport":
+      return "產生/清除開發測試用的假文件";
     case "signing":
       return "文件簽核專區";
     default:

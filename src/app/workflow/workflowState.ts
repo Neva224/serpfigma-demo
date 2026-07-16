@@ -448,6 +448,99 @@ export function normalizeWorkflowDocuments(docs: WorkflowDocument[]) {
   return docs.map((doc) => normalizeWorkflowDocument(doc));
 }
 
+/** 由「匯入測試資料」工具產生的文件都會帶這個標籤，方便篩選與一鍵清除。 */
+export const TEST_DATA_TAG = "測試資料";
+
+const TEST_DOCUMENT_TITLES = [
+  "教育訓練教材",
+  "作業流程規範",
+  "供應商評鑑標準",
+  "客戶服務標準作業",
+  "資訊安全管理政策",
+  "差旅費申請單",
+  "人力資源管理程序書",
+  "系統架構說明書",
+  "採購作業程序",
+  "品質管理手冊",
+];
+
+const TEST_DEPARTMENTS = [
+  "雄獅旅遊-企劃本部",
+  "雄獅旅遊-通路群",
+  "雄獅旅遊-產品群",
+  "雄獅旅遊-行銷群",
+  "雄獅資訊",
+  "雄獅通運",
+];
+
+const TEST_DOCUMENT_LEVELS: DocumentLevel[] = ["level1", "level2", "level3", "level4", "level5", "level6"];
+
+/**
+ * 沒有真正後端資料庫時，先在瀏覽器端灌一批貼近真實分類/部門的測試文件，方便測分頁、
+ * 查詢與到期提醒。約 1/5 的文件到期日會落在 7 天警示範圍內（見 EXPIRY_WARNING_DAYS）。
+ * 每筆都帶 TEST_DATA_TAG，之後可用 removeTestDocuments 一鍵清除，不會誤刪真實資料。
+ */
+export function buildTestDocuments(existingDocs: WorkflowDocument[], count: number): WorkflowDocument[] {
+  const maxId = Math.max(0, ...existingDocs.map((doc) => doc.id));
+  const selectableNodes = CATEGORY_NODES.filter((node) => node.isSelectable && node.pathNames.length > 0);
+  const today = new Date(todayYmd());
+  const created: WorkflowDocument[] = [];
+
+  for (let i = 0; i < count; i += 1) {
+    const id = maxId + i + 1;
+    const node = selectableNodes.length > 0 ? selectableNodes[Math.floor(Math.random() * selectableNodes.length)] : null;
+    const categoryPath = node?.pathNames ?? [];
+    const categoryCode = categoryPath.length > 0 ? buildCategoryCode(CATEGORY_NODES, categoryPath) : "";
+    const department = TEST_DEPARTMENTS[Math.floor(Math.random() * TEST_DEPARTMENTS.length)];
+    const title = TEST_DOCUMENT_TITLES[Math.floor(Math.random() * TEST_DOCUMENT_TITLES.length)];
+    const level = TEST_DOCUMENT_LEVELS[Math.floor(Math.random() * TEST_DOCUMENT_LEVELS.length)];
+
+    const daysAhead = i % 5 === 0 ? Math.floor(Math.random() * 8) : 30 + Math.floor(Math.random() * 300);
+    const validToDate = new Date(today);
+    validToDate.setDate(validToDate.getDate() + daysAhead);
+    const validTo = validToDate.toISOString().slice(0, 10);
+    const validFrom = todayYmd();
+
+    created.push({
+      id,
+      docNo: `TEST-${String(id).padStart(4, "0")}`,
+      name: `${title}（測試 #${id}）`,
+      level,
+      version: "1.0",
+      status: "上架",
+      uploaderName: "測試資料產生器",
+      uploaderCode: "TESTGEN",
+      uploadDate: validFrom,
+      department,
+      tags: [TEST_DATA_TAG],
+      categoryPath,
+      knowledgePath: categoryPath,
+      ownerName: "測試資料產生器",
+      summary: "由「匯入測試資料」工具產生，僅供開發測試使用",
+      validFrom,
+      validTo,
+      createdAt: nowIso(),
+      updatedAt: nowIso(),
+      categoryCode,
+      ownershipDepartmentPath: [department],
+      sourceDepartmentPath: [department],
+      isPublished: true,
+      attachments: [],
+      history: [],
+    });
+  }
+
+  return created;
+}
+
+export function countTestDocuments(docs: ReadonlyArray<{ tags: string[] }>): number {
+  return docs.filter((doc) => doc.tags.includes(TEST_DATA_TAG)).length;
+}
+
+export function removeTestDocuments<T extends { tags: string[] }>(docs: T[]): T[] {
+  return docs.filter((doc) => !doc.tags.includes(TEST_DATA_TAG));
+}
+
 export function submitDocument(
   docs: WorkflowDocument[],
   notifications: WorkflowNotification[],

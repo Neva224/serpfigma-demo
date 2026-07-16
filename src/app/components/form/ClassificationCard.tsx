@@ -1,13 +1,34 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { ChevronDown, Search, X } from "lucide-react";
 import {
   buildCategoryPayload as resolveCategoryPayload,
   CATEGORY_NODES,
   getCategoryLevelOptions,
+  type CategoryNode,
   type CategorySelectionPath,
 } from "../../data/catalogModels";
 import { LEVEL_OPTIONS, type DocumentLevel } from "../document-management/mockData";
 import { Card, Field } from "./BasicInfoCard";
+
+const MAX_SEARCH_RESULTS = 20;
+
+/** 找出 pathNames 任一層有包含關鍵字的可選節點，依層級與名稱排序，最多回傳 MAX_SEARCH_RESULTS 筆。 */
+function searchCategoryNodes(nodes: CategoryNode[], query: string): CategoryNode[] {
+  const keyword = query.trim().toLowerCase();
+  if (!keyword) return [];
+  const seen = new Set<string>();
+  const matches: CategoryNode[] = [];
+  for (const node of nodes) {
+    if (!node.isSelectable) continue;
+    const pathKey = node.pathNames.join(" / ");
+    if (seen.has(pathKey)) continue;
+    if (!node.pathNames.some((segment) => segment.toLowerCase().includes(keyword))) continue;
+    seen.add(pathKey);
+    matches.push(node);
+  }
+  matches.sort((a, b) => a.level - b.level || a.pathNames.join(" / ").localeCompare(b.pathNames.join(" / "), "zh-Hant"));
+  return matches.slice(0, MAX_SEARCH_RESULTS);
+}
 
 export interface ClassificationSelection extends CategorySelectionPath {
   l1: string;
@@ -28,12 +49,27 @@ interface Props {
 
 export function ClassificationCard({ value, onChange, initialLevel }: Props) {
   const [selectedLevel, setSelectedLevel] = useState(initialLevel ?? "");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchBoxRef = useRef<HTMLDivElement>(null);
 
   const l1Options = getCategoryLevelOptions(CATEGORY_NODES, []);
   const l2Options = value.l1 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1]) : [];
   const l3Options = value.l2 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2]) : [];
   const l4Options = value.l3 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2, value.l3]) : [];
   const payload = buildCategoryPayload(value);
+  const searchResults = useMemo(() => searchCategoryNodes(CATEGORY_NODES, searchQuery), [searchQuery]);
+
+  function applySearchResult(node: CategoryNode) {
+    onChange({
+      l1: node.pathNames[0] ?? "",
+      l2: node.pathNames[1] ?? "",
+      l3: node.pathNames[2] ?? "",
+      l4: node.pathNames[3] ?? "",
+    });
+    setSearchQuery("");
+    setSearchFocused(false);
+  }
 
   return (
     <Card title="文件階級與分類" icon="🗂">
@@ -42,6 +78,53 @@ export function ClassificationCard({ value, onChange, initialLevel }: Props) {
           <p className="mb-3 text-xs text-slate-500">
             系統會依 <span className="font-semibold text-teal-700">categoryId / categoryPath</span> 自動帶出對應分類。
           </p>
+
+          <div ref={searchBoxRef} className="relative mb-4">
+            <div className="relative">
+              <Search size={14} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setSearchFocused(false), 120)}
+                placeholder="輸入關鍵字快速定位分類（例如：人資、合約、財務）"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-8 text-sm text-slate-700 transition-all placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500"
+                  aria-label="清除搜尋"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+
+            {searchFocused && searchQuery.trim() && (
+              <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg">
+                {searchResults.length === 0 ? (
+                  <p className="px-4 py-3 text-xs text-slate-400">找不到符合「{searchQuery}」的分類</p>
+                ) : (
+                  searchResults.map((node) => (
+                    <button
+                      key={node.id}
+                      type="button"
+                      onClick={() => applySearchResult(node)}
+                      className="flex w-full flex-col items-start gap-0.5 px-4 py-2.5 text-left transition hover:bg-teal-50"
+                    >
+                      <span className="text-sm font-medium text-slate-700">
+                        {node.pathNames[node.pathNames.length - 1]}
+                      </span>
+                      <span className="text-[11px] text-slate-400">{node.pathNames.join(" / ")}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="第一層分類" required>

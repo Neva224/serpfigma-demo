@@ -8,11 +8,13 @@ import {
   applyWorkflowDecision,
   applyWorkflowTransfer,
   buildExpiryWarningNotifications,
+  buildTestDocuments,
   createDemoUser,
   deleteWorkflowDocument,
   markNotificationRead,
   migrateWorkflowDocuments,
   normalizeWorkflowDocuments,
+  removeTestDocuments,
   restoreWorkflowDocument,
   saveDraftDocument,
   submitDocument,
@@ -190,6 +192,17 @@ export default function App() {
     ) {
       setView(OVERVIEW_VIEW);
     }
+  }
+
+  function handleImportTestDocuments(count: number) {
+    const created = buildTestDocuments(documents, count);
+    setDocuments((current) => [...current, ...created]);
+    toast.success(`已產生 ${created.length} 筆測試文件`);
+  }
+
+  function handleClearTestData() {
+    setDocuments((current) => removeTestDocuments(current));
+    toast.success("已清除測試資料");
   }
 
   async function handleFormSubmit(payload: DocumentFormSubmitPayload) {
@@ -376,6 +389,8 @@ export default function App() {
           canApproveDocAdmin={canApproveDocAdmin}
           currentUserEmpId={currentUser.empId}
           managerIdentityBypass={isSystemAdmin}
+          onImportTestDocuments={handleImportTestDocuments}
+          onClearTestData={handleClearTestData}
         />
       </div>
 
