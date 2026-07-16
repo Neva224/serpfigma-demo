@@ -15,7 +15,7 @@ import { DocumentFormPage, type DocumentFormSubmitPayload } from "./form/Documen
 import { SigningProgressPage } from "./signing/SigningProgressPage";
 import { FaqSearchPage } from "./query/FaqSearchPage";
 import { DraftSectionPage } from "./query/DraftSectionPage";
-import { TransferUnitPage } from "./query/TransferUnitPage";
+import { TransferUnitPage, type DirectTransferInput } from "./query/TransferUnitPage";
 import { DatabasePage } from "./database/DatabasePage";
 import { PermissionsPage } from "./settings/PermissionsPage";
 import { TestDataImportPage } from "./settings/TestDataImportPage";
@@ -64,6 +64,8 @@ interface Props {
   onViewChange: (view: ViewMode) => void;
   onImportTestDocuments: (count: number) => void;
   onClearTestData: () => void;
+  canTransferDocuments: boolean;
+  onTransferDocument: (input: DirectTransferInput) => void;
 }
 
 export const OVERVIEW_VIEW: ViewMode = { kind: "overview" };
@@ -104,6 +106,8 @@ export function DocumentListPage({
   onViewChange,
   onImportTestDocuments,
   onClearTestData,
+  canTransferDocuments,
+  onTransferDocument,
 }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [knowledgeOpen, setKnowledgeOpen] = useState(true);
@@ -522,7 +526,13 @@ export function DocumentListPage({
           ) : view.kind === "query" && view.variant === "faq" ? (
             <FaqSearchPage onBack={activateKnowledgeOverview} embedded documents={documents} />
           ) : view.kind === "signing" && view.variant === "transfer" ? (
-            <TransferUnitPage onBack={activateKnowledgeOverview} embedded documents={documents} />
+            <TransferUnitPage
+              onBack={activateKnowledgeOverview}
+              embedded
+              documents={documents}
+              canTransferDocuments={canTransferDocuments}
+              onTransferDocument={onTransferDocument}
+            />
           ) : (
             <>
               {view.kind === "category" && categoryChildren.length > 0 && (

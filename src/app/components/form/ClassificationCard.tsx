@@ -7,28 +7,9 @@ import {
   type CategoryNode,
   type CategorySelectionPath,
 } from "../../data/catalogModels";
+import { searchPathNodes } from "../../data/pathSearch";
 import { LEVEL_OPTIONS, type DocumentLevel } from "../document-management/mockData";
 import { Card, Field } from "./BasicInfoCard";
-
-const MAX_SEARCH_RESULTS = 20;
-
-/** 找出 pathNames 任一層有包含關鍵字的可選節點，依層級與名稱排序，最多回傳 MAX_SEARCH_RESULTS 筆。 */
-function searchCategoryNodes(nodes: CategoryNode[], query: string): CategoryNode[] {
-  const keyword = query.trim().toLowerCase();
-  if (!keyword) return [];
-  const seen = new Set<string>();
-  const matches: CategoryNode[] = [];
-  for (const node of nodes) {
-    if (!node.isSelectable) continue;
-    const pathKey = node.pathNames.join(" / ");
-    if (seen.has(pathKey)) continue;
-    if (!node.pathNames.some((segment) => segment.toLowerCase().includes(keyword))) continue;
-    seen.add(pathKey);
-    matches.push(node);
-  }
-  matches.sort((a, b) => a.level - b.level || a.pathNames.join(" / ").localeCompare(b.pathNames.join(" / "), "zh-Hant"));
-  return matches.slice(0, MAX_SEARCH_RESULTS);
-}
 
 export interface ClassificationSelection extends CategorySelectionPath {
   l1: string;
@@ -58,7 +39,7 @@ export function ClassificationCard({ value, onChange, initialLevel }: Props) {
   const l3Options = value.l2 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2]) : [];
   const l4Options = value.l3 ? getCategoryLevelOptions(CATEGORY_NODES, [value.l1, value.l2, value.l3]) : [];
   const payload = buildCategoryPayload(value);
-  const searchResults = useMemo(() => searchCategoryNodes(CATEGORY_NODES, searchQuery), [searchQuery]);
+  const searchResults = useMemo(() => searchPathNodes(CATEGORY_NODES, searchQuery), [searchQuery]);
 
   function applySearchResult(node: CategoryNode) {
     onChange({

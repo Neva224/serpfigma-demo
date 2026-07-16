@@ -3,6 +3,7 @@ import { Toaster, toast } from "sonner";
 import { Header } from "./components/Header";
 import { LoginPage } from "./components/LoginPage";
 import { DocumentListPage, OVERVIEW_VIEW, type ViewMode } from "./components/DocumentListPage";
+import type { DirectTransferInput } from "./components/query/TransferUnitPage";
 import { ApprovalDrawer } from "./components/approval/ApprovalDrawer";
 import {
   applyWorkflowDecision,
@@ -205,6 +206,20 @@ export default function App() {
     toast.success("已清除測試資料");
   }
 
+  function handleDirectTransfer(input: DirectTransferInput) {
+    const result = applyWorkflowTransfer(documents, notifications, {
+      doc: input.doc,
+      actor: currentUser,
+      reason: input.reason,
+      transferCategoryId: input.transferCategoryId,
+      transferCategoryPath: input.transferCategoryPath,
+      transferOwnershipDepartmentPath: input.transferOwnershipDepartmentPath,
+    });
+    setDocuments(result.documents);
+    setNotifications(result.notifications);
+    toast.success(`已送出移轉：${input.doc.name}，待文管審核`);
+  }
+
   async function handleFormSubmit(payload: DocumentFormSubmitPayload) {
     // 依歸屬部門帶入對應簽核主管（目前靜態、未來由 BFF/HCM API 提供）
     const signingManager = await orgRepository.getSigningManager(payload.ownershipDepartmentPath);
@@ -337,6 +352,9 @@ export default function App() {
   // 已上架文件的異動（作廢/還原/刪除）僅系統管理員（後台直接操作）。
   const canVoidPublishedDocs = isSystemAdmin;
   const canDeletePublishedDocs = isSystemAdmin;
+  // 直接移轉已上架文件（移轉單位頁的「新增移轉」）：與能審核文管移轉的角色相同，
+  // 移轉後一樣要重新進入文管審核才會正式上架，不會繞過審核。
+  const canTransferDocuments = canApproveDocAdmin;
 
   // 未登入 → 顯示登入頁（所有 hooks 已於上方無條件呼叫）
   if (!account) {
@@ -391,6 +409,8 @@ export default function App() {
           managerIdentityBypass={isSystemAdmin}
           onImportTestDocuments={handleImportTestDocuments}
           onClearTestData={handleClearTestData}
+          canTransferDocuments={canTransferDocuments}
+          onTransferDocument={handleDirectTransfer}
         />
       </div>
 
